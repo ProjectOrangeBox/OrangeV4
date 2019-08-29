@@ -4,8 +4,8 @@
 		"version": "4.0",
     "autoload": {
         "psr-4": {
-					"projectorangebox\\orange4\\library\\": "libraries/",
-					"projectorangebox\\orange4\\model\\": "models/"
+					"projectorangebox\\orange\\library\\": "libraries/",
+					"projectorangebox\\orange\\model\\": "models/"
         }
     }
 }
