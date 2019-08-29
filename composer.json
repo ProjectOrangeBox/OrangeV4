@@ -1,8 +1,5 @@
 {
-    "name": "projectorangebox/orange",
-    "version": "4.0",
-    "dist": {
-        "url": "https://github.com/ProjectOrangeBox/OrangeV4",
-        "type": "git"
-    }
+    "name": "projectorangebox/OrangeV4",
+    "description": "CodeIgniter 3 + namespace + hmvc",
+		"version": "4.0"
 }
