@@ -1,0 +1,26 @@
+{
+	"name": "projectorangebox",
+	"description": "Orange Framework",
+	"repositories": [
+		{
+			"url": "https://github.com/ProjectOrangeBox/OrangeV4",
+			"type": "git"
+		}
+	],
+	"autoload": {
+		"classmap": [
+			"vendor/codeigniter/framework/system/core",
+			"vendor/codeigniter/framework/system/libraries"
+		],
+		"psr-4": {
+			"projectorangebox\\theme\\middleware\\": "packages/projectorangebox/theme/middleware",
+			"projectorangebox\\theme\\library\\": "packages/projectorangebox/theme/libraries",
+			"projectorangebox\\theme\\model\\": "packages/projectorangebox/theme/models",
+			"tests\\mocks\\": "tests/mocks"
+    }
+	},
+	"require": {
+		"codeigniter/framework": "^3.1",
+		"projectorangebox/OrangeV4": "dev-master"
+	}
+}
