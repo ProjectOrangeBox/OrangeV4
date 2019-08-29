@@ -1,5 +1,11 @@
 {
     "name": "projectorangebox/OrangeV4",
     "description": "CodeIgniter 3 + namespace + hmvc",
-		"version": "4.0"
+		"version": "4.0",
+    "autoload": {
+        "psr-4": {
+					"projectorangebox\\orange4\\library\\": "libraries/",
+					"projectorangebox\\orange4\\model\\": "models/"
+        }
+    }
 }
