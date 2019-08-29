@@ -115,6 +115,26 @@ class Orange {
 		return $service;
 	}
 
+	static public function findView(string $name,bool $throwException = true)
+	{
+		return self::findService($name,$throwException,'view');
+	}
+
+	static public function findFilter(string $name,bool $throwException = true)
+	{
+		return self::findService($name,$throwException,'input_filter');
+	}
+
+	static public function findRule(string $name,bool $throwException = true)
+	{
+		return self::findService($name,$throwException,'validation_rule');
+	}
+
+	static public function findPear(string $name,bool $throwException = true)
+	{
+		return self::findService($name,$throwException,'pear_plugin');
+	}
+
 	static public function addService(string $serviceName, string $class) : void
 	{
 		self::$fileConfigs['services'][strtolower($serviceName)] = $class;
@@ -160,7 +180,7 @@ class Orange {
 		extract($__data, EXTR_PREFIX_INVALID, '_');
 
 		/* if the view isn't there then findView will throw an error BEFORE output buffering is turned on */
-		$__path = __ROOT__.self::findService($__view,true,'view');
+		$__path = __ROOT__.self::findView($__view,true);
 
 		/* turn on output buffering */
 		ob_start();

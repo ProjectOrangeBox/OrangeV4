@@ -97,9 +97,6 @@ class Validate
 	 */
 	protected $rules = [];
 
-	protected $ruleServicePrefix;
-	protected $filterServicePrefix;
-
 	/**
 	 *
 	 * Constructor
@@ -117,9 +114,6 @@ class Validate
 
 		/* setup the "chain" request object */
 		$this->input = new Input($this,ci('input'));
-
-		$this->filterServicePrefix = \orange::servicePrefix('input_filter');
-		$this->ruleServicePrefix = \orange::servicePrefix('validation_rule');
 
 		log_message('info', 'Orange Validate Class Initialized');
 	}
@@ -143,7 +137,7 @@ class Validate
 	 */
 	public function attach(string $name, \closure $closure) : Validate
 	{
-		$this->attached[$this->_servicePrefix($name)] = $closure;
+		$this->attached[$name] = $closure;
 
 		return $this;
 	}
@@ -361,12 +355,13 @@ class Validate
 	 */
 	protected function _filter(string $key, string $rule, string $param = null) : bool
 	{
-		$shortRule = substr($rule,7); /* filters start with filter_ */
-		$className = $this->_servicePrefix($rule);
+		/* filters start with filter_ */
+		$shortRule = substr($rule,7);
+		$className = $rule;
 
 		if (isset($this->attached[$className])) {
 			$this->attached[$className]($this->field_data[$key], $param);
-		} elseif ($namedService = \orange::findService($className,false)) {
+		} elseif ($namedService = \orange::findFilter(str_replace('filter_', '',strtolower($className)),false)) {
 			(new $namedService($this->field_data))->filter($this->field_data[$key], $param);
 		} elseif (function_exists($shortRule)) {
 			$this->field_data[$key] = ($param) ? $shortRule($this->field_data[$key], $param) : $shortRule($this->field_data[$key]);
@@ -394,15 +389,15 @@ class Validate
 	 */
 	protected function _validation(string $key, string $rule, string $param = null) : bool
 	{
-		$shortRule = $rule; /* rules don't start with anything */
-		$className = $this->_servicePrefix($rule);
+		/* rules don't start with anything */
+		$shortRule = $className = $rule;
 
 		/* default error */
 		$this->error_string = '%s is not valid.';
 
 		if (isset($this->attached[$className])) {
 			$success = $this->attached[$className]($this->field_data[$key], $param, $this->error_string, $this->field_data, $this);
-		} elseif ($namedService = \orange::findService($className,false)) {
+		} elseif ($namedService = \orange::findRule($className,false)) {
 			$success = (new $namedService($this->field_data, $this->error_string))->validate($this->field_data[$key], $param);
 		} elseif (function_exists($shortRule)) {
 			$success = ($param) ? $shortRule($this->field_data[$key], $param) : $shortRule($this->field_data[$key]);
@@ -428,11 +423,6 @@ class Validate
 		}
 
 		return $success;
-	}
-
-	protected function _servicePrefix($rule) : string
-	{
-		return (substr($rule,0,7) == 'filter_') ? $this->filterServicePrefix.substr($rule,7) : $this->ruleServicePrefix.$rule;
 	}
 
 } /* end class */
