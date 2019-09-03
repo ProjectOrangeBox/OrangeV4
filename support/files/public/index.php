@@ -38,7 +38,7 @@
 
 define('__ROOT__', realpath(__DIR__.'/../'));
 
-define('ORANGEPATH',__ROOT__.'/vendor/projectorangebox/OrangeV4');
+define('ORANGEPATH',__ROOT__.'/vendor/projectorangebox/orange-v4');
 
 /* absolute path to WWW folder */
 define('WWW', dirname(__FILE__));
