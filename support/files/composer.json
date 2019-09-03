@@ -3,7 +3,7 @@
 	"description": "Orange Framework",
 	"repositories": [
 		{
-			"url": "https://github.com/ProjectOrangeBox/OrangeV4",
+			"url": "https://github.com/ProjectOrangeBox/orange-v4",
 			"type": "git"
 		}
 	],
@@ -21,6 +21,6 @@
 	},
 	"require": {
 		"codeigniter/framework": "^3.1",
-		"projectorangebox/OrangeV4": "dev-master"
+		"projectorangebox/orange-v4": "dev-master"
 	}
 }

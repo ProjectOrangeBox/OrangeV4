@@ -3,9 +3,13 @@
     "description": "CodeIgniter 3 + namespace + hmvc",
 		"version": "4.0",
     "autoload": {
-        "psr-4": {
-					"projectorangebox\\orange\\library\\": "libraries/",
-					"projectorangebox\\orange\\model\\": "models/"
-        }
+			"classmap": [
+				"vendor/codeigniter/framework/system/core",
+				"vendor/codeigniter/framework/system/libraries"
+			],
+			"psr-4": {
+				"projectorangebox\\orange\\library\\": "libraries/",
+				"projectorangebox\\orange\\model\\": "models/"
+			}
     }
 }
