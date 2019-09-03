@@ -24,6 +24,7 @@ echo "Application Root Path $ROOT"
 echo "Files Folder $FILES"
 
 mkdir $ROOT/assets
+mkdir $ROOT/packages
 mkdir $ROOT/public
 mkdir $ROOT/var
 
