@@ -43,34 +43,34 @@ $argv = $_SERVER['argv'];
 if ($argc > 1) {
 	$arg1 = (isset($argv[1])) ? $argv[1] : '';
 	$arg2 = (isset($argv[2])) ? $argv[2] : '';
+	$arg3 = (isset($argv[3])) ? $argv[3] : '';
 
-	standard($arg1,$arg2);
-	echo PHP_EOL;
+	find($arg1,$arg2,$arg3);
 } else {
-	standard('validate/filters','input_filter');
-	echo PHP_EOL;
-
-	standard('pear_plugins','pear_plugin');
-	echo PHP_EOL;
-
-	standard('validate/rules','validation_rule');
-	echo PHP_EOL;
-
-	foreach (\orange::applicationSearch('(.*)/views/(.*)\.php') as $file) {
+	find('validate/filters','input_filter','Input Filters');
+	find('pear_plugins','pear_plugin','Pear Plugins');
+	find('validate/rules','validation_rule','Validation Rules');
+	find('views','view','Views',function($file,$prefixKey) {
 		if (preg_match('%(.*)/views/(.*).php%',$file, $matches, PREG_OFFSET_CAPTURE, 0)) {
 			echo "'".\orange::servicePrefix('view').strtolower($matches[2][0])."' => '".$matches[0][0]."',".PHP_EOL;
 		}
-	}
-
-	echo PHP_EOL;
+	});
 }
 
-function standard(string $folder,string $prefixKey) {
+function find(string $folder,string $prefixKey,string $tile,closure $closure = null) {
+	echo '/* '.$tile.' */'.PHP_EOL;
+
 	$folder = trim($folder,'/');
 
-	foreach (\orange::applicationSearch('(.*)/'.$folder.'/(.*)\.php') as $file) {
+	$closure = ($closure) ? $closure : function($file,$prefixKey) {
 		if (preg_match('/namespace (.*);/m', file_get_contents(__ROOT__.$file), $matches, PREG_OFFSET_CAPTURE, 0)) {
 			echo "'".\orange::servicePrefix($prefixKey).strtolower(basename($file,'.php'))."' => '".'\\'.$matches[1][0].'\\'.basename($file,'.php')."',".PHP_EOL;
 		}
+	};
+
+	foreach (\orange::applicationSearch('(.*)/'.$folder.'/(.*)\.php') as $file) {
+		$closure($file,$prefixKey);
 	}
+
+	echo PHP_EOL;
 }
