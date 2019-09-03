@@ -1,5 +1,5 @@
 {
-    "name": "projectorangebox/OrangeV4",
+    "name": "projectorangebox/orange-v4",
     "description": "CodeIgniter 3 + namespace + hmvc",
 		"version": "4.0",
     "autoload": {
