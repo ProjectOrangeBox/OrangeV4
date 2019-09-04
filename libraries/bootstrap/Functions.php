@@ -34,7 +34,7 @@ if (!function_exists('ci_singleton')) {
 		/* has this service been attached yet? */
 		if (!isset($instance->$serviceName)) {
 			/* try to load it's configuration */
-			$serviceConfig = $instance->config->item($serviceName);
+			$serviceConfig = (isset($instance->config)) ? $instance->config->item($serviceName) : [];
 
 			$config = array_replace((array)$serviceConfig,(array)$userConfig);
 

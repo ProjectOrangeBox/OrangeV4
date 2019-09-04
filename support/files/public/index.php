@@ -82,24 +82,17 @@ define('ENVIRONMENT', isset($_ENV['CI_ENV']) ? $_ENV['CI_ENV'] : 'development');
  * Different environments will require different levels of error reporting.
  * By default development will show errors but testing and live will hide them.
  */
-switch (ENVIRONMENT)
+switch ($_ENV['DEBUG'])
 {
 	case 'development':
-		error_reporting(-1);
 		ini_set('display_errors', 1);
+		error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT & ~E_USER_NOTICE & ~E_USER_DEPRECATED);
 	break;
-
 	case 'testing':
+		ini_set('display_errors', 1);
+		error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT & ~E_USER_NOTICE & ~E_USER_DEPRECATED);
 	case 'production':
 		ini_set('display_errors', 0);
-		if (version_compare(PHP_VERSION, '5.3', '>='))
-		{
-			error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT & ~E_USER_NOTICE & ~E_USER_DEPRECATED);
-		}
-		else
-		{
-			error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_USER_NOTICE);
-		}
 	break;
 
 	default:
@@ -332,4 +325,8 @@ switch (ENVIRONMENT)
  * And away we go...
  */
 
-require_once ORANGEPATH.'/libraries/Bootstrap.php';
+if (file_exists(APPPATH.'/Bootstrap.php')) {
+  require APPPATH.'/Bootstrap.php';
+}
+
+require ORANGEPATH.'/libraries/Bootstrap.php';
