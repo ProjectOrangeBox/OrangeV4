@@ -332,19 +332,17 @@ if (!function_exists('site_url')) {
 		}
 
 		/* where is the cache file? */
-		$cacheFilePath = \orange::getFileConfig('config.cache_path').'site_url.php';
+		$cacheFilePath = \orange::getFileConfig('config.cache_path').'paths.php';
 
 		/* are we in development mode or is the cache file missing */
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			$array['keys'] = $array['values'] = [];
 
-			$paths = config('paths',null);
-
 			/* build the array for easier access later */
-			if (is_array($paths)) {
+			if (is_array($paths = config('paths',null))) {
 				foreach ($paths as $find=>$replace) {
 					$array['keys'][] = '{'.strtolower($find).'}';
-					$array['values'][] = $replace;
+					$array['values'][] = (substr($replace,0,1) == '@') ? ci('config')->item(substr($replace,1)) : $replace;
 				}
 			}
 
@@ -355,5 +353,12 @@ if (!function_exists('site_url')) {
 
 		/* return the merge str replace */
 		return str_replace($array['keys'], $array['values'], $uri);
+	}
+}
+
+if (!function_exists('path')) {
+	function path(string $path) : string
+	{
+		return site_url($path);
 	}
 }
