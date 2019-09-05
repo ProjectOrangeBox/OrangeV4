@@ -24,8 +24,6 @@ find $ROOT -type d | xargs chown quadmin
 find $ROOT -type f | xargs chgrp administrators
 find $ROOT -type d | xargs chgrp administrators
 
-chmod 775 "$ROOT/bin/fixPermissions.sh"
-chmod 775 "$ROOT/bin/findServices.sh"
-chmod 775 "$ROOT/bin/findRoutes.sh"
+find $ROOT/bin/*.sh -type f | xargs chmod 775
 
-chmod 775 "$ROOT/bin/crontab.sh"
+find $ROOT/var/* -type d | xargs chmod 777
