@@ -1,8 +1,11 @@
 <?php
 
-namespace projectorangebox\orange\library;
+namespace projectorangebox\orange\library\log;
+
+use \Monolog\Logger;
 
 /**
+ *
  * Orange
  *
  * An open source extensions for CodeIgniter 3.x
@@ -30,13 +33,12 @@ namespace projectorangebox\orange\library;
  * @config config.log_file_permissions `0644`
  * @config config.log_date_format `Y-m-d H:i:s.u`
  * @config config.log_use_bitwise_psr `true`
- * @config config.log_handler
  *
  * @method __call
  *
  */
 
-class Log extends \CI_Log
+class Monolog extends \CI_Log
 {
 	/**
 	 * Local reference to monolog object
@@ -109,7 +111,7 @@ class Log extends \CI_Log
 
 		$this->init();
 
-		$this->write_log('info','Orange Log Class Initialized');
+		$this->write_log('info','Log Monolog Class Initialized');
 	}
 
 	/**
@@ -129,7 +131,7 @@ class Log extends \CI_Log
 	 * @return Log
 	 *
 	 */
-	public function __call(string $name, array $arguments) : Log
+	public function __call(string $name, array $arguments) : Monolog
 	{
 		if (substr($name, 0, 4) == 'log_') {
 			$this->config[$name] = $arguments[0];
@@ -176,7 +178,7 @@ class Log extends \CI_Log
 		}
 
 		/* logging level check passed - log something! */
-		return ($this->_monolog) ? $this->monolog_write_log($level, $msg) : $this->ci_write_log($level, $msg);
+		return $this->monolog_write_log($level, $msg);
 	}
 
 	/**
@@ -275,54 +277,6 @@ class Log extends \CI_Log
 
 	/**
 	 *
-	 * Overridden to allow all PSR3 log levels if they are passed
-	 * This should be tested before calling this mehtod
-	 * Pretty much a copy of CodeIgniter's Method.
-	 *
-	 * @access protected
-	 *
-	 * @param string $level
-	 * @param string $msg
-	 *
-	 * @return bool success
-	 *
-	 */
-	protected function ci_write_log(string $level, string $msg) : bool
-	{
-		$filepath = $this->build_log_file_path();
-		$message = '';
-
-		if (!file_exists($filepath)) {
-			$newfile = true;
-			/* Only add protection to php files */
-			if ($this->_file_ext === 'php') {
-				$message .= "<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>\n\n";
-			}
-		}
-
-		/* Instantiating DateTime with microseconds appended to initial date is needed for proper support of this format */
-		if (strpos($this->_date_fmt, 'u') !== false) {
-			$microtime_full = microtime(true);
-			$microtime_short = sprintf("%06d", ($microtime_full - floor($microtime_full)) * 1000000);
-			$date = new DateTime(date('Y-m-d H:i:s.'.$microtime_short, $microtime_full));
-			$date = $date->format($this->_date_fmt);
-		} else {
-			$date = date($this->_date_fmt);
-		}
-
-		$message .= $this->_format_line($level, $date, $msg);
-
-		$result = file_put_contents($filepath, $message, FILE_APPEND | LOCK_EX);
-
-		if (isset($newfile) && $newfile === true) {
-			chmod($filepath, $this->_file_permissions);
-		}
-
-		return is_int($result);
-	}
-
-	/**
-	 *
 	 * init / reconfigure init after a configuration value change
 	 *
 	 * @access protected
@@ -397,33 +351,29 @@ class Log extends \CI_Log
 			$this->_file_permissions = $this->config['log_file_permissions'];
 		}
 
-		if (isset($this->config['log_handler'])) {
-			if ($this->config['log_handler'] == 'monolog' && class_exists('\Monolog\Logger', false)) {
-				if (!$this->_monolog) {
-					/**
-					 * Create a instance of monolog for the bootstrapper
-					 * Make the monolog "channel" "CodeIgniter"
-					 * This is a local variable so the bootstrapper can attach stuff to it
-					 */
-					$monolog = new \Monolog\Logger('CodeIgniter');
+		if (!$this->_monolog) {
+			/**
+			 * Create a instance of monolog for the bootstrapper
+			 * Make the monolog "channel" "CodeIgniter"
+			 * This is a local variable so the bootstrapper can attach stuff to it
+			 */
+			$monolog = new Logger('CodeIgniter');
 
-					/**
-					 * Find the monolog_bootstrap files
-					 * This is NOT a standard Codeigniter config
-					 * It includes PHP code which can use the $monolog object we just made
-					 */
-					if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/monolog.php')) {
-						include APPPATH.'config/'.ENVIRONMENT.'/monolog.php';
-					} elseif (file_exists(APPPATH.'config/monolog.php')) {
-						include APPPATH.'config/monolog.php';
-					}
-
-					/**
-					 * Attach the monolog instance to our class for later use
-					 */
-					$this->_monolog = &$monolog;
-				}
+			/**
+			 * Find the monolog_bootstrap files
+			 * This is NOT a standard Codeigniter config
+			 * It includes PHP code which can use the $monolog object we just made
+			 */
+			if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/monolog.php')) {
+				include APPPATH.'config/'.ENVIRONMENT.'/monolog.php';
+			} elseif (file_exists(APPPATH.'config/monolog.php')) {
+				include APPPATH.'config/monolog.php';
 			}
+
+			/**
+			 * Attach the monolog instance to our class for later use
+			 */
+			$this->_monolog = &$monolog;
 		}
 	}
 } /* End of Class */
