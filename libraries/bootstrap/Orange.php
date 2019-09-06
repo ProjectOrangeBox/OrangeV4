@@ -115,6 +115,7 @@ class Orange {
 		return $service;
 	}
 
+	/* orange include wrappers */
 	static public function findView(string $name,bool $throwException = true)
 	{
 		return self::findService($name,$throwException,'view');
