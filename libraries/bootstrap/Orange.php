@@ -227,13 +227,22 @@ class Orange {
 
 		/* get the packages from the configuration folder autoload packages key */
 		foreach (self::getPackages() as $package) {
-			foreach (new RegexIterator(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__ROOT__.'/'.$package)),'#^('.__ROOT__.'/)'.$regex.'$#Di') as $file) {
-				$found[self::getAppPath($file->getRealPath())] = true;
+			$packageFolder = __ROOT__.'/'.$package;
+
+
+			if (is_dir($packageFolder)) {
+				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)),'#^'.$regex.'$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
+					if (!is_dir($match[0])) {
+						$match[0] = self::getAppPath($match[0]);
+
+						$found[$match[0]] = $match;
+					}
+				}
 			}
 		}
 
 		/* return just a numbered array */
-		return array_keys($found);
+		return $found;
 	}
 
  /**
