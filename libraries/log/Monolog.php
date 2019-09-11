@@ -107,7 +107,7 @@ class Monolog extends \CI_Log
 		}
 
 		/* combined config */
-		$this->config = array_replace(\orange::loadFileConfig('config'),$this->config);
+		$this->config = array_replace(loadFileConfig('config'),$this->config);
 
 		$this->init();
 

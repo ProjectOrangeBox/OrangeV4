@@ -122,7 +122,7 @@ class Model extends \CI_Model
 	{
 		log_message('info', 'orange model::rule '.$dotNotation);
 
-		$value = \Orange::getDotNotation($this->rules,$dotNotation,NOVALUE);
+		$value = ci('orange')->getDotNotation($this->rules,$dotNotation,NOVALUE);
 
 		if ($value == NOVALUE) {
 			throw new \Exception(sprintf('No rule found in "%s" for "%s".',$this->object,$dotNotation));

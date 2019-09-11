@@ -30,7 +30,7 @@ echo 'Application Root: '.__ROOT__.PHP_EOL.PHP_EOL;
 
 echo 'Searching:'.PHP_EOL;
 
-foreach (\orange::getPackages() as $package) {
+foreach (ci('orange')->getPackages() as $package) {
 	echo '/'.$package.PHP_EOL;
 }
 
@@ -60,7 +60,7 @@ echo '-- Cut & Paste as needed --'.PHP_EOL.PHP_EOL;
  *
  */
 
-foreach (\orange::applicationSearch('(.*)/controllers/(.*)\.php') as $file) {
+foreach (ci('orange')->applicationSearch('(.*)/controllers/(.*)\.php') as $file) {
 	process($file,'controller');
 }
 

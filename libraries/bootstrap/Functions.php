@@ -39,7 +39,7 @@ if (!function_exists('ci_singleton')) {
 			$config = array_replace((array)$serviceConfig,(array)$userConfig);
 
 			/* is it a named service? if it is use the namespaced name instead of the name sent into the function */
-			if ($namedService = \orange::findService($name,false)) {
+			if ($namedService = findService($name,false)) {
 				$name = $namedService;
 			}
 
@@ -68,7 +68,7 @@ if (!function_exists('ci_singleton')) {
 
 if (!function_exists('ci_factory')) {
 	function ci_factory(string $serviceName,array $userConfig = null) {
-		$serviceClass = \orange::findService($serviceName,true);
+		$serviceClass = findService($serviceName,true);
 
 		$serviceConfig = get_instance()->config->item($serviceName);
 
@@ -104,7 +104,7 @@ if (!function_exists('load_class'))
 
 		/* has it already been loaded? */
 		if (!isset($_classes[$class])) {
-			$name = \orange::findService($class,true);
+			$name = findService($class,true);
 
 			/**
 			 * Tell CI is_loaded function
@@ -304,7 +304,7 @@ if (!function_exists('l'))
 		}
 
 		/* write it to the log file */
-		return file_put_contents(\orange::getFileConfig('config.log_path').'/orange_debug.log', implode(chr(10), $log).chr(10), FILE_APPEND | LOCK_EX);
+		return file_put_contents(getFileConfig('config.log_path').'/orange_debug.log', implode(chr(10), $log).chr(10), FILE_APPEND | LOCK_EX);
 	}
 }
 
@@ -332,7 +332,7 @@ if (!function_exists('site_url')) {
 		}
 
 		/* where is the cache file? */
-		$cacheFilePath = \orange::getFileConfig('config.cache_path').'paths.php';
+		$cacheFilePath = getFileConfig('config.cache_path').'paths.php';
 
 		/* are we in development mode or is the cache file missing */
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
@@ -346,7 +346,7 @@ if (!function_exists('site_url')) {
 				}
 			}
 
-			\orange::var_export_file($cacheFilePath,$array);
+			var_export_file($cacheFilePath,$array);
 		} else {
 			$array = include $cacheFilePath;
 		}
@@ -360,5 +360,185 @@ if (!function_exists('path')) {
 	function path(string $path) : string
 	{
 		return site_url($path);
+	}
+}
+
+if (!function_exists('var_export_file')) {
+ /**
+	* named this way to match PHPs var_export
+  * var_export_file
+  *
+  * @param string $cacheFilePath
+  * @param mixed $data
+  * @return void
+  */
+	function var_export_file(string $cacheFilePath,/* mixed */ $data) : bool
+	{
+		if (is_array($data) || is_object($data)) {
+			$data = '<?php return '.str_replace(['Closure::__set_state','stdClass::__set_state'], '(object)', var_export($data, true)).';';
+		} elseif (is_scalar($data)) {
+			$data = '<?php return "'.str_replace('"', '\"', $data).'";';
+		} else {
+			throw new \Exception('Cache export save unknown data type.');
+		}
+
+		return (bool)atomic_file_put_contents($cacheFilePath, $data);
+	}
+}
+
+if (!function_exists('findService')) {
+ /**
+  * findService
+  *
+  * @param string $serviceName
+  * @param mixed bool
+  * @return void
+  */
+	function findService(string $serviceName,bool $throwException = true,string $prefix = '') /* mixed false or string */
+	{
+		$serviceName = strtolower($serviceName);
+
+		$services = loadFileConfig('services');
+
+		$key = servicePrefix($prefix).$serviceName;
+
+		$service = (isset($services[$key])) ? $services[$key] : false;
+
+		if ($throwException && !$service) {
+			throw new \Exception(sprintf('Could not locate a service named "%s".',$serviceName));
+		}
+
+		return $service;
+	}
+}
+
+if (!function_exists('getFileConfig')) {
+	/**
+	 *
+	 * fileConfig
+	 *
+	 * @param string $dotNotation - config filename
+	 * @param mixed return value - if none giving it will throw an error if the array key doesn't exist
+	 * @return mixed - based on $default value
+	 *
+	 */
+	function getFileConfig(string $dotNotation, $default = NOVALUE) /* mixed */
+	{
+		$dotNotation = strtolower($dotNotation);
+
+		if (strpos($dotNotation,'.') === false) {
+			$value = loadFileConfig($dotNotation);
+		} else {
+			list($filename,$key) = explode('.',$dotNotation,2);
+
+			$array = loadFileConfig($filename);
+
+			if (!isset($array[$key]) && $default === NOVALUE) {
+				throw new \Exception('Find Config Key could not locate "'.$key.'" in "'.$filename.'".');
+			}
+
+			$value = (isset($array[$key])) ? $array[$key] : $default;
+		}
+
+		return $value;
+	}
+}
+
+if (!function_exists('loadFileConfig')) {
+	/**
+	 *
+	 * Low Level configuration file loader
+	 * this does NOT include any database configurations
+	 *
+	 * @param string $filename filename
+	 * @param string $variable array variable name there configuration is stored in [config]
+	 *
+	 * @return array
+	 *
+	 */
+	function loadFileConfig(string $filename,bool $throwException = true ,string $variableVariable = 'config') : array
+	{
+		global $_fileConfigs;
+
+		$filename = strtolower($filename);
+
+		if (!isset($_fileConfigs[$filename])) {
+			$configFound = false;
+
+			/* they either return something or use the CI default $config['...'] format so set those up as empty */
+			$returnedApplicationConfig = $returnedEnvironmentConfig = $$variableVariable = [];
+
+			if (file_exists(APPPATH.'config/'.$filename.'.php')) {
+				$configFound = true;
+				$returnedApplicationConfig = require APPPATH.'config/'.$filename.'.php';
+			}
+
+			if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/'.$filename.'.php')) {
+				$returnedEnvironmentConfig = require APPPATH.'config/'.ENVIRONMENT.'/'.$filename.'.php';
+			}
+
+			$_fileConfigs[$filename] = (array)$returnedEnvironmentConfig + (array)$returnedApplicationConfig + (array)$$variableVariable;
+
+			if (!$configFound && $throwException) {
+				throw new \Exception(sprintf('Could not location a configuration file named "%s".',APPPATH.'config/'.$filename.'.php'));
+			}
+		}
+
+		return $_fileConfigs[$filename];
+	}
+}
+
+if (!function_exists('servicePrefix')) {
+ /**
+  * ServicePrefix
+  *
+  * @param mixed string
+  * @return void
+  */
+	function servicePrefix(string $key) : string
+	{
+		global $_fileConfigs;
+
+		if (!isset($_fileConfigs['service_prefixes'])) {
+			loadFileConfig('service_prefixes');
+		}
+
+		return (isset($_fileConfigs['service_prefixes'][$key])) ? $_fileConfigs['service_prefixes'][$key] : '';
+	}
+}
+
+if (!function_exists('addServicePrefix')) {
+	function addServicePrefix(string $key, string $prefix) : void
+	{
+		global $_fileConfigs;
+
+		if (!isset($_fileConfigs['service_prefixes'])) {
+			loadFileConfig('service_prefixes');
+		}
+
+		$_fileConfigs['service_prefixes'][$key] = $prefix;
+	}
+}
+
+if (!function_exists('addService')) {
+	function addService(string $serviceName, string $class) : void
+	{
+		global $_fileConfigs;
+
+		$_fileConfigs['services'][strtolower($serviceName)] = $class;
+	}
+}
+
+if (!function_exists('getAppPath')) {
+ /**
+  * getAppPath
+  *
+  * @param string $path
+  * @return void
+  */
+	function getAppPath(string $path) : string
+	{
+		/* remove anything below the __ROOT__ folder from the passed path */
+		return (substr($path,0,strlen(__ROOT__)) == __ROOT__) ? substr($path,strlen(__ROOT__)) : $path;
 	}
 }

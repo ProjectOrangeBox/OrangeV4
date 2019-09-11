@@ -172,7 +172,7 @@ class Router {
 		/* !todo CACHE hum... what about closure routes? https://github.com/brick/varexporter */
 
 		/* where is the cache file? */
-		$cacheFilePath = \orange::getFileConfig('config.cache_path').'routes.php';
+		$cacheFilePath = getFileConfig('config.cache_path').'routes.php';
 
 		/* are we in development mode or is the cache file missing */
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
@@ -204,7 +204,7 @@ class Router {
 
 	    log_message('debug','Route: Build Router Cache File '.$cacheFilePath);
 
-			\orange::var_export_file($cacheFilePath,$config);
+			var_export_file($cacheFilePath,$config);
 		} else {
 			$config = include $cacheFilePath;
 		}

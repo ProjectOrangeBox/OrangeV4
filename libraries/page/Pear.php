@@ -132,7 +132,7 @@ class Pear
 	public static function plugin(string $name, bool $throwError = true) : void
 	{
 		if (!isset(self::$loadedPlugins[$name])) {
-			$className = \orange::findPear(str_replace('pear_', '',strtolower($name)),false);
+			$className = ci('orange')->findPear(str_replace('pear_', '',strtolower($name)),false);
 
 			if (class_exists($className, true)) {
 				self::$loadedPlugins[$name] = new $className;

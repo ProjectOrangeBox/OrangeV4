@@ -70,7 +70,7 @@ class Cache
 		}
 
 		/* combined config */
-		$this->config = array_replace(orange::loadFileConfig('config'),$this->config);
+		$this->config = array_replace(loadFileConfig('config'),$this->config);
 
 		$this->adapter = isset($this->config['cache_default']) ? $this->config['cache_default'] : 'dummy';
 
@@ -121,7 +121,7 @@ class Cache
 	protected function driver(string $name) /* mixed */
 	{
 		if (!isset($this->drivers[$name])) {
-			$service = \orange::findService('cache_driver_'.$name);
+			$service = findService('cache_driver_'.$name);
 
 			/* attach driver */
 			$this->drivers[$name] = new $service($this->config);

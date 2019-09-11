@@ -88,7 +88,7 @@ class Config extends \CI_Config
 	{
 		$this->_lazyLoad();
 
-		return (\strpos($item,'.') !== false) ? \orange::getDotNotation($this->config,$item,$index) : parent::item($item,$index);
+		return (\strpos($item,'.') !== false) ? ci('orange')->getDotNotation($this->config,$item,$index) : parent::item($item,$index);
 	}
 
 	/**
@@ -104,7 +104,7 @@ class Config extends \CI_Config
 	{
 		$this->_lazyLoad();
 
-		return (\strpos($item,'.') !== false) ? \orange::setDotNotation($this->config,$item,$value) : parent::set_item($item,$value);
+		return (\strpos($item,'.') !== false) ? ci('orange')->setDotNotation($this->config,$item,$value) : parent::set_item($item,$value);
 	}
 
 	/**
@@ -122,7 +122,7 @@ class Config extends \CI_Config
 		log_message('debug', 'Config::flush');
 
 		/* delete the database configs if they are there */
-		$cacheDatabaseFilePath = \orange::getFileConfig('config.cache_path').'config.database.php';
+		$cacheDatabaseFilePath = getFileConfig('config.cache_path').'config.database.php';
 
 		if (\file_exists($cacheDatabaseFilePath)) {
 			\unlink($cacheDatabaseFilePath);
@@ -132,7 +132,7 @@ class Config extends \CI_Config
 			}
 		}
 
-		$cacheFilePath = \orange::getFileConfig('config.cache_path').'config.file.php';
+		$cacheFilePath = getFileConfig('config.cache_path').'config.file.php';
 
 		/* delete the file configs */
 		if ($clearThisSession) {
@@ -175,7 +175,7 @@ class Config extends \CI_Config
 	{
 		$fileConfig = [];
 
-		$cacheFilePath = \orange::getFileConfig('config.cache_path').'config.file.php';
+		$cacheFilePath = getFileConfig('config.cache_path').'config.file.php';
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			/**
@@ -187,7 +187,7 @@ class Config extends \CI_Config
 			foreach (glob(APPPATH.'/config/*.php') as $filepath) {
 				$basename = basename($filepath, '.php');
 
-				$config = \orange::loadFileConfig($basename);
+				$config = loadFileConfig($basename);
 
 				if (is_array($config)) {
 					foreach ($config as $key=>$value) {
@@ -196,7 +196,7 @@ class Config extends \CI_Config
 				}
 			}
 
-			\orange::var_export_file($cacheFilePath,$fileConfig);
+			var_export_file($cacheFilePath,$fileConfig);
 		} else {
 			$fileConfig = include $cacheFilePath;
 		}
@@ -208,7 +208,7 @@ class Config extends \CI_Config
 	{
 		$databaseConfig = [];
 
-		$cacheFilePath = \orange::getFileConfig('config.cache_path').'config.database.php';
+		$cacheFilePath = getFileConfig('config.cache_path').'config.database.php';
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			$config = ci($this->hasDatabase)->get_enabled();
@@ -219,7 +219,7 @@ class Config extends \CI_Config
 				}
 			}
 
-			\orange::var_export_file($cacheFilePath,$databaseConfig);
+			var_export_file($cacheFilePath,$databaseConfig);
 		} else {
 			$databaseConfig = include $cacheFilePath;
 		}
