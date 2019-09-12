@@ -17,8 +17,7 @@
  * $foo = config('file.key2','default value');
  * ```
  */
-if (!function_exists('config'))
-{
+if (!function_exists('config')) {
 	function config(string $arg1,/* mixed */ $arg2 = '') /* mixed */
 	{
 		return ci('config')->item($arg1, $arg2);
@@ -30,12 +29,11 @@ if (!function_exists('config'))
  * This returns the filtered value
  *
  */
-if (!function_exists('filter'))
-{
+if (!function_exists('filter')) {
 	function filter($input, string $rules) /* mixed */
 	{
 		/* passed by reference */
-		return ci('validate')->filter($input,$rules);
+		return ci('validate')->filter($input, $rules);
 	}
 }
 
@@ -46,11 +44,10 @@ if (!function_exists('filter'))
  * or fails (false)
  *
  */
-if (!function_exists('valid'))
-{
-	function valid($input, string $rules) : bool
+if (!function_exists('valid')) {
+	function valid($input, string $rules): bool
 	{
-		return ci('validate')->variable($input,$rules);
+		return ci('validate')->variable($input, $rules);
 	}
 }
 
@@ -62,9 +59,8 @@ if (!function_exists('valid'))
  * @return string
  *
  */
-if (!function_exists('esc'))
-{
-	function esc(string $string) : string
+if (!function_exists('esc')) {
+	function esc(string $string): string
 	{
 		return str_replace('"', '\"', $string);
 	}
@@ -78,9 +74,8 @@ if (!function_exists('esc'))
  * @return string
  *
  */
-if (!function_exists('e'))
-{
-	function e(string $input) : string
+if (!function_exists('e')) {
+	function e(string $input): string
 	{
 		return (empty($input)) ? '' : html_escape($input);
 	}
@@ -94,9 +89,8 @@ if (!function_exists('e'))
  * @return void
  *
  */
-if (!function_exists('unlockSession'))
-{
-	function unlockSession() : void
+if (!function_exists('unlockSession')) {
+	function unlockSession(): void
 	{
 		session_write_close();
 	}

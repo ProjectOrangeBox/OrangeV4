@@ -4,27 +4,28 @@ namespace projectorangebox\orange\library\bootstrap;
 
 use projectorangebox\orange\library\input\RequestRemap;
 
-class Orange {
+class Orange
+{
 
-	/* orange include wrappers */
-	public function findView(string $name,bool $throwException = true)
+	/* wrappers */
+	public function findView(string $name, bool $throwException = true)
 	{
-		return findService($name,$throwException,'view');
+		return findService($name, $throwException, 'view');
 	}
 
-	public function findFilter(string $name,bool $throwException = true)
+	public function findFilter(string $name, bool $throwException = true)
 	{
-		return findService($name,$throwException,'input_filter');
+		return findService($name, $throwException, 'input_filter');
 	}
 
-	public function findRule(string $name,bool $throwException = true)
+	public function findRule(string $name, bool $throwException = true)
 	{
-		return findService($name,$throwException,'validation_rule');
+		return findService($name, $throwException, 'validation_rule');
 	}
 
-	public function findPear(string $name,bool $throwException = true)
+	public function findPear(string $name, bool $throwException = true)
 	{
-		return findService($name,$throwException,'pear_plugin');
+		return findService($name, $throwException, 'pear_plugin');
 	}
 
 	/**
@@ -40,13 +41,13 @@ class Orange {
 	 * @example $html = view('admin/users/show',['name'=>'Johnny Appleseed']);
 	 *
 	 */
-	public function view(string $__view, array $__data = []) : string
+	public function view(string $__view, array $__data = []): string
 	{
 		/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/
 		extract($__data, EXTR_PREFIX_INVALID, '_');
 
 		/* if the view isn't there then findView will throw an error BEFORE output buffering is turned on */
-		$__path = __ROOT__.$this->findView($__view,true);
+		$__path = __ROOT__ . $this->findView($__view, true);
 
 		/* turn on output buffering */
 		ob_start();
@@ -58,23 +59,23 @@ class Orange {
 		return ob_get_clean();
 	}
 
- /**
-  * regular expression search packages and application for files
-  *
-  * @param string $regex
-  * @return void
-  */
-	public function applicationSearch(string $regex) : array
+	/**
+	 * regular expression search packages and application for files
+	 *
+	 * @param string $regex
+	 * @return void
+	 */
+	public function applicationSearch(string $regex): array
 	{
 		$found = [];
 
 		/* get the packages from the configuration folder autoload packages key */
 		foreach ($this->getPackages() as $package) {
-			$packageFolder = __ROOT__.'/'.$package;
+			$packageFolder = __ROOT__ . '/' . $package;
 
 
 			if (is_dir($packageFolder)) {
-				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)),'#^'.$regex.'$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
+				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)), '#^' . $regex . '$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
 					if (!is_dir($match[0])) {
 						$match[0] = getAppPath($match[0]);
 
@@ -88,17 +89,17 @@ class Orange {
 		return $found;
 	}
 
- /**
-  * getPackages
-  *
-  * @return void
-  */
-	public function getPackages() : array
+	/**
+	 * getPackages
+	 *
+	 * @return void
+	 */
+	public function getPackages(): array
 	{
-		$config = loadFileConfig('autoload',true,'autoload');
+		$config = loadFileConfig('autoload', true, 'autoload');
 
 		/* add application as package */
-		array_unshift($config['packages'],'application');
+		array_unshift($config['packages'], 'application');
 
 		return $config['packages'];
 	}
@@ -110,9 +111,9 @@ class Orange {
 	 * @param string $type - browser console log types [log]
 	 *
 	 */
-	public function console(/* mixed */ $var, string $type = 'log') : void
+	public function console(/* mixed */$var, string $type = 'log'): void
 	{
-		echo '<script type="text/javascript">console.'.$type.'('.json_encode($var).')</script>';
+		echo '<script type="text/javascript">console.' . $type . '(' . json_encode($var) . ')</script>';
 	}
 
 	/**
@@ -130,27 +131,27 @@ class Orange {
 		$converted = $value;
 
 		switch (trim(strtolower($value))) {
-		case 'true':
-			$converted = true;
-			break;
-		case 'false':
-			$converted = false;
-			break;
-		case 'empty':
-			$converted = '';
-			break;
-		case 'null':
-			$converted = null;
-			break;
-		default:
-			if (is_numeric($value)) {
-				$converted = (is_float($value)) ? (float)$value : (int)$value;
-			} else {
-				/* if it's json this will return something other than null */
-				$json = @json_decode($value, true);
+			case 'true':
+				$converted = true;
+				break;
+			case 'false':
+				$converted = false;
+				break;
+			case 'empty':
+				$converted = '';
+				break;
+			case 'null':
+				$converted = null;
+				break;
+			default:
+				if (is_numeric($value)) {
+					$converted = (is_float($value)) ? (float) $value : (int) $value;
+				} else {
+					/* if it's json this will return something other than null */
+					$json = @json_decode($value, true);
 
-				$converted = ($json !== null) ? $json : $value;
-			}
+					$converted = ($json !== null) ? $json : $value;
+				}
 		}
 
 		return $converted;
@@ -166,7 +167,7 @@ class Orange {
 	 * @return string
 	 *
 	 */
-	public function convertToString($value) : string
+	public function convertToString($value): string
 	{
 		$converted = $value;
 
@@ -196,7 +197,7 @@ class Orange {
 	 * @return array
 	 *
 	 */
-	public function simplifyArray(array $array, string $key = 'id', string $value = null, string $sort = null) : array
+	public function simplifyArray(array $array, string $key = 'id', string $value = null, string $sort = null): array
 	{
 		$value = ($value) ? $value : $key;
 
@@ -225,20 +226,20 @@ class Orange {
 			case 'd':
 			case 'krsort':
 				krsort($simplifiedArray, $sort_flags);
-			break;
+				break;
 			case 'asc':
 			case 'a':
 			case 'ksort':
 				ksort($simplifiedArray, $sort_flags);
-			break;
+				break;
 			case 'sort':
 			case 'asort':
 				asort($simplifiedArray, $sort_flags);
-			break;
+				break;
 			case 'arsort':
 			case 'rsort':
 				arsort($simplifiedArray, $sort_flags);
-			break;
+				break;
 		}
 
 		return $simplifiedArray;
@@ -261,54 +262,54 @@ class Orange {
 	 * $html = quick_merge('Hello {name}',['name'=>'Johnny'])
 	 * ```
 	 */
-	public function quickMerge(string $template, array $data = []) : string
+	public function quickMerge(string $template, array $data = []): string
 	{
 		if (preg_match_all('/{([^}]+)}/m', $template, $matches)) {
 			foreach ($matches[1] as $key) {
-				$template = str_replace('{'.$key.'}', $data[$key], $template);
+				$template = str_replace('{' . $key . '}', $data[$key], $template);
 			}
 		}
 
 		return $template;
 	}
 
- /**
-  * remapInputStream
-	*
-	* Preprocess the raw input stream
-  *
-  * @param array $rules
-  * @param mixed bool
-  * @return void
-  */
+	/**
+	 * remapInputStream
+	 *
+	 * Preprocess the raw input stream
+	 *
+	 * @param array $rules
+	 * @param mixed bool
+	 * @return void
+	 */
 	public function remapInputStream(array $rules) /* mixed */
 	{
-		ci('input')->set_request((new RequestRemap)->processRaw($rules,ci('input')->get_raw_input_stream())->get(),true);
+		ci('input')->set_request((new RequestRemap)->processRaw($rules, ci('input')->get_raw_input_stream())->get(), true);
 	}
 
- /**
-  * getDotNotation
-  *
-  * @param array $array
-  * @param string $notation
-  * @param mixed $default
-  * @return void
-  */
-	public function getDotNotation(array $array,string $notation, $default = null) /* mixed */
+	/**
+	 * getDotNotation
+	 *
+	 * @param array $array
+	 * @param string $notation
+	 * @param mixed $default
+	 * @return void
+	 */
+	public function getDotNotation(array $array, string $notation, $default = null) /* mixed */
 	{
 		$value = $default;
 
-		if (is_array($array) && array_key_exists($notation,$array)) {
+		if (is_array($array) && array_key_exists($notation, $array)) {
 			$value = $array[$notation];
-		} elseif (is_object($array) && property_exists($array,$notation)) {
+		} elseif (is_object($array) && property_exists($array, $notation)) {
 			$value = $array->$notation;
 		} else {
-			$segments = explode('.',$notation);
+			$segments = explode('.', $notation);
 
 			foreach ($segments as $segment) {
-				if (is_array($array) && array_key_exists($segment,$array)) {
+				if (is_array($array) && array_key_exists($segment, $array)) {
 					$value = $array = $array[$segment];
-				} elseif (is_object($array) && property_exists($array,$segment)) {
+				} elseif (is_object($array) && property_exists($array, $segment)) {
 					$value = $array = $array->$segment;
 				} else {
 					$value = $default;
@@ -320,9 +321,9 @@ class Orange {
 		return $value;
 	}
 
-	public function setDotNotation(array &$array,string $notation, $value) : void
+	public function setDotNotation(array &$array, string $notation, $value): void
 	{
-    $keys = explode('.', $notation);
+		$keys = explode('.', $notation);
 
 		while (count($keys) > 1) {
 			$key = array_shift($keys);
@@ -332,11 +333,10 @@ class Orange {
 			}
 
 			$array = &$array[$key];
-    }
+		}
 
-    $key = reset($keys);
+		$key = reset($keys);
 
 		$array[$key] = $value;
 	}
-
 } /* end class */
