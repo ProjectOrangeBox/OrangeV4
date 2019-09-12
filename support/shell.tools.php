@@ -5,6 +5,7 @@ class tools {
 	protected $merge;
 	protected $callback;
 	protected $foreground_colors = [];
+	protected $processed = [];
 
 	public function __construct()
 	{
@@ -72,28 +73,39 @@ class tools {
 		return $this->println('<light_red>'.$input,$die,STDERR);
 	}
 
-	public function find(string $regex,string $merge,Closure $callback = null) {
-		$defaultClosure = function(array $matches,string $merge,tools $that) : void {
-			$that->merge($matches,$merge);
-		};
+	public function find(string $regex,$searchPaths) : array
+	{
+		return $this->applicationSearch($regex,$searchPaths);
+	}
 
-		$callback = ($callback) ?? $defaultClosure;
+	// ,string $keyMerge, string $valueMerge
+	public function processFound(array $found,array $options,string $function = 'local_merge') {
+		foreach ($found as $matches) {
+			($function == 'local_merge') ? $this->merge($matches,$options[0],$options[1]) : $function($matches,$options,$this);
+		}
 
-		$searchPaths = $this->displayPackages();
+		return $this->processed;
+	}
 
-		$regex = $this->buildRegex($regex);
-
-		$this->println("Matching files against the regular expression");
-		$this->println($regex);
-		$this->println("Merge");
-		$this->println($merge);
-
+	public function showAsServiceArray(array $array,bool $convertNamespace = false,bool $sort = true) {
 		$this->println("Found");
 		$this->println("-- Cut & Paste as needed --");
 		$this->println();
 
-		foreach ($this->applicationSearch($regex,$searchPaths) as $matches) {
-			$callback($matches,$merge,$this);
+		if ($sort) {
+			asort($array);
+		}
+
+		foreach ($array as $key=>$value) {
+			echo "'".strtolower($key)."' => ";
+
+			if ($convertNamespace) {
+				$value = str_replace('/','\\',$value);
+			}
+
+			echo (strpos($value,'=>') !== false) ? "['".$value."']" : "'".$value."'";
+
+			echo ",".PHP_EOL;
 		}
 
 		$this->println();
@@ -104,33 +116,38 @@ class tools {
 		$regexMatch = str_replace('{','(?<',$regex);
 		$regexMatch = str_replace('}','>.*)',$regexMatch);
 
+		$this->println();
+		$this->println("Matching files against the regular expression");
+		$this->println($regexMatch);
+		$this->println();
+
 		return $regexMatch;
 	}
 
 	public function displayPackages() : array
 	{
-		$searchPathsFile = __ROOT__.'/bin/searchPaths.json';
+		$config = __ROOT__.'/bin/config.json';
 
 		$this->println('Searching the following "packages"');
-		$this->println('These are loaded from the '.$searchPathsFile.' file');
+		$this->println('These are loaded from the '.$config.' file');
 
-		if (!file_exists($searchPathsFile)) {
-			$this->error('Could not locate the search path JSON file.');
+		if (!file_exists($config)) {
+			$this->error('Could not locate config file.');
 		}
 
-		$searchPaths = json_decode(file_get_contents($searchPathsFile),true,8);
+		$configObj = json_decode(file_get_contents($config));
 
-		if (!is_array($searchPaths)) {
+		if (!is_array($configObj->search)) {
 			$this->error('Search path json error.');
 		}
 
-		foreach ($searchPaths as $package) {
+		foreach ($configObj->search as $package) {
 			$this->println('../'.$package);
 		}
 
 		$this->println();
 
-		return $searchPaths;
+		return $configObj->search;
 	}
 
 	public function applicationSearch(string $regex, array $paths) : array
@@ -157,11 +174,14 @@ class tools {
 		return $found;
 	}
 
-	public function merge(array $mergeData,string $text)
+	public function merge(array $mergeData,string $keyMerge, string $valueMerge): void
 	{
 		$mergeData['APPPATH'] = APPPATH;
 		$mergeData['ROOT'] = __ROOT__;
 		$mergeData['NAMESPACE'] = $this->getNamespace($mergeData[0]);
+		$zero = chr(0);
+
+		$text = $keyMerge.$zero.$valueMerge;
 
 		if (preg_match_all('/{([^}]+)}/m', $text, $matches)) {
 			foreach ($matches[1] as $key) {
@@ -181,7 +201,14 @@ class tools {
 			}
 		}
 
-		$this->println($text);
+		list($key,$value) =  explode($zero,$text,2);
+
+		$this->addProcessed($key,$value);
+	}
+
+	public function addProcessed(string $key,string $value) : void
+	{
+		$this->processed[$key] = $value;
 	}
 
 	public function getAppPath(string $path) : string

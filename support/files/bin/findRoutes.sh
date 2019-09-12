@@ -1,137 +1,34 @@
 #!/usr/bin/env php
 <?php
 
-ini_set('display_errors', 1);
+define('__ROOT__',dirname(dirname(realpath($_SERVER['argv'][0]))));
 
-define('__ROOT__',realpath(''));
+require __ROOT__.'/vendor/projectorangebox/orange-v4/support/shell.tools.php';
 
-echo __ROOT__.PHP_EOL;
+$tools = new tools();
 
-chdir(__ROOT__);
+$regularEx = $tools->buildRegex('{folder}/controllers/{controller}\.php');
+$matches = $tools->find($regularEx,$tools->displayPackages());
+$found = $tools->processFound($matches,['{url}',"{method}'=>'{namespace}{class}"],'callback');
 
-define('BASEPATH',__ROOT__);
+$tools->showAsServiceArray($found);
 
-/* .env file */
-if (!file_exists('.env')) {
-	echo getcwd().'/.env file missing.';
-	exit(1); // EXIT_ERROR
-}
+function callback($matches,$options,$tools) {
+	list($key,$value) = $options;
 
-/* bring in the system .env files */
-$_ENV = array_merge($_ENV,parse_ini_file('.env',true,INI_SCANNER_TYPED));
+	foreach (file(__ROOT__.$matches[0]) as $line) {
+		if (preg_match('#(.*)@route(\s*)(?<url>\S*)(\s*)(?<method>\S*)(\s*)(?<class>\S*)(.*)#', trim($line), $m)) {
+			$matches['url'] = $m['url'];
 
-define('APPPATH',__ROOT__.'/application/');
-define('ENVIRONMENT', isset($_ENV['CI_ENV']) ? $_ENV['CI_ENV'] : 'development');
-
-require __ROOT__.'/packages/projectorangebox/orange/libraries/bootstrap/Functions.php';
-require __ROOT__.'/packages/projectorangebox/orange/libraries/bootstrap/Orange.php';
-
-echo 'Application Root: '.__ROOT__.PHP_EOL.PHP_EOL;
-
-echo 'Searching:'.PHP_EOL;
-
-foreach (ci('orange')->getPackages() as $package) {
-	echo '/'.$package.PHP_EOL;
-}
-
-echo PHP_EOL;
-
-echo '-- Cut & Paste as needed --'.PHP_EOL.PHP_EOL;
-
-
-/**
- *
- * @httpPost 'snakes/([a-zA-Z]+)/edit/(\d+)' => 'forder1\folder2\admin\welcome::index'
- *
- * $route['snakes/([a-zA-Z]+)/edit/(\d+)']['post'] = 'forder1\folder2\admin\welcome::index';
- *
- * Auto replace URL with the folder path inside the controllers folder
- * Auto replace Controller with the Directory path based on the ROOT level unless it is in application
- * Auto replace Method with the next found public method
- *
- * @httpGet ~ => *::*
- * @httpPost
- * @httpDelete
- * @httpPut
- * @httpPatch
- *
- * @cli
- *
- *
- */
-
-foreach (ci('orange')->applicationSearch('(.*)/controllers/(.*)\.php') as $file) {
-	process($file,'controller');
-}
-
-echo PHP_EOL;
-
-exit(1);
-
-function process(string $realPath,string $stripFromControllerName) : void
-{
-	$last = '';
-	$lines = file(__ROOT__.$realPath);
-
-	foreach ($lines as $line) {
-
-		if (preg_match_all('%[^\@]+@(http|cli)(\S*) (\S*) => (\S*)%i',$line, $match, PREG_SET_ORDER, 0)) {
-			/* found another route */
-			println($last);
-
-			$pathinfo = pathinfo($realPath);
-
-			$request = (strtolower($match[0][1]) == 'http') ? strtolower($match[0][2]) : strtolower($match[0][1]);
-			$url = $match[0][3];
-
-			if ($url == '~') {
-				$controllersFolder = '/controllers/';
-
-				$new = strtolower($pathinfo['dirname'].'/'.$pathinfo['filename']);
-
-				if (substr($new,-strlen($stripFromControllerName)) == $stripFromControllerName) {
-					$new = substr($new,0,-strlen($stripFromControllerName));
-				}
-
-				$url = substr($new,strpos($new,$controllersFolder) + strlen($controllersFolder)).'~';
+			if (empty($m['class'])) {
+				$matches['class'] = $m['method'];
+				$matches['method'] = 'get';
+			} else {
+				$matches['class'] = $m['class'];
+				$matches['method'] = $m['method'];
 			}
 
-			$controller = $match[0][4];
-
-			$directory = ($pathinfo['dirname'] != '/application/controllers') ? $pathinfo['dirname'].'/'.$pathinfo['filename'] : $pathinfo['filename'];
-
-			$controller = str_replace('*:',str_replace('/','\\',$directory).':',$controller);
-
-			$last = format($request,$url,$controller);
+			$tools->merge($matches,$key,$value);
 		}
-
-		if (preg_match('%(\s*)public(\s*)function(\s*)([a-z0-9_-]*)%i', $line, $match, PREG_OFFSET_CAPTURE, 0)) {
-			$method = $match[4][0];
-
-			$last = str_replace('::*','::'.$method,$last);
-			$last = ($method == 'index') ? str_replace('~','',$last) : str_replace('~','/'.$method,$last);
-		}
-	}
-
-	/* do we have a route still in there? */
-	println($last);
-}
-
-function format(string $request,string $url,string $controller) : string
-{
-	/*
-	'form/input' => 'FormController::index',
-	'products/(:num)' => ['DelEte' => 'product/delete/$1'],
-	*/
-
-	return ($request == 'get') ? sprintf("'%s' => '%s',",$url,$controller) : sprintf("'%s' => ['%s'=>'%s'],",$url,$request,$controller);
-}
-
-function println(string &$last) : void
-{
-	if (!empty($last)) {
-		echo $last.PHP_EOL;
-
-		$last = '';
 	}
 }
