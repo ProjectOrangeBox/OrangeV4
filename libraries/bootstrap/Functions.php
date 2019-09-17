@@ -47,6 +47,8 @@ if (!function_exists('ci_singleton')) {
 		/* if the name has segments (namespaced or folder based) we only need the last which is the service name */
 		$serviceName = strtolower(($as) ?? basename(str_replace('\\', '/', $name), '.php'));
 
+		$serviceName = serviceAlias($serviceName);
+
 		/* has this service been attached yet? */
 		if (!isset($instance->$serviceName)) {
 			/* try to load it's configuration */
@@ -79,6 +81,15 @@ if (!function_exists('ci_singleton')) {
 
 		/* now grab the reference */
 		return $instance->$serviceName;
+	}
+}
+
+if (!function_exists('serviceAlias')) {
+	function serviceAlias(string $name): string
+	{
+		$services = loadFileConfig('services');
+
+		return (isset($services['alias'][$name])) ? $services['alias'][$name] : $name;
 	}
 }
 
