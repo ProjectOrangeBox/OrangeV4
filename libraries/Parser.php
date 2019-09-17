@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Lang extends \CI_Lang {
+use CI_Parser;
+
+class Parser extends CI_Parser
+{
 
 }

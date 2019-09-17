@@ -2,6 +2,8 @@
 
 namespace projectorangebox\orange\library;
 
+use CI_Session;
+
 /**
  * Orange
  *
@@ -25,7 +27,7 @@ namespace projectorangebox\orange\library;
  *
  *
  */
-class Session extends \CI_Session
+class Session extends CI_Session
 {
 
 	/**

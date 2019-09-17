@@ -2,7 +2,7 @@
 
 namespace projectorangebox\orange\library;
 
-use projectorangebox\orange\library\input\RequestRemap;
+use CI_Input;
 
 /**
  * Orange
@@ -42,7 +42,7 @@ use projectorangebox\orange\library\input\RequestRemap;
  *
  */
 
-class Input extends \CI_Input
+class Input extends CI_Input
 {
 	/**
 	 * Contains the current POST or PUT or PATCH request data

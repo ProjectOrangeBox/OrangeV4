@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Uri extends \CI_URI {
+use CI_URI;
+
+class Uri extends CI_URI
+{
 
 }

@@ -1,7 +1,6 @@
 {
 	"search": [
 		"application",
-		"packages/handlebars",
 		"vendor/projectorangebox/orange-v4"
 	]
 }

@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Zip extends \CI_Zip {
+use CI_Zip;
+
+class Zip extends CI_Zip
+{
 
 }

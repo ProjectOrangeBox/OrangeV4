@@ -1,6 +1,7 @@
 <?php
 
-class tools {
+class tools
+{
 	protected $regex;
 	protected $merge;
 	protected $callback;
@@ -34,32 +35,34 @@ class tools {
 
 		chdir(__ROOT__);
 
-		define('BASEPATH',__ROOT__);
+		define('BASEPATH', __ROOT__);
 
 		/* .env file */
 		if (!file_exists('.env')) {
-			$this->error(getcwd().'/.env file missing.');
+			$this->error(getcwd() . '/.env file missing.');
 		}
 
 		/* bring in the system .env files */
-		$_ENV = array_merge($_ENV,parse_ini_file('.env',true,INI_SCANNER_TYPED));
+		$_ENV = array_merge($_ENV, parse_ini_file('.env', true, INI_SCANNER_TYPED));
 
-		define('APPPATH',__ROOT__.'/application/');
+		define('APPPATH', __ROOT__ . '/application/');
 		define('ENVIRONMENT', isset($_ENV['CI_ENV']) ? $_ENV['CI_ENV'] : 'development');
 
 		$this->println('Application Root');
 		$this->println(__ROOT__);
 	}
 
-	public function println(string $input = '',bool $die = false,$stream = STDOUT) {
-		return $this->print($input.PHP_EOL,$die,$stream);
+	public function println(string $input = '', bool $die = false, $stream = STDOUT): void
+	{
+		$this->print($input . PHP_EOL, $die, $stream);
 	}
 
 	/* STDOUT or STDERR */
-	public function print(string $input,bool $die = false,$stream = STDOUT) {
-		foreach ($this->foreground_colors as $color=>$console) {
-			$input = str_replace('<'.$color.'>',"\033[".$console."m",$input);
-			$input = str_replace('</'.$color.'>',"\033[0m",$input);
+	public function print(string $input, bool $die = false, $stream = STDOUT): void
+	{
+		foreach ($this->foreground_colors as $color => $console) {
+			$input = str_replace('<' . $color . '>', "\033[" . $console . "m", $input);
+			$input = str_replace('</' . $color . '>', "\033[0m", $input);
 		}
 
 		fwrite($stream, $input);
@@ -69,67 +72,81 @@ class tools {
 		}
 	}
 
-	public function error(string $input,bool $die = true) {
-		return $this->println('<light_red>'.$input,$die,STDERR);
-	}
-
-	public function find(string $regex,$searchPaths) : array
+	public function error(string $input, bool $die = true): void
 	{
-		return $this->applicationSearch($regex,$searchPaths);
+		$this->println('<light_red>' . $input, $die, STDERR);
 	}
 
-	// ,string $keyMerge, string $valueMerge
-	public function processFound(array $found,array $options,string $function = 'local_merge') {
+	public function processFound(array $found, array $options): array
+	{
 		foreach ($found as $matches) {
-			($function == 'local_merge') ? $this->merge($matches,$options[0],$options[1]) : $function($matches,$options,$this);
+			if (function_exists('processMatch')) {
+				processMatch($matches, $options, $this);
+			} else {
+				$this->addProcessed($this->merge($matches, $options[0], $options[1]));
+			}
 		}
 
 		return $this->processed;
 	}
 
-	public function showAsServiceArray(array $array,bool $convertNamespace = false,bool $sort = true) {
+	public function showAsServiceArray(array $array, bool $convertNamespace = false, string $sort = 'none'): void
+	{
 		$this->println("Found");
 		$this->println("-- Cut & Paste as needed --");
 		$this->println();
 
-		if ($sort) {
-			asort($array);
+		switch ($sort) {
+			case 'asort':
+			case 'value':
+				asort($array);
+				break;
+			case 'ksort':
+			case 'key':
+				ksort($array);
+				break;
 		}
 
-		foreach ($array as $key=>$value) {
-			echo "'".strtolower($key)."' => ";
+		foreach ($array as $mixed) {
+			list($key, $value) = $mixed;
+
+			echo "'" . strtolower($key) . "' => ";
 
 			if ($convertNamespace) {
-				$value = str_replace('/','\\',$value);
+				$value = str_replace('/', '\\', $value);
 			}
 
-			echo (strpos($value,'=>') !== false) ? "['".$value."']" : "'".$value."'";
+			echo (strpos($value, '=>') !== false) ? "['" . $value . "']" : "'" . $value . "'";
 
-			echo ",".PHP_EOL;
+			echo "," . PHP_EOL;
 		}
 
 		$this->println();
 	}
 
-	public function buildRegex(string $regex) : string
+	public function buildRegex(string $regex, bool $displayOutput = false): string
 	{
-		$regexMatch = str_replace('{','(?<',$regex);
-		$regexMatch = str_replace('}','>.*)',$regexMatch);
+		$regexMatch = str_replace('{', '(?<', $regex);
+		$regexMatch = str_replace('}', '>.*)', $regexMatch);
 
-		$this->println();
-		$this->println("Matching files against the regular expression");
-		$this->println($regexMatch);
-		$this->println();
+		if ($displayOutput) {
+			$this->println();
+			$this->println("Matching files against the regular expression");
+			$this->println($regexMatch);
+			$this->println();
+		}
 
 		return $regexMatch;
 	}
 
-	public function displayPackages() : array
+	public function packages(bool $displayOutput = false): array
 	{
-		$config = __ROOT__.'/bin/config.json';
+		$config = __ROOT__ . '/bin/config.json';
 
-		$this->println('Searching the following "packages"');
-		$this->println('These are loaded from the '.$config.' file');
+		if ($displayOutput) {
+			$this->println('Searching the following "packages"');
+			$this->println('These are loaded from the ' . $config . ' file');
+		}
 
 		if (!file_exists($config)) {
 			$this->error('Could not locate config file.');
@@ -141,26 +158,28 @@ class tools {
 			$this->error('Search path json error.');
 		}
 
-		foreach ($configObj->search as $package) {
-			$this->println('../'.$package);
-		}
+		if ($displayOutput) {
+			foreach ($configObj->search as $package) {
+				$this->println('../' . $package);
+			}
 
-		$this->println();
+			$this->println();
+		}
 
 		return $configObj->search;
 	}
 
-	public function applicationSearch(string $regex, array $paths) : array
+	public function find(string $regex, array $paths): array
 	{
 		$found = [];
 
 		/* get the packages from the configuration folder autoload packages key */
 		foreach ($paths as $package) {
-			$packageFolder = __ROOT__.'/'.$package;
+			$packageFolder = __ROOT__ . '/' . $package;
 
 
 			if (is_dir($packageFolder)) {
-				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)),'#^'.$regex.'$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
+				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)), '#^' . $regex . '$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
 					if (!is_dir($match[0])) {
 						$match[0] = $this->getAppPath($match[0]);
 
@@ -174,19 +193,19 @@ class tools {
 		return $found;
 	}
 
-	public function merge(array $mergeData,string $keyMerge, string $valueMerge): void
+	public function merge(array $mergeData, string $keyMerge, string $valueMerge): array
 	{
 		$mergeData['APPPATH'] = APPPATH;
 		$mergeData['ROOT'] = __ROOT__;
 		$mergeData['NAMESPACE'] = $this->getNamespace($mergeData[0]);
 		$zero = chr(0);
 
-		$text = $keyMerge.$zero.$valueMerge;
+		$text = $keyMerge . $zero . $valueMerge;
 
 		if (preg_match_all('/{([^}]+)}/m', $text, $matches)) {
 			foreach ($matches[1] as $key) {
-				if (strpos($key,'|') !== false) {
-					$filters = explode('|',$key);
+				if (strpos($key, '|') !== false) {
+					$filters = explode('|', $key);
 					$newkey = array_pop($filters);
 					$value = $mergeData[$newkey];
 
@@ -197,35 +216,32 @@ class tools {
 					$value = $mergeData[$key];
 				}
 
-				$text = str_replace('{'.$key.'}',$value,$text);
+				$text = str_replace('{' . $key . '}', $value, $text);
 			}
 		}
 
-		list($key,$value) =  explode($zero,$text,2);
-
-		$this->addProcessed($key,$value);
+		return explode($zero, $text, 2);
 	}
 
-	public function addProcessed(string $key,string $value) : void
+	public function addProcessed($mixed): void
 	{
-		$this->processed[$key] = $value;
+		$this->processed[] = $mixed;
 	}
 
-	public function getAppPath(string $path) : string
+	public function getAppPath(string $path): string
 	{
 		/* remove anything below the __ROOT__ folder from the passed path */
-		return (substr($path,0,strlen(__ROOT__)) == __ROOT__) ? substr($path,strlen(__ROOT__)) : $path;
+		return (substr($path, 0, strlen(__ROOT__)) == __ROOT__) ? substr($path, strlen(__ROOT__)) : $path;
 	}
 
-	public function getNamespace(string $filepath) : string
+	public function getNamespace(string $filepath): string
 	{
 		$namespace = '';
 
-		if (preg_match('/namespace (?<namespace>.*);/m', file_get_contents(__ROOT__.$filepath), $matches)) {
+		if (preg_match('/namespace (?<namespace>.*);/m', file_get_contents(__ROOT__ . $filepath), $matches)) {
 			$namespace = $matches['namespace'];
 		}
 
 		return trim($namespace);
 	}
-
 } /* end class */

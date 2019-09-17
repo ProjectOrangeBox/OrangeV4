@@ -18,8 +18,8 @@ echo $ROOT
 find $ROOT -type f | xargs chmod 664
 find $ROOT -type d | xargs chmod 775
 
-find $ROOT -type f | xargs chown quadmin
-find $ROOT -type d | xargs chown quadmin
+find $ROOT -type f | xargs chown admin
+find $ROOT -type d | xargs chown admin
 
 find $ROOT -type f | xargs chgrp administrators
 find $ROOT -type d | xargs chgrp administrators

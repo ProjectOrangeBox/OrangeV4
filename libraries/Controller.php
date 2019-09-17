@@ -2,7 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Controller extends \CI_Controller
+use CI_Controller;
+
+class Controller extends CI_Controller
 {
 
 	public function __construct()

@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Utf8 extends \CI_Utf8 {
+use CI_Utf8;
+
+class Utf8 extends CI_Utf8
+{
 
 }

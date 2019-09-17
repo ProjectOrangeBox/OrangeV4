@@ -2,9 +2,8 @@
 
 namespace projectorangebox\orange\library;
 
-use CI_Hooks;
+use CI_Router;
 
-class Hooks extends CI_Hooks
-{
+class Router_CI extends CI_Router {
 
 }

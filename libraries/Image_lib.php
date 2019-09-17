@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Image_lib extends \CI_Image_lib {
+use CI_Image_lib;
+
+class Image_lib extends CI_Image_lib
+{
 
 }

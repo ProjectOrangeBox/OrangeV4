@@ -3,6 +3,7 @@
 namespace projectorangebox\orange\library\log;
 
 use \Monolog\Logger;
+use \CI_Log;
 
 /**
  *
@@ -38,7 +39,7 @@ use \Monolog\Logger;
  *
  */
 
-class Monolog extends \CI_Log
+class Monolog extends CI_Log
 {
 	/**
 	 * Local reference to monolog object

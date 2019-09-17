@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Security extends \CI_Security {
+use CI_Security;
+
+class Security extends CI_Security
+{
 
 }

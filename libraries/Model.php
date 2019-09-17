@@ -2,6 +2,8 @@
 
 namespace projectorangebox\orange\library;
 
+use CI_Model;
+
 /**
  * Orange
  *
@@ -25,7 +27,7 @@ namespace projectorangebox\orange\library;
  *
  */
 
-class Model extends \CI_Model
+class Model extends CI_Model
 {
 	/**
 	 * Formatted array of rules for this model
@@ -79,7 +81,7 @@ class Model extends \CI_Model
 	{
 		parent::__construct();
 
-		$this->validate = ci('validate',true);
+		$this->validate = ci('validate',[],false); /* return new each time */
 
 		log_message('info', 'Orange Model Class Initialized');
 	}

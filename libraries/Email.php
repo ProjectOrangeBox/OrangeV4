@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Email extends \CI_Email {
+use CI_Email;
+
+class Email extends CI_Email
+{
 
 }

@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Typography extends \CI_Typography {
+use CI_Typography;
+
+class Typography extends CI_Typography
+{
 
 }

@@ -2,6 +2,8 @@
 
 namespace projectorangebox\orange\library;
 
+use CI_Config;
+
 /**
  * Orange
  *
@@ -37,7 +39,7 @@ namespace projectorangebox\orange\library;
  *
  */
 
-class Config extends \CI_Config
+class Config extends CI_Config
 {
 	protected $fileCache = [];
 	protected $fileLoaded = false;

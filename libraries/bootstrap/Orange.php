@@ -340,22 +340,4 @@ class Orange
 		$array[$key] = $value;
 	}
 
-
-	public function makeCacheFolder(string $folder): string
-	{
-		$folder = path('{cache}').trim($folder,'/');
-
-		/* let's make sure the compile folder is there before we try to save the compiled file! */
-		if (!\file_exists($folder)) {
-			mkdir($folder, 0755, true);
-		}
-
-		/* is the folder writable by us? */
-		if (!is_writable($folder)) {
-			throw new \Exception('Cannot write to folder ' . $folder);
-		}
-
-		return $folder;
-	}
-
 } /* end class */

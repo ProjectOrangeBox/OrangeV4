@@ -2,6 +2,8 @@
 
 namespace projectorangebox\orange\library\log;
 
+use CI_Log;
+
 /**
  * Orange
  *
@@ -35,7 +37,7 @@ namespace projectorangebox\orange\library\log;
  *
  */
 
-class Codeigniter extends \CI_Log
+class Codeigniter extends CI_Log
 {
     /**
      * Boolean whether we are using bitwise error levels

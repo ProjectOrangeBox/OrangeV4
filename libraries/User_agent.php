@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class User_agent extends \CI_User_agent {
+use CI_User_agent;
+
+class User_agent extends CI_User_agent
+{
 
 }

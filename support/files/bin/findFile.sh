@@ -19,4 +19,4 @@ $prefix = isset($argv[2]) ? $argv[2] : '';
 
 $tools = new tools;
 
-$tools->showAsServiceArray($tools->processFound($tools->find($tools->buildRegex('{folder}/'.$folder.'/{file}\.php',true),$tools->packages(true)),[$prefix.'{file}','\{NAMESPACE}\{file}']),true);
+$tools->showAsServiceArray($tools->processFound($tools->find($tools->buildRegex('{folder}/'.$folder.'/{file}\.{ext}',true),$tools->packages(true)),[$prefix.'{file}','{0}']));

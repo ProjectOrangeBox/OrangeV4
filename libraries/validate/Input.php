@@ -5,7 +5,8 @@ namespace projectorangebox\orange\library\validate;
 use projectorangebox\orange\library\Validate;
 use projectorangebox\orange\library\Input as ci_input;
 
-class Input {
+class Input
+{
 	/**
 	 * $input
 	 *

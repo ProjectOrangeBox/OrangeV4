@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Benchmark extends \CI_Benchmark {
+use CI_Benchmark;
+
+class Benchmark extends CI_Benchmark
+{
 
 }

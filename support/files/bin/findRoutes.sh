@@ -1,34 +1,48 @@
 #!/usr/bin/env php
 <?php
 
-define('__ROOT__',dirname(dirname(realpath($_SERVER['argv'][0]))));
+$levelUp = (strpos($where = dirname(realpath($_SERVER['argv'][0])),'/vendor/projectorangebox/orange-v4/support/') !== false) ? 6 : 1;
+
+define('__ROOT__',dirname($where,$levelUp));
 
 require __ROOT__.'/vendor/projectorangebox/orange-v4/support/shell.tools.php';
 
 $tools = new tools();
 
-$regularEx = $tools->buildRegex('{folder}/controllers/{controller}\.php');
-$matches = $tools->find($regularEx,$tools->displayPackages());
-$found = $tools->processFound($matches,['{url}',"{method}'=>'{namespace}{class}"],'callback');
+$tools->showAsServiceArray($tools->processFound($tools->find($tools->buildRegex('{folder}/controllers/{controller}\.php',true),$tools->packages(true)),['{url}',"{method}'=>'{class}"]));
 
-$tools->showAsServiceArray($found);
-
-function callback($matches,$options,$tools) {
-	list($key,$value) = $options;
+function processMatch($matches,$options,$tools) {
+	$tag = '@route ';
 
 	foreach (file(__ROOT__.$matches[0]) as $line) {
-		if (preg_match('#(.*)@route(\s*)(?<url>\S*)(\s*)(?<method>\S*)(\s*)(?<class>\S*)(.*)#', trim($line), $m)) {
-			$matches['url'] = $m['url'];
+		if (strpos($line,$tag) !== false) {
+			list($arrayKey,$arrayValue) = $options;
 
-			if (empty($m['class'])) {
-				$matches['class'] = $m['method'];
+			$parts = explode(' ',trim(substr($line,strpos($line,$tag)+strlen($tag))));
+
+			$matches['url'] = $parts[0];
+			$matches['method'] = $parts[1];
+			$matches['class'] = $parts[2];
+
+			if (count($parts) == 2) {
+				$matches['class'] = $parts[1];
 				$matches['method'] = 'get';
-			} else {
-				$matches['class'] = $m['class'];
-				$matches['method'] = $m['method'];
 			}
 
-			$tools->merge($matches,$key,$value);
+			$matches['method'] = strtolower($matches['method']);
+
+			/* change the template if the method is get since it's the default */
+			if ($matches['method'] == 'get') {
+				$arrayValue = '{class}';
+			}
+
+			/**
+			 * this handles * as the controller
+			 * @route /example/handlebars post *::compileCliAction
+			 */
+			$matches['class'] = str_replace('*',substr($matches[0],0,-4),$matches['class']);
+
+			$tools->addProcessed($tools->merge($matches,$arrayKey,$arrayValue));
 		}
 	}
 }

@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Encryption extends \CI_Encryption {
+use CI_Encryption;
+
+class Encryption extends CI_Encryption
+{
 
 }

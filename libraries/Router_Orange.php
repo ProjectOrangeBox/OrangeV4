@@ -3,7 +3,7 @@
 namespace projectorangebox\orange\library;
 
 /* Total Rewrite therefore we are NOT extending */
-class Router {
+class Router_Orange {
 	/**
 	 * Current class name
 	 *

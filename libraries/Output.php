@@ -2,6 +2,8 @@
 
 namespace projectorangebox\orange\library;
 
+use CI_Output;
+
 /**
  * Orange
  *
@@ -33,7 +35,7 @@ namespace projectorangebox\orange\library;
  *
  */
 
-class Output extends \CI_Output
+class Output extends CI_Output
 {
 	/**
 	 * JSON encoding for all json output

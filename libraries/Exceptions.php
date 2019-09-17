@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Exceptions extends \CI_Exceptions {
+use CI_Exceptions;
+
+class Exceptions extends CI_Exceptions
+{
 
 }

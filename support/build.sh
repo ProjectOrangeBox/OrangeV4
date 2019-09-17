@@ -23,20 +23,20 @@ CODEIGNITER="$ROOT/vendor/codeigniter/framework";
 echo "Application Root Path $ROOT"
 echo "Files Folder $FILES"
 
-mkdir $ROOT/assets
-mkdir $ROOT/packages
-mkdir $ROOT/public
-mkdir $ROOT/var
+mkdir -p $ROOT/assets
+mkdir -p $ROOT/packages
+mkdir -p $ROOT/public
+mkdir -p $ROOT/var
 
-mkdir $ROOT/var/cache
-mkdir $ROOT/var/downloads
-mkdir $ROOT/var/emails
-mkdir $ROOT/var/gulp
-mkdir $ROOT/var/logs
-mkdir $ROOT/var/sessions
-mkdir $ROOT/var/tmp
-mkdir $ROOT/var/uploads
-mkdir $ROOT/var/xdebug
+mkdir -p $ROOT/var/cache
+mkdir -p $ROOT/var/downloads
+mkdir -p $ROOT/var/emails
+mkdir -p $ROOT/var/gulp
+mkdir -p $ROOT/var/logs
+mkdir -p $ROOT/var/sessions
+mkdir -p $ROOT/var/tmp
+mkdir -p $ROOT/var/uploads
+mkdir -p $ROOT/var/xdebug
 
 cp -R $FILES/public $ROOT
 cp -R $FILES/bin $ROOT

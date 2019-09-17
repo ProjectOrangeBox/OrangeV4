@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
-class Migration extends \CI_Migration {
+use CI_Migration;
+
+class Migration extends CI_Migration
+{
 
 }
