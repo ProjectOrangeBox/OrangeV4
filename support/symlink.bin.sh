@@ -21,4 +21,4 @@ mkdir -p $ROOT/bin
 
 #find $SCRIPTFOLDER/files/bin/*.sh -type f | xargs chmod 775
 
-find $SCRIPTFOLDER/files/bin/*.sh -type f -exec ln -s {} $ROOT/bin ';'
+find $SCRIPTFOLDER/files/bin/find*.sh -type f -exec ln -s {} $ROOT/bin ';'
