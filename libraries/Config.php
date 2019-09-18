@@ -3,6 +3,7 @@
 namespace projectorangebox\orange\library;
 
 use CI_Config;
+use Exception;
 
 /**
  * Orange
@@ -232,6 +233,34 @@ class Config extends CI_Config
 	protected function _normalize(string $string) : string
 	{
 		return strtolower($string);
+	}
+
+	public function merged(string $group, array $required, array $userConfig = []) : array
+	{
+		$config = parent::item($group);
+
+		if (!\is_array($config)) {
+			$config = [];
+		}
+
+		$config = \array_replace($config,$userConfig);
+
+		foreach ($required as $name=>$default) {
+			if (\is_integer($name)) {
+				$name = $default;
+				$default = null;
+			}
+
+			if (!isset($config[$name])) {
+				if ($default === null) {
+					throw new Exception('Could not locate a configuration value '.$group.'.'.$name.' and no default was provided.');
+				}
+
+				$config[$name] = $default;
+			}
+		}
+
+		return $config;
 	}
 
 } /* end class */

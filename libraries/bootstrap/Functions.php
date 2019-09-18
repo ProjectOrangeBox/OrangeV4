@@ -24,7 +24,7 @@ if (!function_exists('ci')) {
 	 * @param mixed string | bool
 	 * @return object
 	 */
-	function ci(string $name = null, array $userConfig = null,/* string|bool */ $as = null): object
+	function ci(string $name = null, array $userConfig = [],/* string|bool */ $as = null): object
 	{
 		/* Are we looking for a named service? factory or singleton? CodeIgniter "super" object? */
 		return ($name) ? ($as === true) ? ci_factory($name, $userConfig) : ci_singleton($name, $userConfig, $as) : get_instance();
@@ -35,26 +35,34 @@ if (!function_exists('ci_singleton')) {
 	/**
 	 * ci_singleton
 	 *
+	 * $instance = ci_singleton('user',['name'=>'Johnny']);
+	 * $instance = ci_singleton('auth');
+	 *
+	 * $instance = ci_singleton('\namespace\class');
+	 * $instance = ci_singleton('\namespace\class',['name'=>'Johnny']);
+	 * $instance = ci_singleton('\namespace\class',['name'=>'Johnny'],'user');
+	 *
 	 * @param string $name
 	 * @param mixed array
 	 * @param mixed string
 	 * @return object
 	 */
-	function ci_singleton(string $name, array $userConfig = null, string $as = null): object
+	function ci_singleton(string $name, array $userConfig = [], string $as = null): object
 	{
 		$instance = get_instance();
 
-		/* if the name has segments (namespaced or folder based) we only need the last which is the service name */
-		$serviceName = strtolower(($as) ?? basename(str_replace('\\', '/', $name), '.php'));
-
-		$serviceName = serviceAlias($serviceName);
+		$serviceName = ($as) ? $as : serviceAlias($name);
 
 		/* has this service been attached yet? */
 		if (!isset($instance->$serviceName)) {
-			/* try to load it's configuration */
-			$serviceConfig = (isset($instance->config)) ? $instance->config->item($serviceName) : [];
+			$config = [];
 
-			$config = array_replace((array) $serviceConfig, (array) $userConfig);
+			/* try to load it's configuration if configuration library loaded */
+			if (isset($instance->config)) {
+				$serviceConfig = $instance->config->item($serviceName);
+
+				$config = (is_array($serviceConfig)) ? array_replace($serviceConfig,$userConfig) : $userConfig;
+			}
 
 			/* is it a named service? if it is use the namespaced name instead of the name sent into the function */
 			if ($namedService = findService($name, false)) {
@@ -103,11 +111,17 @@ if (!function_exists('ci_factory')) {
 	 */
 	function ci_factory(string $serviceName, array $userConfig = null): object
 	{
-		$serviceClass = findService($serviceName, true);
+		if (strpos($serviceName,'\\') !== false) {
+			$serviceClass = $serviceName;
 
-		$serviceConfig = get_instance()->config->item($serviceName);
+			$config = [];
+		} else {
+			$serviceClass = findService($serviceName, true);
 
-		$config = array_replace((array) $serviceConfig, (array) $userConfig);
+			$serviceConfig = get_instance()->config->item($serviceName);
+
+			$config = array_replace((array) $serviceConfig, (array) $userConfig);
+		}
 
 		return new $serviceClass($config);
 	}
