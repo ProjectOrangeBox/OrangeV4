@@ -1,29 +1,39 @@
-#!/bin/bash
+#!/usr/bin/env php
+<?php
 
-if [ "$EUID" -ne 0 ]
-  then echo "Please run using sudo or as root"
-  exit
-fi
+$levelUp = (strpos($where = dirname(realpath($_SERVER['argv'][0])),'/vendor/projectorangebox/orange-v4/support/') !== false) ? 6 : 1;
 
-# This Folder
-ROOT="$( cd "$(dirname "$0")" ; pwd -P )"
+define('__ROOT__',dirname($where,$levelUp));
 
-# This Folder -1
-ROOT="`dirname $ROOT`"
+require __ROOT__.'/vendor/projectorangebox/orange-v4/support/shell.tools.php';
 
-# ----------------
+$tools = new tools;
 
-echo $ROOT
+$config = __ROOT__ . '/bin/config.json';
 
-find $ROOT -type f | xargs chmod 664
-find $ROOT -type d | xargs chmod 775
+if (!file_exists($config)) {
+	$tool->error('Could not locate config file.');
+}
 
-find $ROOT -type f | xargs chown admin
-find $ROOT -type d | xargs chown admin
+$configObj = json_decode(file_get_contents($config));
 
-find $ROOT -type f | xargs chgrp administrators
-find $ROOT -type d | xargs chgrp administrators
+if (!isset($configObj->chown)) {
+	$tool->error('Change Owner (chown) not set in config.json');
+}
 
-find $ROOT/bin/*.sh -type f | xargs chmod 775
+if (!isset($configObj->chgrp)) {
+	$tool->error('Change Group (chgrp) not set in config.json');
+}
 
-find $ROOT/var/* -type d | xargs chmod 777
+$tools->exec('find '.__ROOT__.' -type f | xargs chmod 664');
+$tools->exec('find '.__ROOT__.' -type d | xargs chmod 775');
+
+$tools->exec('find '.__ROOT__.' -type f | xargs chown '.$configObj->chown);
+$tools->exec('find '.__ROOT__.' -type d | xargs chown '.$configObj->chown);
+
+$tools->exec('find '.__ROOT__.' -type f | xargs chgrp '.$configObj->chgrp);
+$tools->exec('find '.__ROOT__.' -type d | xargs chgrp '.$configObj->chgrp);
+
+$tools->exec('find '.__ROOT__.' -name \'*.sh\' -type f | xargs chmod 775');
+
+$tools->exec('find '.__ROOT__.'/var/* -type d | xargs chmod 777');

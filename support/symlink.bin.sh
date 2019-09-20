@@ -19,6 +19,10 @@ echo "Files Folder $FILES"
 
 mkdir -p $ROOT/bin
 
-#find $SCRIPTFOLDER/files/bin/*.sh -type f | xargs chmod 775
+find $SCRIPTFOLDER/files/bin/*.sh -type f -exec ln -s {} $ROOT/bin ';'
 
-find $SCRIPTFOLDER/files/bin/find*.sh -type f -exec ln -s {} $ROOT/bin ';'
+FILE=$SCRIPTFOLDER/files/bin/config.json
+
+if [ ! -f "$FILE" ]; then
+	echo '{}' > $FILE
+fi
