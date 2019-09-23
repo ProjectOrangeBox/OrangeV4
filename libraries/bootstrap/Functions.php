@@ -27,27 +27,27 @@ if (!function_exists('ci')) {
 	function ci(string $name = null, array $userConfig = [],/* string|bool */ $as = null): object
 	{
 		/* Are we looking for a named service? factory or singleton? CodeIgniter "super" object? */
-		return ($name) ? ($as === true) ? ci_factory($name, $userConfig) : ci_singleton($name, $userConfig, $as) : get_instance();
+		return ($name) ? ($as === true) ? ciFactory($name, $userConfig) : ciSingleton($name, $userConfig, $as) : get_instance();
 	}
 }
 
-if (!function_exists('ci_singleton')) {
+if (!function_exists('ciSingleton')) {
 	/**
-	 * ci_singleton
+	 * ciSingleton
 	 *
-	 * $instance = ci_singleton('user',['name'=>'Johnny']);
-	 * $instance = ci_singleton('auth');
+	 * $instance = ciSingleton('user',['name'=>'Johnny']);
+	 * $instance = ciSingleton('auth');
 	 *
-	 * $instance = ci_singleton('\namespace\class');
-	 * $instance = ci_singleton('\namespace\class',['name'=>'Johnny']);
-	 * $instance = ci_singleton('\namespace\class',['name'=>'Johnny'],'user');
+	 * $instance = ciSingleton('\namespace\class');
+	 * $instance = ciSingleton('\namespace\class',['name'=>'Johnny']);
+	 * $instance = ciSingleton('\namespace\class',['name'=>'Johnny'],'user');
 	 *
 	 * @param string $name
 	 * @param mixed array
 	 * @param mixed string
 	 * @return object
 	 */
-	function ci_singleton(string $name, array $userConfig = [], string $as = null): object
+	function ciSingleton(string $name, array $userConfig = [], string $as = null): object
 	{
 		$instance = get_instance();
 
@@ -101,15 +101,15 @@ if (!function_exists('serviceAlias')) {
 	}
 }
 
-if (!function_exists('ci_factory')) {
+if (!function_exists('ciFactory')) {
 	/**
-	 * ci_factory
+	 * ciFactory
 	 *
 	 * @param string $serviceName
 	 * @param mixed array
 	 * @return object
 	 */
-	function ci_factory(string $serviceName, array $userConfig = null): object
+	function ciFactory(string $serviceName, array $userConfig = null): object
 	{
 		if (strpos($serviceName,'\\') !== false) {
 			$serviceClass = $serviceName;

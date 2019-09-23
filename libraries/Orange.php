@@ -1,6 +1,6 @@
 <?php
 
-namespace projectorangebox\orange\library\bootstrap;
+namespace projectorangebox\orange\library;
 
 use projectorangebox\orange\library\input\RequestRemap;
 
