@@ -244,11 +244,4 @@ class tools
 
 		return trim($namespace);
 	}
-
-	public function exec(string $cli)
-	{
-		echo $cli.PHP_EOL;
-
-		exec($cli);
-	}
 } /* end class */
