@@ -33,7 +33,6 @@ use \CI_Log;
  * @config config.log_file_extension `log`
  * @config config.log_file_permissions `0644`
  * @config config.log_date_format `Y-m-d H:i:s.u`
- * @config config.log_use_bitwise_psr `true`
  *
  * @method __call
  *
@@ -46,14 +45,7 @@ class Monolog extends CI_Log
 	 *
 	 * @var \Monolog\Logger
 	 */
-	protected $_monolog = null; /* singleton reference to monolog */
-
-	/**
-	 * Boolean whether we are using bitwise error levels
-	 *
-	 * @var Boolean
-	 */
-	protected $_bitwise = false; /* Are we using CodeIgniter Mode or PSR3 Bitwise Mode? */
+	protected $monolog = null; /* singleton reference to monolog */
 
 	/**
 	 * Local reference to logging configurations
@@ -101,16 +93,12 @@ class Monolog extends CI_Log
 	 * @access public
 	 *
 	 */
-	public function __construct(array &$config=null)
+	public function __construct(array $config = [])
 	{
-		if (is_array($config)) {
-			$this->config = &$config;
-		}
+		/* manually merge because other classes might try to log and cause a loop */
+		$this->config = array_replace(loadFileConfig('config'),$config);
 
-		/* combined config */
-		$this->config = array_replace(loadFileConfig('config'),$this->config);
-
-		$this->init();
+		$this->configure()->attachMonolog();
 
 		$this->write_log('info','Log Monolog Class Initialized');
 	}
@@ -132,13 +120,46 @@ class Monolog extends CI_Log
 	 * @return Log
 	 *
 	 */
-	public function __call(string $name, array $arguments) : Monolog
+	public function __call(string $name, array $arguments) : self
 	{
 		if (substr($name, 0, 4) == 'log_') {
 			$this->config[$name] = $arguments[0];
 
 			/* resetup */
-			$this->init();
+			$this->configure();
+		}
+
+		return $this;
+	}
+
+	protected function attachMonolog(): self
+	{
+		if (!$this->monolog) {
+			/* expose $config to monolog config file */
+			$config = &$this->config;
+
+			/**
+			 * Create a instance of monolog for the bootstrapper
+			 * Make the monolog "channel" "CodeIgniter"
+			 * This is a local variable so the bootstrapper can attach stuff to it
+			 */
+			$monolog = new Logger('CodeIgniter');
+
+			/**
+			 * Find the monolog_bootstrap files
+			 * This is NOT a standard Codeigniter config
+			 * It includes PHP code which can use the $monolog object we just made
+			 */
+			if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/monolog.php')) {
+				include APPPATH.'config/'.ENVIRONMENT.'/monolog.php';
+			} elseif (file_exists(APPPATH.'config/monolog.php')) {
+				include APPPATH.'config/monolog.php';
+			}
+
+			/**
+			 * Attach the monolog instance to our class for later use
+			 */
+			$this->monolog = &$monolog;
 		}
 
 		return $this;
@@ -148,8 +169,6 @@ class Monolog extends CI_Log
 	 *
 	 * Write to log file
 	 * Generally this function will be called using the global log_message() function
-	 * If configuration value log_use_bitwise_psr is true
-	 * then you can also use all of the other psr error levels
 	 *
 	 * @access public
 	 *
@@ -179,23 +198,35 @@ class Monolog extends CI_Log
 		}
 
 		/* logging level check passed - log something! */
-		return $this->monolog_write_log($level, $msg);
-	}
 
-	/**
-	 *
-	 * Get the contents of the current log file
-	 *
-	 * @access public
-	 *
-	 * @return string
-	 *
-	 */
-	public function get_log_file() : string
-	{
-		$file = $this->build_log_file_path();
+		switch ($level) {
+		case 'EMERGENCY': // 1
+			$this->monolog->emergency($msg);
+			break;
+		case 'ALERT': // 2
+			$this->monolog->alert($msg);
+			break;
+		case 'CRITICAL': // 4
+			$this->monolog->critical($msg);
+			break;
+		case 'ERROR': // 8
+			$this->monolog->error($msg);
+			break;
+		case 'WARNING': // 16
+			$this->monolog->warning($msg);
+			break;
+		case 'NOTICE': // 32
+			$this->monolog->notice($msg);
+			break;
+		case 'INFO': // 64
+			$this->monolog->info($msg);
+			break;
+		case 'DEBUG': // 128
+			$this->monolog->debug($msg);
+			break;
+		}
 
-		return (file_exists($file)) ? file_get_contents($file) : '';
+		return true;
 	}
 
 	/**
@@ -218,72 +249,12 @@ class Monolog extends CI_Log
 
 	/**
 	 *
-	 * Handle writing to monolog
-	 * if we are using it
-	 *
-	 * @access protected
-	 *
-	 * @param string $level
-	 * @param string $msg
-	 *
-	 * @return bool
-	 *
-	 */
-	protected function monolog_write_log(string $level, string $msg) : bool
-	{
-		/* route to monolog */
-		switch ($level) {
-		case 'EMERGENCY': // 1
-			$this->_monolog->addEmergency($msg);
-			break;
-		case 'ALERT': // 2
-			$this->_monolog->addAlert($msg);
-			break;
-		case 'CRITICAL': // 4
-			$this->_monolog->addCritical($msg);
-			break;
-		case 'ERROR': // 8
-			$this->_monolog->addError($msg);
-			break;
-		case 'WARNING': // 16
-			$this->_monolog->addWarning($msg);
-			break;
-		case 'NOTICE': // 32
-			$this->_monolog->addNotice($msg);
-			break;
-		case 'INFO': // 64
-			$this->_monolog->addInfo($msg);
-			break;
-		case 'DEBUG': // 128
-			$this->_monolog->addDebug($msg);
-			break;
-		}
-
-		return true;
-	}
-
-	/**
-	 *
-	 * Build the CodeIgniter Log File Path
-	 *
-	 * @access protected
-	 *
-	 * @return string
-	 *
-	 */
-	protected function build_log_file_path() : string
-	{
-		return rtrim($this->_log_path, '/').'/log-'.date('Y-m-d').'.'.$this->_file_ext;
-	}
-
-	/**
-	 *
-	 * init / reconfigure init after a configuration value change
+	 * configure / reconfigure configure after a configuration value change
 	 *
 	 * @access protected
 	 *
 	 */
-	protected function init() : void
+	protected function configure() : self
 	{
 		if (isset($this->config['log_threshold'])) {
 			$log_threshold = $this->config['log_threshold'];
@@ -352,29 +323,6 @@ class Monolog extends CI_Log
 			$this->_file_permissions = $this->config['log_file_permissions'];
 		}
 
-		if (!$this->_monolog) {
-			/**
-			 * Create a instance of monolog for the bootstrapper
-			 * Make the monolog "channel" "CodeIgniter"
-			 * This is a local variable so the bootstrapper can attach stuff to it
-			 */
-			$monolog = new Logger('CodeIgniter');
-
-			/**
-			 * Find the monolog_bootstrap files
-			 * This is NOT a standard Codeigniter config
-			 * It includes PHP code which can use the $monolog object we just made
-			 */
-			if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/monolog.php')) {
-				include APPPATH.'config/'.ENVIRONMENT.'/monolog.php';
-			} elseif (file_exists(APPPATH.'config/monolog.php')) {
-				include APPPATH.'config/monolog.php';
-			}
-
-			/**
-			 * Attach the monolog instance to our class for later use
-			 */
-			$this->_monolog = &$monolog;
-		}
+		return $this;
 	}
 } /* End of Class */

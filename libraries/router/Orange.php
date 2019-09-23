@@ -1,9 +1,9 @@
 <?php
 
-namespace projectorangebox\orange\library;
+namespace projectorangebox\orange\library\router;
 
 /* Total Rewrite therefore we are NOT extending */
-class Router_Orange {
+class Orange {
 	/**
 	 * Current class name
 	 *
@@ -229,13 +229,21 @@ class Router_Orange {
 
 		$built = [];
 
-		foreach ($routes as $key=>$val) {
-			if (is_array($val)) {
-				$httpMethod = array_keys($val)[0];
-				$callback = $val[$httpMethod];
-			} else {
-				$httpMethod = 'get';
-				$callback = $val;
+		foreach ($routes as $route) {
+			switch (count($route)) {
+				case 2:
+					$url = $route[0];
+					$httpMethod = 'get';
+					$callback = $route[1];
+				break;
+				case 3:
+					$url = $route[0];
+					$httpMethod = $route[1];
+					$callback = $route[2];
+				break;
+				default:
+					echo 'Route Configuration Incorrect number of parameters for '.print_r($route,true).'.'.PHP_EOL;
+					exit(1);
 			}
 
 			/* if they didn't provide a method use the default */
@@ -247,7 +255,7 @@ class Router_Orange {
 				$callback = $attachMethod($callback,$defaultMethod);
 			}
 
-			$built[strtolower($httpMethod)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $key).'$#'] = $callback;
+			$built[strtolower($httpMethod)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $url).'$#'] = $callback;
 		}
 
 		return $built;

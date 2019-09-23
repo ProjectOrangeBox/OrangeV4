@@ -59,7 +59,7 @@ $config['routes'][''] = ['*'=>'/packages/projectorangebox/theme/controllers/Welc
 $config['routes']['(.*)'] = ['*'=>'/packages/projectorangebox/theme/controllers/WelcomeController::fourohfour'];
 
 /* PHP Unit test controller location */
-if (isset($_ENV['PHPUNIT'])) {
+if (env('PHPUNIT',false)) {
 	$config['routes']['(.*)'] = ['cli'=>'/tests/support/PHPUnitController::index'];
 }
 
