@@ -180,7 +180,7 @@ class tools
 			if (is_dir($packageFolder)) {
 				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)), '#^' . $regex . '$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
 					if (!is_dir($match[0])) {
-						$match[0] = $this->getAppPath($match[0]);
+						$match[0] = $this->getRootPath($match[0]);
 						$match['package'] = $package;
 
 						$found[$match[0]] = $match;
@@ -230,7 +230,7 @@ class tools
 		$this->processed[] = $mixed;
 	}
 
-	public function getAppPath(string $path): string
+	public function getRootPath(string $path): string
 	{
 		/* remove anything below the __ROOT__ folder from the passed path */
 		return (substr($path, 0, strlen(__ROOT__)) == __ROOT__) ? substr($path, strlen(__ROOT__)) : $path;

@@ -124,8 +124,10 @@ class Config extends CI_Config
 	{
 		log_message('debug', 'Config::flush');
 
+		$config = loadFileConfig('config');
+
 		/* delete the database configs if they are there */
-		$cacheDatabaseFilePath = getFileConfig('config.cache_path').'config.database.php';
+		$cacheDatabaseFilePath = $config['cache_path'].'config.database.php';
 
 		if (\file_exists($cacheDatabaseFilePath)) {
 			\unlink($cacheDatabaseFilePath);
@@ -135,7 +137,7 @@ class Config extends CI_Config
 			}
 		}
 
-		$cacheFilePath = getFileConfig('config.cache_path').'config.file.php';
+		$cacheFilePath = $config['cache_path'].'config.file.php';
 
 		/* delete the file configs */
 		if ($clearThisSession) {
@@ -178,7 +180,9 @@ class Config extends CI_Config
 	{
 		$fileConfig = [];
 
-		$cacheFilePath = getFileConfig('config.cache_path').'config.file.php';
+		$configFile = loadFileConfig('config');
+
+		$cacheFilePath = $configFile['cache_path'].'config.file.php';
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			/**
@@ -211,7 +215,9 @@ class Config extends CI_Config
 	{
 		$databaseConfig = [];
 
-		$cacheFilePath = getFileConfig('config.cache_path').'config.database.php';
+		$config = loadFileConfig('config');
+
+		$cacheFilePath = $config['cache_path'].'config.database.php';
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			$config = ci($this->hasDatabase)->get_enabled();

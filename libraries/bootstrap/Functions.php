@@ -26,104 +26,26 @@ if (!function_exists('ci')) {
 	 */
 	function ci(string $name = null, array $userConfig = [],/* string|bool */ $as = null): object
 	{
-		/* Are we looking for a named service? factory or singleton? CodeIgniter "super" object? */
-		return ($name) ? ($as === true) ? ciFactory($name, $userConfig) : ciSingleton($name, $userConfig, $as) : get_instance();
-	}
-}
+		static $serviceLocator;
 
-if (!function_exists('ciSingleton')) {
-	/**
-	 * ciSingleton
-	 *
-	 * $instance = ciSingleton('user',['name'=>'Johnny']);
-	 * $instance = ciSingleton('auth');
-	 *
-	 * $instance = ciSingleton('\namespace\class');
-	 * $instance = ciSingleton('\namespace\class',['name'=>'Johnny']);
-	 * $instance = ciSingleton('\namespace\class',['name'=>'Johnny'],'user');
-	 *
-	 * @param string $name
-	 * @param mixed array
-	 * @param mixed string
-	 * @return object
-	 */
-	function ciSingleton(string $name, array $userConfig = [], string $as = null): object
-	{
-		$instance = get_instance();
-
-		$serviceName = ($as) ? $as : serviceAlias($name);
-
-		/* has this service been attached yet? */
-		if (!isset($instance->$serviceName)) {
-			$config = [];
-
-			/* try to load it's configuration if configuration library loaded */
-			if (isset($instance->config)) {
-				$serviceConfig = $instance->config->item($serviceName);
-
-				$config = (is_array($serviceConfig)) ? array_replace($serviceConfig,$userConfig) : $userConfig;
-			}
-
-			/* is it a named service? if it is use the namespaced name instead of the name sent into the function */
-			if ($namedService = findService($name, false)) {
-				$name = $namedService;
-			}
-
-			/* try to let composer autoload load it */
-			if (class_exists($name, true)) {
-				/* create a new instance and attach the singleton to the CodeIgniter super object */
-				$instance->$serviceName = new $name($config);
+		/* did we attach the service locator yet? */
+		if (!$serviceLocator) {
+			/* does their bootstrap file include a customer get service locator function? */
+			if (function_exists('getServiceLocator')) {
+				$serviceLocator = &getServiceLocator();
 			} else {
-				/*
-				else try to let CodeIgniter load it the old fashion way
-				using the _model suffix we can assume it's a model we are trying to load
-				*/
-				if (substr($name, -6) == '_model') {
-					$instance->load->model($name, $serviceName);
-				} else {
-					/* library will take a config so let's try to find it if it exists */
-					$instance->load->library($name, $config);
-				}
+				/* not use the default orange service locator */
+				$serviceLocator = new \projectorangebox\orange\library\ServiceLocator;
 			}
 		}
 
-		/* now grab the reference */
-		return $instance->$serviceName;
-	}
-}
-
-if (!function_exists('ciFactory')) {
-	/**
-	 * ciFactory
-	 *
-	 * @param string $serviceName
-	 * @param mixed array
-	 * @return object
-	 */
-	function ciFactory(string $serviceName, array $userConfig = null): object
-	{
-		if (strpos($serviceName,'\\') !== false) {
-			$serviceClass = $serviceName;
-
-			$config = [];
-		} else {
-			$serviceClass = findService($serviceName, true);
-
-			$serviceConfig = get_instance()->config->item($serviceName);
-
-			$config = array_replace((array) $serviceConfig, (array) $userConfig);
+		/* A little messy but since I control the service locator... */
+		if ($name === 'servicelocator') {
+			return $serviceLocator;
 		}
 
-		return new $serviceClass($config);
-	}
-}
-
-if (!function_exists('serviceAlias')) {
-	function serviceAlias(string $name): string
-	{
-		$services = loadFileConfig('services');
-
-		return (isset($services['alias'][$name])) ? $services['alias'][$name] : $name;
+		/* Are we looking for a named service? factory or singleton? CodeIgniter "super" object? */
+		return ($name) ? ($as === true) ? $serviceLocator->ciFactory($name, $userConfig) : $serviceLocator->ciSingleton($name, $userConfig, $as) : get_instance();
 	}
 }
 
@@ -157,8 +79,6 @@ if (!function_exists('load_class')) {
 
 		/* has it already been loaded? */
 		if (!isset($_classes[$class])) {
-			$name = findService($class, true);
-
 			/**
 			 * Tell CI is_loaded function
 			 * so these can be attach to the Controller
@@ -166,6 +86,8 @@ if (!function_exists('load_class')) {
 			 * then they can be accessed using $this-> syntax in the controller
 			 */
 			is_loaded($class);
+
+			$name = findService($class, true);
 
 			$_classes[$class] = new $name;
 		}
@@ -351,8 +273,10 @@ if (!function_exists('l')) {
 			$log[] = (!is_scalar($arg)) ? chr(9) . json_encode($arg) : chr(9) . $arg;
 		}
 
+		$config = loadFileConfig('config');
+
 		/* write it to the log file */
-		return file_put_contents(getFileConfig('config.log_path') . '/orange_debug.log', implode(chr(10), $log) . chr(10), FILE_APPEND | LOCK_EX);
+		return file_put_contents($config['log_path'] . '/orange_debug.log', implode(chr(10), $log) . chr(10), FILE_APPEND | LOCK_EX);
 	}
 }
 
@@ -379,8 +303,10 @@ if (!function_exists('site_url')) {
 			$uri = ci('config')->site_url($uri, $protocol);
 		}
 
+		$config = loadFileConfig('config');
+
 		/* where is the cache file? */
-		$cacheFilePath = getFileConfig('config.cache_path') . 'paths.php';
+		$cacheFilePath = $config['cache_path'] . 'paths.php';
 
 		/* are we in development mode or is the cache file missing */
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
@@ -411,6 +337,20 @@ if (!function_exists('path')) {
 	}
 }
 
+if (!function_exists('getRootPath')) {
+	/**
+	 * getAppPath
+	 *
+	 * @param string $path
+	 * @return void
+	 */
+	function getRootPath(string $path): string
+	{
+		/* remove anything below the __ROOT__ folder from the passed path */
+		return (substr($path, 0, strlen(__ROOT__)) == __ROOT__) ? substr($path, strlen(__ROOT__)) : $path;
+	}
+}
+
 if (!function_exists('var_export_file')) {
 	/**
 	 * named this way to match PHPs var_export
@@ -431,154 +371,5 @@ if (!function_exists('var_export_file')) {
 		}
 
 		return (bool) atomic_file_put_contents($cacheFilePath, $data);
-	}
-}
-
-if (!function_exists('findService')) {
-	/**
-	 * findService
-	 *
-	 * @param string $serviceName
-	 * @param mixed bool
-	 * @return void
-	 */
-	function findService(string $serviceName, bool $throwException = true, string $prefix = '') /* mixed false or string */
-	{
-		$serviceName = strtolower($serviceName);
-
-		$services = loadFileConfig('services');
-
-		$key = servicePrefix($prefix) . $serviceName;
-
-		$service = (isset($services['services'][$key])) ? $services['services'][$key] : false;
-
-		if ($throwException && !$service) {
-			throw new \Exception(sprintf('Could not locate a service named "%s".', $serviceName));
-		}
-
-		return $service;
-	}
-}
-
-if (!function_exists('getFileConfig')) {
-	/**
-	 *
-	 * fileConfig
-	 *
-	 * @param string $dotNotation - config filename
-	 * @param mixed return value - if none giving it will throw an error if the array key doesn't exist
-	 * @return mixed - based on $default value
-	 *
-	 */
-	function getFileConfig(string $dotNotation, $default = NOVALUE) /* mixed */
-	{
-		$dotNotation = strtolower($dotNotation);
-
-		if (strpos($dotNotation, '.') === false) {
-			$value = loadFileConfig($dotNotation);
-		} else {
-			list($filename, $key) = explode('.', $dotNotation, 2);
-
-			$array = loadFileConfig($filename);
-
-			if (!isset($array[$key]) && $default === NOVALUE) {
-				throw new \Exception('Find Config Key could not locate "' . $key . '" in "' . $filename . '".');
-			}
-
-			$value = (isset($array[$key])) ? $array[$key] : $default;
-		}
-
-		return $value;
-	}
-}
-
-if (!function_exists('loadFileConfig')) {
-	/**
-	 *
-	 * Low Level configuration file loader
-	 * this does NOT include any database configurations
-	 *
-	 * @param string $filename filename
-	 * @param string $variable array variable name there configuration is stored in [config]
-	 *
-	 * @return array
-	 *
-	 */
-	function loadFileConfig(string $filename, bool $throwException = true, string $variableVariable = 'config'): array
-	{
-		global $_fileConfigs;
-
-		$filename = strtolower($filename);
-
-		if (!isset($_fileConfigs[$filename])) {
-			$configFound = false;
-
-			/* they either return something or use the CI default $config['...'] format so set those up as empty */
-			$returnedApplicationConfig = $returnedEnvironmentConfig = $$variableVariable = [];
-
-			if (file_exists(APPPATH . 'config/' . $filename . '.php')) {
-				$configFound = true;
-				$returnedApplicationConfig = require APPPATH . 'config/' . $filename . '.php';
-			}
-
-			if (file_exists(APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php')) {
-				$returnedEnvironmentConfig = require APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php';
-			}
-
-			$_fileConfigs[$filename] = (array) $returnedEnvironmentConfig + (array) $returnedApplicationConfig + (array) $$variableVariable;
-
-			if (!$configFound && $throwException) {
-				throw new \Exception(sprintf('Could not location a configuration file named "%s".', APPPATH . 'config/' . $filename . '.php'));
-			}
-		}
-
-		return $_fileConfigs[$filename];
-	}
-}
-
-if (!function_exists('servicePrefix')) {
-	/**
-	 * ServicePrefix
-	 *
-	 * @param mixed string
-	 * @return void
-	 */
-	function servicePrefix(string $key): string
-	{
-		global $_fileConfigs;
-
-		return (isset($_fileConfigs['services'][$key])) ? $_fileConfigs['services'][$key] : '';
-	}
-}
-
-if (!function_exists('addServicePrefix')) {
-	function addServicePrefix(string $key, string $prefix): void
-	{
-		global $_fileConfigs;
-
-		$_fileConfigs['services'][$key] = $prefix;
-	}
-}
-
-if (!function_exists('addService')) {
-	function addService(string $serviceName, string $class): void
-	{
-		global $_fileConfigs;
-
-		$_fileConfigs['services']['services'][strtolower($serviceName)] = $class;
-	}
-}
-
-if (!function_exists('getAppPath')) {
-	/**
-	 * getAppPath
-	 *
-	 * @param string $path
-	 * @return void
-	 */
-	function getAppPath(string $path): string
-	{
-		/* remove anything below the __ROOT__ folder from the passed path */
-		return (substr($path, 0, strlen(__ROOT__)) == __ROOT__) ? substr($path, strlen(__ROOT__)) : $path;
 	}
 }
