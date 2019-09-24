@@ -7,16 +7,47 @@ define('__ROOT__',dirname($where,$levelUp));
 
 require __ROOT__.'/vendor/projectorangebox/orange-v4/support/shell.tools.php';
 
-$argv = $_SERVER['argv'];
-
-if (count($argv) < 2) {
-	echo 'Please enter folder.'.PHP_EOL;
-	exit(1);
-}
-
-$folder = trim($argv[1],'/');
-$prefix = isset($argv[2]) ? $argv[2] : '';
-
 $tools = new tools;
 
-$tools->showAsServiceArray($tools->processFound($tools->find($tools->buildRegex('{folder}/'.$folder.'/{file}\.php',true),$tools->packages(true)),[$prefix.'{file}','\{NAMESPACE}\{file}']),true);
+$a = $tools->packages(true);
+$b = $tools->buildRegex('(.*)\.php',true);
+$c = $tools->find($b,$a);
+
+$array = [];
+
+foreach ($c as $match) {
+	getNameSpace($match[1].'.php',$array);
+}
+
+$tools->showAsServiceArray($array,true);
+
+function getNameSpace(string $file,array &$array): void
+{
+	$tokens = token_get_all(file_get_contents($file));
+	$namespace = false;
+
+	foreach ($tokens as $idx=>$token) {
+		switch($token[0]) {
+			case T_NAMESPACE;
+				$namespaceTxt = '';
+
+				for ($i = 1; $i <= 10; $i++) {
+					$namespaceTxt .= $tokens[$idx+$i][1];
+				}
+
+				$namespaceTxt = trim($namespaceTxt);
+
+				$namespace = substr($namespaceTxt,0,strpos($namespaceTxt,PHP_EOL));
+			break;
+			case T_CLASS;
+				$class = $tokens[$idx+2][1];
+
+				if ($namespace) {
+					$array[] = [strtolower($class),'\\'.$namespace.'\\'.$class];
+				}
+
+				break 2; /* break from switch and foreach */
+			break;
+		}
+	}
+}

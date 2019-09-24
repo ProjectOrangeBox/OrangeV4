@@ -177,15 +177,17 @@ class tools
 		foreach ($paths as $package) {
 			$packageFolder = __ROOT__ . '/' . $package;
 
-
 			if (is_dir($packageFolder)) {
 				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)), '#^' . $regex . '$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
 					if (!is_dir($match[0])) {
 						$match[0] = $this->getAppPath($match[0]);
+						$match['package'] = $package;
 
 						$found[$match[0]] = $match;
 					}
 				}
+			} else {
+				$this->error('Could not locate '.$packageFolder);
 			}
 		}
 

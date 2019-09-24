@@ -242,7 +242,7 @@ class Orange {
 					$callback = $route[2];
 				break;
 				default:
-					echo 'Route Configuration Incorrect number of parameters for '.print_r($route,true).'.'.PHP_EOL;
+					echo 'Route Configuration (routes.php) Incorrect number of parameters '.print_r($route,true).'.'.PHP_EOL;
 					exit(1);
 			}
 
@@ -255,6 +255,7 @@ class Orange {
 				$callback = $attachMethod($callback,$defaultMethod);
 			}
 
+			/* add CodeIgnitor "Defaults" */
 			$built[strtolower($httpMethod)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $url).'$#'] = $callback;
 		}
 
@@ -278,9 +279,9 @@ class Orange {
 				/* match */
 				$this->matched = $regxUrl;
 
-				/* add custom parameters */
-				$params['RequestType'] = ucfirst($this->requestType);
-				$params['HttpMethod'] = ucfirst($this->requestMethod);
+				/* add our own custom parameters */
+				$params['T'] = ucfirst($this->requestType); /* Http, Cli, Ajax */
+				$params['M'] = ucfirst($this->requestMethod); /* http method - Get, Put, Post, Patch, Delete... or Cli */
 
 				/* replace arguments with params */
 				foreach ($params as $key=>$value) {

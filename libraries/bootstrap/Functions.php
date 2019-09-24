@@ -92,15 +92,6 @@ if (!function_exists('ciSingleton')) {
 	}
 }
 
-if (!function_exists('serviceAlias')) {
-	function serviceAlias(string $name): string
-	{
-		$services = loadFileConfig('services');
-
-		return (isset($services['alias'][$name])) ? $services['alias'][$name] : $name;
-	}
-}
-
 if (!function_exists('ciFactory')) {
 	/**
 	 * ciFactory
@@ -124,6 +115,15 @@ if (!function_exists('ciFactory')) {
 		}
 
 		return new $serviceClass($config);
+	}
+}
+
+if (!function_exists('serviceAlias')) {
+	function serviceAlias(string $name): string
+	{
+		$services = loadFileConfig('services');
+
+		return (isset($services['alias'][$name])) ? $services['alias'][$name] : $name;
 	}
 }
 
