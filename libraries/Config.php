@@ -124,10 +124,10 @@ class Config extends CI_Config
 	{
 		log_message('debug', 'Config::flush');
 
-		$config = loadFileConfig('config');
+		$cachePath = \fileConfig('config.cache_path');
 
 		/* delete the database configs if they are there */
-		$cacheDatabaseFilePath = $config['cache_path'].'config.database.php';
+		$cacheDatabaseFilePath = $cachePath.'config.database.php';
 
 		if (\file_exists($cacheDatabaseFilePath)) {
 			\unlink($cacheDatabaseFilePath);
@@ -137,7 +137,7 @@ class Config extends CI_Config
 			}
 		}
 
-		$cacheFilePath = $config['cache_path'].'config.file.php';
+		$cacheFilePath = $cachePath.'config.file.php';
 
 		/* delete the file configs */
 		if ($clearThisSession) {
@@ -159,7 +159,7 @@ class Config extends CI_Config
 	protected function _lazyLoad() : void
 	{
 		if (!$this->fileLoaded) {
-			$this->fileCached = $this->_getFileConfig();
+			$this->fileCached = $this->getConfigCacheFile();
 
 			$this->config = \array_replace($this->config,$this->fileCached);
 
@@ -176,13 +176,11 @@ class Config extends CI_Config
 		}
 	}
 
-	protected function _getFileConfig() : array
+	protected function getConfigCacheFile() : array
 	{
 		$fileConfig = [];
 
-		$configFile = loadFileConfig('config');
-
-		$cacheFilePath = $configFile['cache_path'].'config.file.php';
+		$cacheFilePath = \fileConfig('config.cache_path').'config.file.php';
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			/**
@@ -194,7 +192,7 @@ class Config extends CI_Config
 			foreach (glob(APPPATH.'/config/*.php') as $filepath) {
 				$basename = basename($filepath, '.php');
 
-				$config = loadFileConfig($basename);
+				$config = \loadConfigFile($basename);
 
 				if (is_array($config)) {
 					foreach ($config as $key=>$value) {
@@ -215,9 +213,7 @@ class Config extends CI_Config
 	{
 		$databaseConfig = [];
 
-		$config = loadFileConfig('config');
-
-		$cacheFilePath = $config['cache_path'].'config.database.php';
+		$cacheFilePath = \fileConfig('config.cache_path').'config.database.php';
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			$config = ci($this->hasDatabase)->get_enabled();

@@ -70,7 +70,7 @@ class Cache
 		}
 
 		/* combined config */
-		$this->config = array_replace(loadFileConfig('config'),$this->config);
+		$this->config = array_replace(\loadConfigFile('config'),$this->config);
 
 		$this->adapter = isset($this->config['cache_default']) ? $this->config['cache_default'] : 'dummy';
 

@@ -2,16 +2,16 @@
 
 namespace projectorangebox\orange\library;
 
-class ServiceLocator
+use projectorangebox\orange\library\serviceLocator\ServiceLocator_interface;
+
+class ServiceLocator implements ServiceLocator_interface
 {
-	protected $servicesConfig = [];
-	protected $fileConfigs = [];
+	protected $config = [];
 
 	public function __construct()
 	{
-		$this->loadFileConfig('services');
-
-		$this->servicesConfig = &$this->fileConfigs['services'];
+		/* force load the services config file into the config array */
+		$this->config = \loadConfigFile('services');
 	}
 
 	/**
@@ -28,7 +28,7 @@ class ServiceLocator
 
 		$key = $this->servicePrefix($prefix) . $serviceName;
 
-		$service = (isset($this->servicesConfig['services'][$key])) ? $this->servicesConfig['services'][$key] : false;
+		$service = (isset($this->config['services'][$key])) ? $this->config['services'][$key] : false;
 
 		if ($throwException && !$service) {
 			throw new \Exception(sprintf('Could not locate a service named "%s".', $serviceName));
@@ -45,7 +45,7 @@ class ServiceLocator
 	 */
 	function servicePrefix(string $key): string
 	{
-		return (isset($this->servicesConfig['prefixes'][$key])) ? $this->servicesConfig['prefixes'][$key] : '';
+		return (isset($this->config['prefixes'][$key])) ? $this->config['prefixes'][$key] : '';
 	}
 
 /**
@@ -57,7 +57,7 @@ class ServiceLocator
  */
 	function addServicePrefix(string $key, string $prefix): void
 	{
-		$this->servicesConfig['prefixes'][$key] = $prefix;
+		$this->config['prefixes'][$key] = $prefix;
 	}
 
 /**
@@ -69,7 +69,7 @@ class ServiceLocator
  */
 	function addService(string $serviceName, string $class): void
 	{
-		$this->servicesConfig['services'][strtolower($serviceName)] = $class;
+		$this->config['services'][strtolower($serviceName)] = $class;
 	}
 
 /**
@@ -81,7 +81,7 @@ class ServiceLocator
  */
 	function addAlias(string $alias, string $real): void
 	{
-		$this->servicesConfig['alias'][$alias] = $real;
+		$this->config['alias'][$alias] = $real;
 	}
 
 /**
@@ -92,25 +92,25 @@ class ServiceLocator
  */
 	function serviceAlias(string $name): string
 	{
-		return (isset($this->servicesConfig['alias'][$name])) ? $this->servicesConfig['alias'][$name] : $name;
+		return (isset($this->config['alias'][$name])) ? $this->config['alias'][$name] : $name;
 	}
 
 	/**
-	 * ciSingleton
+	 * singleton
 	 *
-	 * $instance = ciSingleton('user',['name'=>'Johnny']);
-	 * $instance = ciSingleton('auth');
+	 * $instance = singleton('user',['name'=>'Johnny']);
+	 * $instance = singleton('auth');
 	 *
-	 * $instance = ciSingleton('\namespace\class');
-	 * $instance = ciSingleton('\namespace\class',['name'=>'Johnny']);
-	 * $instance = ciSingleton('\namespace\class',['name'=>'Johnny'],'user');
+	 * $instance = singleton('\namespace\class');
+	 * $instance = singleton('\namespace\class',['name'=>'Johnny']);
+	 * $instance = singleton('\namespace\class',['name'=>'Johnny'],'user');
 	 *
 	 * @param string $name
 	 * @param mixed array
 	 * @param mixed string
 	 * @return object
 	 */
-	function ciSingleton(string $name, array $userConfig = [], string $as = null): object
+	function singleton(string $name, array $userConfig = [], string $as = null): object
 	{
 		$instance = get_instance();
 
@@ -161,94 +161,25 @@ class ServiceLocator
 	 * @param mixed array
 	 * @return object
 	 */
-	function ciFactory(string $serviceName, array $userConfig = null): object
+	function factory(string $name, array $userConfig = []): object
 	{
-		if (strpos($serviceName,'\\') !== false) {
-			$serviceClass = $serviceName;
+		$instance = get_instance();
 
-			$config = [];
-		} else {
-			$serviceClass = $this->findService($serviceName, true);
+		$config = [];
 
-			$serviceConfig = get_instance()->config->item($serviceName);
+		/* try to load it's configuration if configuration library loaded */
+		if (isset($instance->config)) {
+			$serviceConfig = $instance->config->item($name);
 
-			$config = array_replace((array) $serviceConfig, (array) $userConfig);
+			$config = (is_array($serviceConfig)) ? array_replace($serviceConfig,$userConfig) : $userConfig;
 		}
 
-		return new $serviceClass($config);
-	}
-
-	/* low level config */
-
-	/**
-	 *
-	 * fileConfig
-	 *
-	 * @param string $dotNotation - config filename
-	 * @param mixed return value - if none giving it will throw an error if the array key doesn't exist
-	 * @return mixed - based on $default value
-	 *
-	 */
-	function getFileConfig(string $dotNotation, $default = NOVALUE) /* mixed */
-	{
-		$dotNotation = strtolower($dotNotation);
-
-		if (strpos($dotNotation, '.') === false) {
-			$value = $this->loadFileConfig($dotNotation);
-		} else {
-			list($filename, $key) = explode('.', $dotNotation, 2);
-
-			$array = $this->loadFileConfig($filename);
-
-			if (!isset($array[$key]) && $default === NOVALUE) {
-				throw new \Exception('Find Config Key could not locate "' . $key . '" in "' . $filename . '".');
-			}
-
-			$value = (isset($array[$key])) ? $array[$key] : $default;
+		/* is it a named service? if it is use the namespaced name instead of the name sent into the function */
+		if ($namedService = $this->findService($name, false)) {
+			$name = $namedService;
 		}
 
-		return $value;
-	}
-
-	/**
-	 *
-	 * Low Level configuration file loader
-	 * this does NOT include any database configurations
-	 *
-	 * @param string $filename filename
-	 * @param string $variable array variable name there configuration is stored in [config]
-	 *
-	 * @return array
-	 *
-	 */
-	function loadFileConfig(string $filename, bool $throwException = true, string $variableVariable = 'config'): array
-	{
-		$filename = strtolower($filename);
-
-		/* did we load the file yet? */
-		if (!isset($this->fileConfigs[$filename])) {
-			$configFound = false;
-
-			/* they either return something or use the CI default $config['...'] format so set those up as empty */
-			$returnedApplicationConfig = $returnedEnvironmentConfig = $$variableVariable = [];
-
-			if (file_exists(APPPATH . 'config/' . $filename . '.php')) {
-				$configFound = true;
-				$returnedApplicationConfig = require APPPATH . 'config/' . $filename . '.php';
-			}
-
-			if (file_exists(APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php')) {
-				$returnedEnvironmentConfig = require APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php';
-			}
-
-			$this->fileConfigs[$filename] = (array) $returnedEnvironmentConfig + (array) $returnedApplicationConfig + (array) $$variableVariable;
-
-			if (!$configFound && $throwException) {
-				throw new \Exception(sprintf('Could not location a configuration file named "%s".', APPPATH . 'config/' . $filename . '.php'));
-			}
-		}
-
-		return $this->fileConfigs[$filename];
+		return new $name($config);
 	}
 
 } /* end class */

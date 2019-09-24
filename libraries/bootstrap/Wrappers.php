@@ -96,15 +96,6 @@ if (!function_exists('unlockSession')) {
 	}
 }
 
-/* load the config file */
-
-if (!function_exists('loadFileConfig')) {
-	function loadFileConfig(string $filename, bool $throwException = true, string $variableVariable = 'config'): array
-	{
-		return ci('servicelocator')->loadFileConfig($filename,$throwException,$variableVariable);
-	}
-}
-
 /* services */
 
 if (!function_exists('findService')) {

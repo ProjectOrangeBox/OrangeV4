@@ -96,7 +96,7 @@ class Orange
 	 */
 	public function getPackages(): array
 	{
-		$config = loadFileConfig('autoload', true, 'autoload');
+		$config = \loadConfigFile('autoload', true, 'autoload');
 
 		/* add application as package */
 		array_unshift($config['packages'], 'application');
