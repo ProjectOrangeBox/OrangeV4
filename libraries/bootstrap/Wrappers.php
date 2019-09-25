@@ -95,12 +95,3 @@ if (!function_exists('unlockSession')) {
 		session_write_close();
 	}
 }
-
-/* services */
-
-if (!function_exists('findService')) {
-	function findService(string $serviceName, bool $throwException = true, string $prefix = '') /* mixed false or string */
-	{
-		return ci('servicelocator')->findService($serviceName,$throwException,$prefix);
-	}
-}

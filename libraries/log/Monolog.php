@@ -93,9 +93,9 @@ class Monolog extends CI_Log
 	 * @access public
 	 *
 	 */
-	public function __construct(array $config = [])
+	public function __construct(array &$config = [])
 	{
-		/* manually merge because other classes might try to log and cause a loop */
+		/* we need to go low level here because other services might try to log therefore create a loop */
 		$this->config = array_replace(\loadConfigFile('config'),$config);
 
 		$this->configure()->attachMonolog();

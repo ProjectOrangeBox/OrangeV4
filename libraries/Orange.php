@@ -6,28 +6,6 @@ use projectorangebox\orange\library\input\RequestRemap;
 
 class Orange
 {
-
-	/* wrappers */
-	public function findView(string $name, bool $throwException = true)
-	{
-		return findService($name, $throwException, 'view');
-	}
-
-	public function findFilter(string $name, bool $throwException = true)
-	{
-		return findService($name, $throwException, 'input_filter');
-	}
-
-	public function findRule(string $name, bool $throwException = true)
-	{
-		return findService($name, $throwException, 'validation_rule');
-	}
-
-	public function findPear(string $name, bool $throwException = true)
-	{
-		return findService($name, $throwException, 'pear_plugin');
-	}
-
 	/**
 	 * The most Basic MVC View loader
 	 *
@@ -47,7 +25,7 @@ class Orange
 		extract($__data, EXTR_PREFIX_INVALID, '_');
 
 		/* if the view isn't there then findView will throw an error BEFORE output buffering is turned on */
-		$__path = __ROOT__ . $this->findView($__view, true);
+		$__path = __ROOT__ . ci('servicelocator')->findView($__view, true);
 
 		/* turn on output buffering */
 		ob_start();
@@ -96,6 +74,7 @@ class Orange
 	 */
 	public function getPackages(): array
 	{
+		/* manually load because we are not using the standard $config variable to store the configuration */
 		$config = \loadConfigFile('autoload', true, 'autoload');
 
 		/* add application as package */

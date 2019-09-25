@@ -124,10 +124,8 @@ class Config extends CI_Config
 	{
 		log_message('debug', 'Config::flush');
 
-		$cachePath = \fileConfig('config.cache_path');
-
 		/* delete the database configs if they are there */
-		$cacheDatabaseFilePath = $cachePath.'config.database.php';
+		$cacheDatabaseFilePath = $this->getCacheFilePath('database');
 
 		if (\file_exists($cacheDatabaseFilePath)) {
 			\unlink($cacheDatabaseFilePath);
@@ -137,7 +135,7 @@ class Config extends CI_Config
 			}
 		}
 
-		$cacheFilePath = $cachePath.'config.file.php';
+		$cacheFilePath = $this->getCacheFilePath('file');
 
 		/* delete the file configs */
 		if ($clearThisSession) {
@@ -156,10 +154,15 @@ class Config extends CI_Config
 	 * @return void
 	 *
 	 */
+	/**
+	 * _lazyLoad
+	 *
+	 * @return void
+	 */
 	protected function _lazyLoad() : void
 	{
 		if (!$this->fileLoaded) {
-			$this->fileCached = $this->getConfigCacheFile();
+			$this->fileCached = $this->getFileConfig();
 
 			$this->config = \array_replace($this->config,$this->fileCached);
 
@@ -168,7 +171,7 @@ class Config extends CI_Config
 
 		/* if this has a database model and the database is attached to CI then we can load again this time with the database */
 		if ($this->hasDatabase && function_exists('DB') && !$this->databaseLoaded) {
-			$this->databaseCached = $this->_getDatabaseConfig();
+			$this->databaseCached = $this->getDatabaseConfig();
 
 			$this->config = \array_replace($this->config,$this->databaseCached);
 
@@ -176,11 +179,16 @@ class Config extends CI_Config
 		}
 	}
 
-	protected function getConfigCacheFile() : array
+	/**
+	 * getFileConfig
+	 *
+	 * @return void
+	 */
+	protected function getFileConfig() : array
 	{
 		$fileConfig = [];
 
-		$cacheFilePath = \fileConfig('config.cache_path').'config.file.php';
+		$cacheFilePath = $this->getCacheFilePath('file');
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			/**
@@ -192,12 +200,9 @@ class Config extends CI_Config
 			foreach (glob(APPPATH.'/config/*.php') as $filepath) {
 				$basename = basename($filepath, '.php');
 
-				$config = \loadConfigFile($basename);
-
-				if (is_array($config)) {
-					foreach ($config as $key=>$value) {
-						$fileConfig[$this->_normalize($basename)][$this->_normalize($key)] = $value;
-					}
+				foreach ($this->loadConfigFile($basename) as $key=>$value) {
+					/* normalize */
+					$fileConfig[$this->_normalize($basename)][$this->_normalize($key)] = $value;
 				}
 			}
 
@@ -209,11 +214,27 @@ class Config extends CI_Config
 		return $fileConfig;
 	}
 
-	protected function _getDatabaseConfig() : array
+	/**
+	 * getCacheFilePath
+	 *
+	 * @param string $type
+	 * @return void
+	 */
+	protected function getCacheFilePath(string $type) : string
+	{
+		return $this->config['cache_path'].ENVIRONMENT.'.config.'.$type.'.php';
+	}
+
+	/**
+	 * getDatabaseConfig
+	 *
+	 * @return void
+	 */
+	protected function getDatabaseConfig() : array
 	{
 		$databaseConfig = [];
 
-		$cacheFilePath = \fileConfig('config.cache_path').'config.database.php';
+		$cacheFilePath = $this->getCacheFilePath('database');
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
 			$config = ci($this->hasDatabase)->get_enabled();
@@ -232,11 +253,25 @@ class Config extends CI_Config
 		return $databaseConfig;
 	}
 
+	/**
+	 * _normalize
+	 *
+	 * @param string $string
+	 * @return void
+	 */
 	protected function _normalize(string $string) : string
 	{
 		return strtolower($string);
 	}
 
+	/**
+	 * merged - can be used buy the library constructs to load & check required with defaults configuration
+	 *
+	 * @param string $group
+	 * @param array $required
+	 * @param mixed array
+	 * @return void
+	 */
 	public function merged(string $group, array $required, array $userConfig = []) : array
 	{
 		$config = parent::item($group);
@@ -263,6 +298,44 @@ class Config extends CI_Config
 		}
 
 		return $config;
+	}
+
+	/**
+	 * loadConfigFile
+	 *
+	 * @param string $filename
+	 * @param mixed bool
+	 * @param mixed string
+	 * @return void
+	 */
+	protected function loadConfigFile(string $filename, bool $throwException = true, string $variableVariable = 'config'): array
+	{
+		$fileConfig = [];
+
+		$filename = strtolower($filename);
+
+		/* did we load the file yet? */
+		$configFound = false;
+
+		/* they either return something or use the CI default $config['...'] format so set those up as empty */
+		$returnedApplicationConfig = $returnedEnvironmentConfig = $$variableVariable = [];
+
+		if (file_exists(APPPATH . 'config/' . $filename . '.php')) {
+			$configFound = true;
+			$returnedApplicationConfig = require APPPATH . 'config/' . $filename . '.php';
+		}
+
+		if (file_exists(APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php')) {
+			$returnedEnvironmentConfig = require APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php';
+		}
+
+		$fileConfig[$filename] = (array) $returnedEnvironmentConfig + (array) $returnedApplicationConfig + (array) $$variableVariable;
+
+		if (!$configFound && $throwException) {
+			throw new \Exception(sprintf('Could not location a configuration file named "%s".', APPPATH . 'config/' . $filename . '.php'));
+		}
+
+		return $fileConfig[$filename];
 	}
 
 } /* end class */

@@ -70,7 +70,7 @@ class Cache
 		}
 
 		/* combined config */
-		$this->config = array_replace(\loadConfigFile('config'),$this->config);
+		$this->config = array_replace(ci('config')->item('config'),$this->config);
 
 		$this->adapter = isset($this->config['cache_default']) ? $this->config['cache_default'] : 'dummy';
 
@@ -121,7 +121,7 @@ class Cache
 	protected function driver(string $name) /* mixed */
 	{
 		if (!isset($this->drivers[$name])) {
-			$service = findService('cache_driver_'.$name);
+			$service = ci('servicelocator')->findService('cache_driver_'.$name);
 
 			/* attach driver */
 			$this->drivers[$name] = new $service($this->config);

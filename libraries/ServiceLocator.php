@@ -8,33 +8,45 @@ class ServiceLocator implements ServiceLocator_interface
 {
 	protected $config = [];
 
-	public function __construct()
+	public function __construct(array &$config)
 	{
-		/* force load the services config file into the config array */
-		$this->config = \loadConfigFile('services');
+		$this->config = &$config;
 	}
 
 	/**
-	 * findService
 	 *
-	 * @param string $serviceName
-	 * @param mixed bool
-	 * @return void
+	 * ci('serviceLocator')->findView('home');
+	 * ci('serviceLocator')->findValidationRule('cleanup');
+	 * ci('serviceLocator')->findService('cleanup');
+	 * ci('serviceLocator')->find + a prefix(..);
+	 *
+	 * ci('serviceLocator')->addView('home','main/index');
+	 * ci('serviceLocator')->addValidationRule('cleanup','\library\validate\rules\Cleanup');
+	 * ci('serviceLocator')->addService('cleanup','\library\validate\rules\Cleanup');
+	 * ci('serviceLocator')->add + a prefix(..,..);
+	 *
 	 */
-	function findService(string $serviceName, bool $throwException = true, string $prefix = '') /* mixed false or string */
+	public function __call(string $name,array $arguments)
 	{
-		/* normalize */
-		$serviceName = strtolower($serviceName);
+		$name = strtolower($name);
 
-		$key = $this->servicePrefix($prefix) . $serviceName;
+		if (substr($name,0,4) == 'find') {
+			/* find + prefix */
+			$key = $this->servicePrefix(substr($name,4),true,$arguments[0]);
 
-		$service = (isset($this->config['services'][$key])) ? $this->config['services'][$key] : false;
+			if (!isset($this->config['services'][$key])) {
+				throw new \Exception(sprintf('Could not locate a service named "%s".', $arguments[0]));
+			}
 
-		if ($throwException && !$service) {
-			throw new \Exception(sprintf('Could not locate a service named "%s".', $serviceName));
+			return $this->config['services'][$key];
+		} elseif(substr($name,0,3) === 'add') {
+			/* add + prefix */
+			$this->config['services'][$this->servicePrefix(substr($name,3),true,$arguments[0])] = $arguments[1];
+
+			return;
 		}
 
-		return $service;
+		throw new \Exception(sprintf('No method named "%s" found.', $name));
 	}
 
 	/**
@@ -43,9 +55,13 @@ class ServiceLocator implements ServiceLocator_interface
 	 * @param mixed string
 	 * @return void
 	 */
-	function servicePrefix(string $key): string
+	public function servicePrefix(string $key, bool $throwException = false,string $classname = ''): string
 	{
-		return (isset($this->config['prefixes'][$key])) ? $this->config['prefixes'][$key] : '';
+		if (!isset($this->config['prefixes'][$key]) && $throwException) {
+			throw new \Exception(sprintf('Service Prefix "%s" not found.', $key));
+		}
+
+		return (isset($this->config['prefixes'][$key])) ? strtolower($this->config['prefixes'][$key].$classname) : strtolower(''.$classname);
 	}
 
 /**
@@ -55,21 +71,9 @@ class ServiceLocator implements ServiceLocator_interface
  * @param string $prefix
  * @return void
  */
-	function addServicePrefix(string $key, string $prefix): void
+	public function addServicePrefix(string $key, string $prefix): void
 	{
 		$this->config['prefixes'][$key] = $prefix;
-	}
-
-/**
- * addService
- *
- * @param string $serviceName
- * @param string $class
- * @return void
- */
-	function addService(string $serviceName, string $class): void
-	{
-		$this->config['services'][strtolower($serviceName)] = $class;
 	}
 
 /**
@@ -79,7 +83,7 @@ class ServiceLocator implements ServiceLocator_interface
  * @param string $real
  * @return void
  */
-	function addAlias(string $alias, string $real): void
+	public function addAlias(string $alias, string $real): void
 	{
 		$this->config['alias'][$alias] = $real;
 	}
@@ -90,7 +94,7 @@ class ServiceLocator implements ServiceLocator_interface
  * @param string $name
  * @return void
  */
-	function serviceAlias(string $name): string
+	public function serviceAlias(string $name): string
 	{
 		return (isset($this->config['alias'][$name])) ? $this->config['alias'][$name] : $name;
 	}
@@ -110,7 +114,7 @@ class ServiceLocator implements ServiceLocator_interface
 	 * @param mixed string
 	 * @return object
 	 */
-	function singleton(string $name, array $userConfig = [], string $as = null): object
+	public function get(string $name, array $userConfig = [], string $as = null): object
 	{
 		$instance = get_instance();
 
@@ -161,7 +165,7 @@ class ServiceLocator implements ServiceLocator_interface
 	 * @param mixed array
 	 * @return object
 	 */
-	function factory(string $name, array $userConfig = []): object
+	public function create(string $name, array $userConfig = []): object
 	{
 		$instance = get_instance();
 

@@ -26,27 +26,28 @@ if (!function_exists('ci')) {
 	 */
 	function ci(string $name = null, array $userConfig = [],/* string|bool */ $as = null): object
 	{
-		/* i am the keeper of the service locator!! */
+		/* i am the keeper of the service locator */
 		static $serviceLocator;
 
 		/* did we attach the service locator yet? */
 		if (!$serviceLocator) {
-			/* does their bootstrap file include a customer get service locator function? */
-			if (function_exists('getServiceLocator')) {
-				$serviceLocator = &getServiceLocator();
-			} else {
-				/* use the default orange service locator */
-				$serviceLocator = new \projectorangebox\orange\library\ServiceLocator;
-			}
+			$serviceLocator = &getServiceLocator();
 		}
 
 		/* a little messy but since I control the service locator... */
-		if ($name === 'servicelocator') {
+		if (strtolower($name) === 'servicelocator') {
 			return $serviceLocator;
 		}
 
 		/* Are we looking for a named service? factory or singleton? CodeIgniter "super" object? */
-		return ($name) ? ($as === true) ? $serviceLocator->factory($name, $userConfig) : $serviceLocator->singleton($name, $userConfig, $as) : get_instance();
+		return ($name) ? ($as === true) ? $serviceLocator->create($name, $userConfig) : $serviceLocator->get($name, $userConfig, $as) : get_instance();
+	}
+}
+
+if (!function_exists('getServiceLocator')) {
+	function getServiceLocator(): object
+	{
+		return new \projectorangebox\orange\library\ServiceLocator(loadConfigFile('services'));
 	}
 }
 
@@ -88,7 +89,7 @@ if (!function_exists('load_class')) {
 			 */
 			is_loaded($class);
 
-			$name = findService($class, true);
+			$name = ci('servicelocator')->findService($class, true);
 
 			$_classes[$class] = new $name;
 		}
@@ -277,7 +278,7 @@ if (!function_exists('l')) {
 		}
 
 		/* write it to the log file */
-		return file_put_contents(\fileConfig('config.log_path') . '/orange_debug.log', implode(chr(10), $log) . chr(10), FILE_APPEND | LOCK_EX);
+		return file_put_contents(\ci('config')->item('config.log_path') . '/orange_debug.log', implode(chr(10), $log) . chr(10), FILE_APPEND | LOCK_EX);
 	}
 }
 
@@ -305,7 +306,7 @@ if (!function_exists('site_url')) {
 		}
 
 		/* where is the cache file? */
-		$cacheFilePath = \fileConfig('config.cache_path') . 'paths.php';
+		$cacheFilePath = ci('config')->item('config.cache_path') . 'paths.php';
 
 		/* are we in development mode or is the cache file missing */
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
@@ -374,38 +375,6 @@ if (!function_exists('var_export_file')) {
 	}
 }
 
-if (!function_exists('fileConfig')) {
-	/**
-	 *
-	 * fileConfig
-	 *
-	 * @param string $dotNotation - config filename
-	 * @param mixed return value - if none giving it will throw an error if the array key doesn't exist
-	 * @return mixed - based on $default value
-	 *
-	 */
-	function fileConfig(string $dotNotation, $default = NOVALUE) /* mixed */
-	{
-		$dotNotation = strtolower($dotNotation);
-
-		if (strpos($dotNotation, '.') === false) {
-			$value = \loadConfigFile($dotNotation); /* this will return a empty array if the file doesn't actually exist */
-		} else {
-			/* this will throw an error if the key doesn't exist */
-			list($filename, $key) = explode('.', $dotNotation, 2);
-
-			$array = \loadConfigFile($filename);
-
-			if (!isset($array[$key]) && $default === NOVALUE) {
-				throw new \Exception('Find Config could not locate "' . $key . '" in "' . $filename . '".');
-			}
-
-			$value = (isset($array[$key])) ? $array[$key] : $default;
-		}
-
-		return $value;
-	}
-}
 
 if (!function_exists('loadConfigFile')) {
 	/**
@@ -421,12 +390,13 @@ if (!function_exists('loadConfigFile')) {
 	 */
 	function loadConfigFile(string $filename, bool $throwException = true, string $variableVariable = 'config'): array
 	{
-		static $config;
+		/* this "should" only have the services & base config */
+		static $fileConfig;
 
 		$filename = strtolower($filename);
 
 		/* did we load the file yet? */
-		if (!isset($config[$filename])) {
+		if (!isset($fileConfig[$filename])) {
 			$configFound = false;
 
 			/* they either return something or use the CI default $config['...'] format so set those up as empty */
@@ -441,13 +411,13 @@ if (!function_exists('loadConfigFile')) {
 				$returnedEnvironmentConfig = require APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php';
 			}
 
-			$config[$filename] = (array) $returnedEnvironmentConfig + (array) $returnedApplicationConfig + (array) $$variableVariable;
+			$fileConfig[$filename] = (array) $returnedEnvironmentConfig + (array) $returnedApplicationConfig + (array) $$variableVariable;
 
 			if (!$configFound && $throwException) {
 				throw new \Exception(sprintf('Could not location a configuration file named "%s".', APPPATH . 'config/' . $filename . '.php'));
 			}
 		}
 
-		return $config[$filename];
+		return $fileConfig[$filename];
 	}
 }

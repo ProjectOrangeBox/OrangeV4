@@ -171,8 +171,11 @@ class Orange {
 	{
 		/* !todo CACHE hum... what about closure routes? https://github.com/brick/varexporter */
 
+		/* low level because config not even fully loaded */
+		$configuration = loadConfigFile('config');
+
 		/* where is the cache file? */
-		$cacheFilePath = \fileConfig('config.cache_path').'routes.php';
+		$cacheFilePath = $configuration['cache_path'].'routes.php';
 
 		/* are we in development mode or is the cache file missing */
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
