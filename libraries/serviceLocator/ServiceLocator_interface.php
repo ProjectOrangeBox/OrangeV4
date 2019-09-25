@@ -4,6 +4,8 @@ namespace projectorangebox\orange\library\serviceLocator;
 
 interface ServiceLocator_interface {
 
+	public function __construct(array $config);
+
 	function servicePrefix(string $key): string;
 	function addServicePrefix(string $key, string $prefix): void;
 

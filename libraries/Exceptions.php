@@ -7,4 +7,4 @@ use CI_Exceptions;
 class Exceptions extends CI_Exceptions
 {
 
-}
+} /* end class */

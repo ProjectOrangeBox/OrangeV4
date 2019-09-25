@@ -31,7 +31,7 @@ if (!function_exists('ci')) {
 
 		/* did we attach the service locator yet? */
 		if (!$serviceLocator) {
-			$serviceLocator = &getServiceLocator();
+			$serviceLocator = getServiceLocator();
 		}
 
 		/* a little messy but since I control the service locator... */
