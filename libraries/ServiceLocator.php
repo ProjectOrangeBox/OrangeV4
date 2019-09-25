@@ -139,12 +139,6 @@ class ServiceLocator implements ServiceLocator_interface
 			/* try to let composer autoload load it */
 			if (class_exists($name, true)) {
 				/* create a new instance and attach the singleton to the CodeIgniter super object */
-
-				/* controller not even "constructed" therefore something low level just happened. Just return the new object */
-				if ($instance === null) {
-					return new $name($config);
-				}
-
 				$instance->$serviceName = new $name($config);
 			} else {
 				/*
