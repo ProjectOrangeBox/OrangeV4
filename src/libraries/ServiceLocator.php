@@ -2,6 +2,7 @@
 
 namespace projectorangebox\orange\library;
 
+use Exception;
 use projectorangebox\orange\library\serviceLocator\ServiceLocator_interface;
 
 class ServiceLocator implements ServiceLocator_interface
@@ -33,33 +34,33 @@ class ServiceLocator implements ServiceLocator_interface
 		$name = strtolower($name);
 
 		if (substr($name,0,4) == 'find') {
-			$return = $this->_find(substr($name,4),$arguments[0]);
+			$return = $this->find(substr($name,4),$arguments[0]);
 		} elseif(substr($name,0,3) === 'add') {
-			$return = $this->_add(substr($name,3),$arguments[0],$arguments[1]);
+			$return = $this->add(substr($name,3),$arguments[0],$arguments[1]);
 		}	else {
-			throw new \Exception(sprintf('No method named "%s" found.', $name));
+			throw new Exception(sprintf('No method named "%s" found.', $name));
 		}
 
 		return $return;
 	}
 
-	public function _find(string $type,string $name): string
+	public function find(string $type,string $name): string
 	{
 		$type = strtolower($type);
 		$name = strtolower($name);
 
 		if (!isset($this->config[$type])) {
-			throw new \Exception(sprintf('Could not locate a service type of "%s".', $type));
+			throw new Exception(sprintf('Could not locate a %s type.', $type));
 		}
 
 		if (!isset($this->config[$type][$name])) {
-			throw new \Exception(sprintf('Could not locate a service type "%s" named "%s".',$type,$name));
+			throw new Exception(sprintf('Could not locate a %s type named %s.',$type,$name));
 		}
 
 		return $this->config[$type][$name];
 	}
 
-	public function _add(string $type,string $name,string $serviceClass): bool
+	public function add(string $type,string $name,string $serviceClass): bool
 	{
 		$type = strtolower($type);
 		$name = strtolower($name);
@@ -91,7 +92,7 @@ class ServiceLocator implements ServiceLocator_interface
  * @param string $name
  * @return void
  */
-	public function serviceAlias(string $name): string
+	public function alias(string $name): string
 	{
 		return $this->config['alias'][strtolower($name)] ?? $name;
 	}
@@ -115,40 +116,11 @@ class ServiceLocator implements ServiceLocator_interface
 	{
 		$instance = get_instance();
 
-		$serviceName = ($as) ? $as : $this->serviceAlias($name);
+		$serviceName = ($as) ? $as : $this->alias($name);
 
 		/* has this service been attached yet? */
 		if (!isset($instance->$serviceName)) {
-			$config = [];
-
-			/* try to load it's configuration if configuration library loaded */
-			if (isset($instance->config)) {
-				$serviceConfig = $instance->config->item($serviceName);
-
-				$config = (is_array($serviceConfig)) ? array_replace($serviceConfig,$userConfig) : $userConfig;
-			}
-
-			/* is it a named service? if it is use the namespaced name instead of the name sent into the function */
-			if ($namedService = $this->findService($name, false)) {
-				$name = $namedService;
-			}
-
-			/* try to let composer autoload load it */
-			if (class_exists($name, true)) {
-				/* create a new instance and attach the singleton to the CodeIgniter super object */
-				$instance->$serviceName = new $name($config);
-			} else {
-				/*
-				else try to let CodeIgniter load it the old fashion way
-				using the _model suffix we can assume it's a model we are trying to load
-				*/
-				if (substr($name, -6) == '_model') {
-					$instance->load->model($name, $serviceName);
-				} else {
-					/* library will take a config so let's try to find it if it exists */
-					$instance->load->library($name, $config);
-				}
-			}
+			$instance->$serviceName = $this->create($serviceName,$userConfig);
 		}
 
 		/* now grab the reference */
@@ -166,6 +138,8 @@ class ServiceLocator implements ServiceLocator_interface
 	{
 		$instance = get_instance();
 
+		$name = $this->alias($name);
+
 		$config = [];
 
 		/* try to load it's configuration if configuration library loaded */
@@ -175,12 +149,13 @@ class ServiceLocator implements ServiceLocator_interface
 			$config = (is_array($serviceConfig)) ? array_replace($serviceConfig,$userConfig) : $userConfig;
 		}
 
-		/* is it a named service? if it is use the namespaced name instead of the name sent into the function */
-		if ($namedService = $this->findService($name, false)) {
-			$name = $namedService;
+		try {
+			$serviceClass = $this->findService($name, false);
+		} catch (Exception $e) {
+			$serviceClass = $name;
 		}
 
-		return new $name($config);
+		return new $serviceClass($config);
 	}
 
 } /* end class */
