@@ -31,7 +31,7 @@ function getNameSpace(string $file,array &$array): void
 			case T_NAMESPACE;
 				$namespaceTxt = '';
 
-				for ($i = 1; $i <= 10; $i++) {
+				for ($i = 1; $i <= 64; $i++) {
 					$namespaceTxt .= $tokens[$idx+$i][1];
 				}
 

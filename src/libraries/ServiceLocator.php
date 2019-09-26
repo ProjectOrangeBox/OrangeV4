@@ -28,52 +28,49 @@ class ServiceLocator implements ServiceLocator_interface
 	 */
 	public function __call(string $name,array $arguments)
 	{
+		$return = true;
+
 		$name = strtolower($name);
 
 		if (substr($name,0,4) == 'find') {
-			/* find + prefix */
-			$key = $this->servicePrefix(substr($name,4),true,$arguments[0]);
-
-			if (!isset($this->config['services'][$key])) {
-				throw new \Exception(sprintf('Could not locate a service named "%s".', $arguments[0]));
-			}
-
-			return $this->config['services'][$key];
+			$return = $this->_find(substr($name,4),$arguments[0]);
 		} elseif(substr($name,0,3) === 'add') {
-			/* add + prefix */
-			$this->config['services'][$this->servicePrefix(substr($name,3),true,$arguments[0])] = $arguments[1];
-
-			return;
+			$return = $this->_add(substr($name,3),$arguments[0],$arguments[1]);
+		}	else {
+			throw new \Exception(sprintf('No method named "%s" found.', $name));
 		}
 
-		throw new \Exception(sprintf('No method named "%s" found.', $name));
+		return $return;
 	}
 
-	/**
-	 * ServicePrefix
-	 *
-	 * @param mixed string
-	 * @return void
-	 */
-	public function servicePrefix(string $key, bool $throwException = false,string $classname = ''): string
+	public function _find(string $type,string $name): string
 	{
-		if (!isset($this->config['prefixes'][$key]) && $throwException) {
-			throw new \Exception(sprintf('Service Prefix "%s" not found.', $key));
+		$type = strtolower($type);
+		$name = strtolower($name);
+
+		if (!isset($this->config[$type])) {
+			throw new \Exception(sprintf('Could not locate a service type of "%s".', $type));
 		}
 
-		return (isset($this->config['prefixes'][$key])) ? strtolower($this->config['prefixes'][$key].$classname) : strtolower(''.$classname);
+		if (!isset($this->config[$type][$name])) {
+			throw new \Exception(sprintf('Could not locate a service type "%s" named "%s".',$type,$name));
+		}
+
+		return $this->config[$type][$name];
 	}
 
-/**
- * addServicePrefix
- *
- * @param string $key
- * @param string $prefix
- * @return void
- */
-	public function addServicePrefix(string $key, string $prefix): void
+	public function _add(string $type,string $name,string $serviceClass): bool
 	{
-		$this->config['prefixes'][$key] = $prefix;
+		$type = strtolower($type);
+		$name = strtolower($name);
+
+		if (!isset($this->config[$type])) {
+			$this->config[$type] = [];
+		}
+
+		$this->config[$type][$name] = $serviceClass;
+
+		return true;
 	}
 
 /**
@@ -85,7 +82,7 @@ class ServiceLocator implements ServiceLocator_interface
  */
 	public function addAlias(string $alias, string $real): void
 	{
-		$this->config['alias'][$alias] = $real;
+		$this->config['alias'][strtolower($alias)] = $real;
 	}
 
 /**
@@ -96,7 +93,7 @@ class ServiceLocator implements ServiceLocator_interface
  */
 	public function serviceAlias(string $name): string
 	{
-		return (isset($this->config['alias'][$name])) ? $this->config['alias'][$name] : $name;
+		return $this->config['alias'][strtolower($name)] ?? $name;
 	}
 
 	/**

@@ -9,4 +9,4 @@ require __ROOT__.'/vendor/projectorangebox/orange-v4/support/shell.tools.php';
 
 $tools = new tools;
 
-$tools->showAsServiceArray($tools->processFound($tools->find($tools->buildRegex('{folder}/views/{file}\.php',true),$tools->packages(true)),['#{file}','{0}']));
+$tools->showAsServiceArray($tools->processFound($tools->find($tools->buildRegex('{folder}/views/{file}\.php',true),$tools->packages(true)),['{file}','{0}']));
