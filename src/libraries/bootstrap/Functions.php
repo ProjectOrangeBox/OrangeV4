@@ -1,5 +1,8 @@
 <?php
 
+use \projectorangebox\orange\library\ServiceLocator;
+use \projectorangebox\orange\library\serviceLocator\ServiceLocator_interface;
+
 /**
  * ci
  *
@@ -15,6 +18,7 @@
  * $ci = ci();
  *
  */
+
 if (!function_exists('ci')) {
 	/**
 	 * ci
@@ -32,6 +36,11 @@ if (!function_exists('ci')) {
 		/* did we attach the service locator yet? */
 		if (!$serviceLocator) {
 			$serviceLocator = getServiceLocator();
+
+			if (!($serviceLocator instanceof ServiceLocator_interface)) {
+				throw new Exception('getServiceLocator did not return a instance of ServiceLocator_interface.');
+			}
+
 		}
 
 		/* a little messy but since I control the service locator... */
@@ -44,10 +53,17 @@ if (!function_exists('ci')) {
 	}
 }
 
-if (!function_exists('getServiceLocator')) {
-	function getServiceLocator(): object
+if (!function_exists('create')) {
+	function create(string $name = null, array $userConfig = []): object
 	{
-		return new \projectorangebox\orange\library\ServiceLocator(loadConfigFile('services'));
+		return ci($name,$userConfig,true);
+	}
+}
+
+if (!function_exists('getServiceLocator')) {
+	function getServiceLocator(): ServiceLocator_interface
+	{
+		return new ServiceLocator(loadConfigFile('services'));
 	}
 }
 
@@ -89,7 +105,8 @@ if (!function_exists('load_class')) {
 			 */
 			is_loaded($class);
 
-			$name = ci('servicelocator')->findService($class, true);
+			/* this will throw an error if the service does not exist */
+			$name = ci('servicelocator')->find('service',$class);
 
 			$_classes[$class] = new $name;
 		}

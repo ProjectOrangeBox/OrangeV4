@@ -2,6 +2,7 @@
 
 namespace projectorangebox\orange\library;
 
+use Exception;
 use projectorangebox\orange\library\validate\Input;
 
 /**
@@ -112,7 +113,7 @@ class Validate
 			$this->config = &$config;
 		}
 
-		/* setup the "chain" request object */
+		/* setup the "chainable" request object */
 		$this->input = new Input($this,ci('input'));
 
 		log_message('info', 'Orange Validate Class Initialized');
@@ -195,7 +196,7 @@ class Validate
 	public function run(string $namedGroup = 'default') : Validate
 	{
 		if (!isset($this->rules[$namedGroup])) {
-			throw new \Exception('Validate rule group "'.$namedGroup.'" was not found.');
+			throw new Exception('Validate rule group "'.$namedGroup.'" was not found.');
 		}
 
 		/* process each field and rule as a single rule, field, and human label */
@@ -361,12 +362,12 @@ class Validate
 
 		if (isset($this->attached[$className])) {
 			$this->attached[$className]($this->field_data[$key], $param);
-		} elseif ($namedService = ci('servicelocator')->findInputFilter(str_replace('filter_', '',strtolower($className)),false)) {
+		} elseif ($namedService = $this->findFilter($className)) {
 			(new $namedService($this->field_data))->filter($this->field_data[$key], $param);
 		} elseif (function_exists($shortRule)) {
 			$this->field_data[$key] = ($param) ? $shortRule($this->field_data[$key], $param) : $shortRule($this->field_data[$key]);
 		} else {
-			throw new \Exception('Could not locate the filter named "'.$rule.'".');
+			throw new Exception('Could not locate the filter named "'.$rule.'".');
 		}
 
 		/* filters don't fail */
@@ -397,12 +398,12 @@ class Validate
 
 		if (isset($this->attached[$className])) {
 			$success = $this->attached[$className]($this->field_data[$key], $param, $this->error_string, $this->field_data, $this);
-		} elseif ($namedService = ci('servicelocator')->findValidationRule($className,false)) {
+		} elseif ($namedService = $this->findValidation($className)) {
 			$success = (new $namedService($this->field_data, $this->error_string))->validate($this->field_data[$key], $param);
 		} elseif (function_exists($shortRule)) {
 			$success = ($param) ? $shortRule($this->field_data[$key], $param) : $shortRule($this->field_data[$key]);
 		} else {
-			throw new \Exception('Could not locate the validate rule "'.$rule.'".');
+			throw new Exception('Could not locate the validate rule "'.$rule.'".');
 		}
 
 		/* if success is really really false then it's a error */
@@ -423,6 +424,32 @@ class Validate
 		}
 
 		return $success;
+	}
+
+	protected function findValidation(string $className) /* mixed */
+	{
+		$className = strtolower($className);
+
+		try {
+			$namedService = ci('servicelocator')->find('validation',$className);
+		} catch(Exception $e) {
+			$namedService = false;
+		}
+
+		return $namedService;
+	}
+
+	protected function findFilter(string $className) /* mixed */
+	{
+		$className = str_replace('filter_', '',strtolower($className));
+
+		try {
+			$namedService = ci('servicelocator')->find('filter',$className);
+		} catch(Exception $e) {
+			$namedService = false;
+		}
+
+		return $namedService;
 	}
 
 } /* end class */

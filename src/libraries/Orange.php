@@ -25,7 +25,7 @@ class Orange
 		extract($__data, EXTR_PREFIX_INVALID, '_');
 
 		/* if the view isn't there then findView will throw an error BEFORE output buffering is turned on */
-		$__path = __ROOT__ . ci('servicelocator')->findView($__view, true);
+		$__path = __ROOT__ . ci('servicelocator')->find('view',$__view);
 
 		/* turn on output buffering */
 		ob_start();

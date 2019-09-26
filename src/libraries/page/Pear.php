@@ -132,7 +132,8 @@ class Pear
 	public static function plugin(string $name, bool $throwError = true) : void
 	{
 		if (!isset(self::$loadedPlugins[$name])) {
-			$className = ci('servicelocator')->findPearPlugin(str_replace('pear_', '',strtolower($name)),false);
+			/* this will throw an error if this service does not exist */
+			$className = ci('servicelocator')->find('pear',str_replace('pear_', '',strtolower($name)));
 
 			if (class_exists($className, true)) {
 				self::$loadedPlugins[$name] = new $className;

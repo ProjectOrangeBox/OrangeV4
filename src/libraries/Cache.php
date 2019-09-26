@@ -121,7 +121,7 @@ class Cache
 	protected function driver(string $name) /* mixed */
 	{
 		if (!isset($this->drivers[$name])) {
-			$service = ci('servicelocator')->findService('cache_driver_'.$name);
+			$service = ci('servicelocator')->find('service','cache_driver_'.$name);
 
 			/* attach driver */
 			$this->drivers[$name] = new $service($this->config);

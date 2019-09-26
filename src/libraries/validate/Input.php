@@ -3,7 +3,7 @@
 namespace projectorangebox\orange\library\validate;
 
 use projectorangebox\orange\library\Validate;
-use projectorangebox\orange\library\Input as ci_input;
+use projectorangebox\orange\library\Input as CI_Input;
 
 class Input
 {
@@ -27,7 +27,7 @@ class Input
 	 * @param mixed $parent
 	 * @return void
 	 */
-	public function __construct(Validate $parent,ci_input $input)
+	public function __construct(Validate $parent,CI_Input $input)
 	{
 		$this->parent = $parent;
 		$this->input = $input;
