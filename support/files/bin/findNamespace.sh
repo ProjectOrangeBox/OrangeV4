@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+/* find anything with a namespace */
+
 $levelUp = (strpos($where = dirname(realpath($_SERVER['argv'][0])),'/vendor/projectorangebox/orange-v4/support/') !== false) ? 6 : 1;
 
 define('__ROOT__',dirname($where,$levelUp));
@@ -42,6 +44,7 @@ function getNameSpace(string $file,array &$array): void
 			case T_CLASS;
 				$class = $tokens[$idx+2][1];
 
+				/* does it have a namespace? if so add it */
 				if ($namespace) {
 					$array[] = [strtolower($class),'\\'.$namespace.'\\'.$class];
 				}

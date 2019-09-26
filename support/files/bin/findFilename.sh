@@ -9,4 +9,27 @@ require __ROOT__.'/vendor/projectorangebox/orange-v4/support/shell.tools.php';
 
 $tools = new tools;
 
-$tools->showAsServiceArray($tools->processFound($tools->find($tools->buildRegex('{folder}/views/{file}\.php',true),$tools->packages(true)),['{file}','{0}']));
+$a = $tools->packages(true);
+
+$search = $_SERVER['argv'][1] ?? 'views';
+
+$combined = [];
+
+foreach (explode(',',$search) as $v) {
+	list($folder,$ext) = explode('::',$v,2);
+
+	$ext = ($ext) ?? '.php';
+
+	$b = $tools->buildRegex('{folder}/'.$folder.'/{file}\\'.$ext,true);
+	$c = $tools->find($b,$a);
+
+	$combined = $combined + $c;
+}
+
+$array = [];
+
+foreach ($combined as $match) {
+	$array[] = [$match['file'],$match[0]];
+}
+
+$tools->showAsServiceArray($array,true);
