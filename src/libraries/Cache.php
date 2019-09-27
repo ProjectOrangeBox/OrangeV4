@@ -83,6 +83,18 @@ class Cache
 		log_message('info', 'Orange Cache Class Initialized');
 	}
 
+	/**
+	 * defaultAdapter
+	 *
+	 * Get the default cache driver if you don't "pick" one.
+	 *
+	 * @return void
+	 */
+	public function defaultAdapter(): string
+	{
+		return $this->adapter;
+	}
+
 	public function __get($name)
 	{
 		/* if the driver doesn't exist the driver() method will throw a exception */
