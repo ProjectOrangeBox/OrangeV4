@@ -68,6 +68,8 @@ $_ENV = array_merge($_ENV,parse_ini_file('.env',true,INI_SCANNER_TYPED));
 
 define('ENVIRONMENT', $_ENV['ENVIRONMENT']);
 
+define('DEBUG', $_ENV['DEBUG']);
+
 /*
  *---------------------------------------------------------------
  * ERROR REPORTING

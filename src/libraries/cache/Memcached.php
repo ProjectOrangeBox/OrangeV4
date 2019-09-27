@@ -2,9 +2,11 @@
 
 namespace projectorangebox\orange\library\cache;
 
+use CI_Cache_memcached;
+
 /* wrapper */
 
-class Memcached extends \CI_Cache_memcached
+class Memcached extends CI_Cache_memcached
 {
 	use traits\DeleteByTag;
 	use traits\Inline;

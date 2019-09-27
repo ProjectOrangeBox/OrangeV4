@@ -2,9 +2,11 @@
 
 namespace projectorangebox\orange\library\cache;
 
+use CI_Cache_apc;
+
 /* wrapper */
 
-class Apc extends \CI_Cache_apc
+class Apc extends CI_Cache_apc
 {
 	use traits\DeleteByTag;
 	use traits\Inline;

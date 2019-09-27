@@ -2,9 +2,11 @@
 
 namespace projectorangebox\orange\library\cache;
 
+use CI_Cache_wincache;
+
 /* wrapper */
 
-class Wincache extends \CI_Cache_wincache
+class Wincache extends CI_Cache_wincache
 {
 	use traits\DeleteByTag;
 	use traits\Inline;

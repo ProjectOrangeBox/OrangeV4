@@ -261,4 +261,27 @@ class Output extends CI_Output
 		return (isset($map[$code])) ? $map[$code] : '';
 	}
 
+	public function sendInjectHeader(): void
+	{
+		$this->_display('<script>function _i(i,c){let b=document.getElementById(i);if(b){b.outerHTML=c}}</script>');
+	}
+
+	public function send(string $output): void
+	{
+		echo $output;
+
+		ob_flush();
+		flush();
+	}
+
+	public function inject(string $key, string $html): void
+	{
+		$html = str_replace(['"',chr(10),chr(13)],['\"','\n','\n'],$html);
+
+		echo '<script>_i("'.$key.'","'.$html.'");</script>';
+
+		ob_flush();
+		flush();
+	}
+
 } /* end class */

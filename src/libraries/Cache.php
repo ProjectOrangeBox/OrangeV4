@@ -2,8 +2,6 @@
 
 namespace projectorangebox\orange\library;
 
-use orange;
-
 /**
  * Extension to the CodeIgniter Cache Library
  *
@@ -52,7 +50,7 @@ class Cache
 	 *
 	 * @var integer
 	 */
-	static protected $ttl = 0;
+	protected $ttl = 0;
 
 	/**
 	 *
@@ -63,22 +61,19 @@ class Cache
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(array &$config=null)
+	public function __construct(array &$config = [])
 	{
-		if (is_array($config)) {
-			$this->config = &$config;
-		}
+		$this->config = ci('config')->merged('config',['cache_default'=>'dummy','cache_ttl'=>0],$config);
 
-		/* combined config */
-		$this->config = array_replace(ci('config')->item('config'),$this->config);
+		/* Bring in my global namespace function */
+		require_once 'cache/Cache.functions.php';
 
-		$this->adapter = isset($this->config['cache_default']) ? $this->config['cache_default'] : 'dummy';
+		/* setup the default adapter incase they don't specifiy one */
+		$this->adapter = $this->config['cache_default'];
 
 		if (!$this->driver($this->adapter)->is_supported()) {
 			throw new \Exception('Cache Driver '.$this->adapter.' is a unsupported.');
 		}
-
-		self::$ttl = isset($this->config['cache_ttl']) ? $this->config['cache_ttl'] : 0;
 
 		log_message('info', 'Orange Cache Class Initialized');
 	}
@@ -149,38 +144,29 @@ class Cache
 	 *
 	 * @access public
 	 *
-	 * @param mixed $cache_ttl
-	 * @param bool $use_window - use a cache "window" which should help prevent a stampede.
+	 * @param mixed $cacheTTL
+	 * @param bool $useWindow - use a cache "window" which should help prevent a stampede.
 	 *
 	 * @return int
 	 *
 	 */
-	static public function ttl(/* mixed */ $cache_ttl = null,bool $use_window = true) : int
+	public function ttl(int $cacheTTL = null,bool $useWindow = true) : int
 	{
-		/**
-		 * if cache_ttl boolean this is used as the $use_window variable and cache_ttl is set to the value in the the configration file
-	 	 * if cache_ttl is null then cache_ttl is set to the value in the the configration file
-	 	 * else cache_ttl is set the integer value of what was sent in for cache_ttl
-		 */
-		if (is_bool($cache_ttl)) {
-			$use_window = $cache_ttl;
-			$cache_ttl = self::$ttl;
-		} elseif (is_null($cache_ttl)) {
-			$cache_ttl = self::$ttl;
-		} else {
-			$cache_ttl = (int)$cache_ttl;
-		}
+		$cacheTTL = $cacheTTL ?? $this->config['cache_ttl'];
 
 		/* are we using the window option? */
-		if ($use_window) {
-			/* let determine the window size based on there cache time to live length no more than 5 minutes */
-			$window = min(300, ceil($cache_ttl * .02));
+		if ($useWindow) {
+			/*
+			let determine the window size based on there cache time to live length no more than 5 minutes
+			if your traffic to the cache data is that light then cache stampede shouldn't be a problem
+			*/
+			$window = min(300, ceil($cacheTTL * .02));
 
 			/* add it to the cache_ttl to get our "new" cache time to live */
-			$cache_ttl += mt_rand(-$window, $window);
+			$cacheTTL += mt_rand(-$window, $window);
 		}
 
-		return $cache_ttl;
+		return $cacheTTL;
 	}
 
 } /* end class */

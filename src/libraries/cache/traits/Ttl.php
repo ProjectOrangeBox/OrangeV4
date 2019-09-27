@@ -20,7 +20,7 @@ trait Ttl {
 	 */
 	public function ttl(int $ttl = null) : int
 	{
-		return cache::ttl($ttl);
+		return ci('cache')->ttl($ttl);
 	}
 
 } /* end trait */

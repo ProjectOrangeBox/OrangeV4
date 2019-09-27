@@ -2,9 +2,11 @@
 
 namespace projectorangebox\orange\library\cache;
 
+use CI_Cache_file;
+
 /* wrapper */
 
-class File extends \CI_Cache_file
+class File extends CI_Cache_file
 {
 	use traits\DeleteByTag;
 	use traits\Inline;

@@ -2,9 +2,11 @@
 
 namespace projectorangebox\orange\library\cache;
 
+use CI_Cache_redis;
+
 /* wrapper */
 
-class Redis extends \CI_Cache_redis
+class Redis extends CI_Cache_redis
 {
 	use traits\DeleteByTag;
 	use traits\Inline;
