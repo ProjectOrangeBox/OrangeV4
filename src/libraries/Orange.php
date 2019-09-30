@@ -319,4 +319,22 @@ class Orange
 		$array[$key] = $value;
 	}
 
+	public function datauri(string $path,bool $html = true): string
+	{
+		$completePath = __ROOT__.'/'.trim($path,'/');
+
+		if (!\file_exists($completePath)) {
+			throw new Exception('Output could not locate the image at '.$path);
+		}
+
+		/* Read image path, convert to base64 encoding */
+		$imageData = base64_encode(file_get_contents($completePath));
+
+		/* Format the image SRC:  data:{mime};base64,{data}; */
+		$src = 'data: '.mime_content_type($completePath).';base64,'.$imageData;
+
+		/* Echo out a sample image */
+		return ($html) ? '<img src="'.$src.'">' : $src;
+	}
+
 } /* end class */
