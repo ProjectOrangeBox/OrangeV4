@@ -200,6 +200,7 @@ class Orange {
 			$this->onResponse = $config['response middleware on'];
 
 			/* reformat */
+			$config['routeto'] = $this->buildRouteToArray($config['routes'],'get');
 			$config['routes'] = $this->buildArray($config['routes'],$this->defaultMethod);
 
 			$config['request'] = (!isset($config['request'])) ? [] : $this->buildArray($config['request'],'request');
@@ -215,6 +216,7 @@ class Orange {
 		$this->routes['routes'] = $config['routes'];
 		$this->routes['request'] = $config['request'];
 		$this->routes['response'] = $config['response'];
+		$this->routes['routeto'] = $config['routeto'];
 	}
 
 	/**
@@ -263,6 +265,30 @@ class Orange {
 		}
 
 		return $built;
+	}
+
+	protected function buildRouteToArray(array $routes,string $defaultMethod) : array
+	{
+		$routeTo = [];
+
+		foreach ($routes as $route) {
+			switch (count($route)) {
+				case 2:
+					$sectionRoute = $route[0];
+					$sectionHttpMethod = $defaultMethod;
+					$sectionMatch = $route[1];
+				break;
+				case 3:
+					$sectionRoute = $route[0];
+					$sectionHttpMethod = $route[1];
+					$sectionMatch = $route[2];
+				break;
+			}
+
+			$routeTo['<'.$sectionHttpMethod.'>'.$sectionMatch] = $sectionRoute;
+		}
+
+		return $routeTo;
 	}
 
 	/**
@@ -447,47 +473,7 @@ class Orange {
 
 	public function routeTo(string $search, ...$params): string
 	{
-		$routeConfig = loadConfigFile('routes');
-
-		$routes = $routeConfig['routes'];
-
-		$matchString = '';
-
-		$parts = explode('@',$search);
-
-		switch (count($parts)) {
-			case 1:
-				$httpMethod = 'get';
-				$match = $parts[0];
-			break;
-			case 2:
-				$httpMethod = $parts[0];
-				$match = $parts[1];
-			break;
-		}
-
-		foreach ($routes as $route) {
-			switch (count($route)) {
-				case 2:
-					$sectionRoute = $route[0];
-					$sectionHttpMethod = 'get';
-					$sectionMatch = $route[1];
-				break;
-				case 3:
-					$sectionRoute = $route[0];
-					$sectionHttpMethod = $route[1];
-					$sectionMatch = $route[2];
-				break;
-			}
-
-			if ($sectionMatch == $match && ($sectionHttpMethod == $httpMethod || $sectionHttpMethod == '*')) {
-				$matchString = '/'.$this->routeTofindReplace($sectionRoute,$params);
-
-				break;
-			}
-		}
-
-		return $matchString;
+		return (isset($this->routes['routeto'][$search])) ? '/'.$this->routeTofindReplace($this->routes['routeto'][$search],$params) : '';
 	}
 
 	protected function routeTofindReplace(string $found, ...$params): string
@@ -496,18 +482,12 @@ class Orange {
 
 		if (count($matches[0]) > 0) {
 			foreach ($matches[0] as $idx=>$matchString) {
-				$found = $this->str_replace_first($matchString,$params[0][$idx],$found);
+				$string = (isset($params[0][$idx])) ? $params[0][$idx] : '';
+				$found = preg_replace('/'.preg_quote($matchString, '/').'/', $string, $found, 1);
 			}
 		}
 
 		return $found;
-	}
-
-	protected function str_replace_first(string $from,string $to,string $content): string
-	{
-    $from = '/'.preg_quote($from, '/').'/';
-
-    return preg_replace($from, $to, $content, 1);
 	}
 
 } /* end class */
