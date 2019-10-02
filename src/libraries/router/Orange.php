@@ -445,4 +445,69 @@ class Orange {
 		}
 	}
 
+	public function routeTo(string $search, ...$params): string
+	{
+		$routeConfig = loadConfigFile('routes');
+
+		$routes = $routeConfig['routes'];
+
+		$matchString = '';
+
+		$parts = explode('@',$search);
+
+		switch (count($parts)) {
+			case 1:
+				$httpMethod = 'get';
+				$match = $parts[0];
+			break;
+			case 2:
+				$httpMethod = $parts[0];
+				$match = $parts[1];
+			break;
+		}
+
+		foreach ($routes as $route) {
+			switch (count($route)) {
+				case 2:
+					$sectionRoute = $route[0];
+					$sectionHttpMethod = 'get';
+					$sectionMatch = $route[1];
+				break;
+				case 3:
+					$sectionRoute = $route[0];
+					$sectionHttpMethod = $route[1];
+					$sectionMatch = $route[2];
+				break;
+			}
+
+			if ($sectionMatch == $match && ($sectionHttpMethod == $httpMethod || $sectionHttpMethod == '*')) {
+				$matchString = '/'.$this->routeTofindReplace($sectionRoute,$params);
+
+				break;
+			}
+		}
+
+		return $matchString;
+	}
+
+	protected function routeTofindReplace(string $found, ...$params): string
+	{
+		preg_match_all('/\(([^)]+)\)/', $found, $matches);
+
+		if (count($matches[0]) > 0) {
+			foreach ($matches[0] as $idx=>$matchString) {
+				$found = $this->str_replace_first($matchString,$params[0][$idx],$found);
+			}
+		}
+
+		return $found;
+	}
+
+	protected function str_replace_first(string $from,string $to,string $content): string
+	{
+    $from = '/'.preg_quote($from, '/').'/';
+
+    return preg_replace($from, $to, $content, 1);
+	}
+
 } /* end class */

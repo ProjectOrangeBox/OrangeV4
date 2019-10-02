@@ -25,7 +25,7 @@ class Loader extends CI_Loader
 		$__html = ob_get_clean();
 
 		if (!$__return) {
-			echo $__html;
+			ci('output')->append_output($__html);
 		}
 
 		return $__html;
