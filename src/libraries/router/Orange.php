@@ -58,14 +58,14 @@ class Orange {
 	 *
 	 * @var undefined
 	 */
-	protected $backUpLevels = '';
+	protected $backUpLevels = '../..';
 
 	/**
 	 * $defaultMethod
 	 *
 	 * @var undefined
 	 */
-	protected $defaultMethod = '';
+	protected $defaultMethod = 'index';
 
 	/**
 	 * $processMiddleware
@@ -80,6 +80,13 @@ class Orange {
 	 * @var boolean
 	 */
 	protected $onRequest = true;
+
+	/**
+	 * $allMethods
+	 *
+	 * @var string
+	 */
+	protected $allMethods = 'get,post,cli,put,delete';
 
 	/**
 	 * Class constructor
@@ -194,10 +201,11 @@ class Orange {
 			}
 
 			/* grab the config values */
-			$this->backUpLevels = $config['back up levels to root'];
-			$this->defaultMethod = $config['default method'];
-			$this->onRequest = $config['request middleware on'];
-			$this->onResponse = $config['response middleware on'];
+			$this->allMethods = $config['all'] ?? $this->allMethods;
+			$this->backUpLevels = $config['back up levels to root'] ?? $this->backUpLevels;
+			$this->defaultMethod = $config['default method'] ?? $this->defaultMethod;
+			$this->onRequest = $config['request middleware on'] ?? $this->onRequest;
+			$this->onResponse = $config['response middleware on'] ?? $this->onResponse;
 
 			/* reformat */
 			$config['routeto'] = $this->buildRouteToArray($config['routes'],'get');
@@ -228,6 +236,8 @@ class Orange {
 	 */
 	protected function buildArray(array $routes,string $defaultMethod) : array
 	{
+		$allMethods = explode(',',$this->allMethods);
+
 		$attachMethod = function($input,$method) {
 			return (is_string($input) && strpos($input,'::') === false) ? $input .= '::'.$method : $input;
 		};
@@ -260,8 +270,14 @@ class Orange {
 				$callback = $attachMethod($callback,$defaultMethod);
 			}
 
-			/* add CodeIgnitor "Defaults" */
-			$built[strtolower($httpMethod)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $url).'$#'] = $callback;
+			if ($httpMethod == '*') {
+				foreach ($allMethods as $httpMethod) {
+					$built[strtolower($httpMethod)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $url).'$#'] = $callback;
+				}
+			} else {
+				/* add CodeIgnitor "Defaults" */
+				$built[strtolower($httpMethod)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $url).'$#'] = $callback;
+			}
 		}
 
 		return $built;
@@ -341,10 +357,7 @@ class Orange {
 	 */
 	protected function getSearch(string $key) : array
 	{
-		$a = (isset($this->routes[$key][$this->requestMethod]) && is_array($this->routes[$key][$this->requestMethod])) ? $this->routes[$key][$this->requestMethod] : [];
-		$b = (isset($this->routes[$key]['*']) && is_array($this->routes[$key]['*'])) ? $this->routes[$key]['*'] : [];
-
-		return $a + $b;
+		return (isset($this->routes[$key][$this->requestMethod]) && is_array($this->routes[$key][$this->requestMethod])) ? $this->routes[$key][$this->requestMethod] : [];
 	}
 
 	/**
@@ -471,6 +484,18 @@ class Orange {
 		}
 	}
 
+	/**
+	 *
+	 * If your route is ['test/(:num)','*','Test::test$1'] for example
+	 * you would search for '<*>Test::test$1'
+	 * this would return 'test/(:num)'
+	 * which is used to create the path 'test/(:num)' => test/option1
+	 * using: ci('router')->routeTo('<*>Test::test$1','option1');
+	 *
+	 * @param string $search
+	 * @param [type] ...$params
+	 * @return string
+	 */
 	public function routeTo(string $search, ...$params): string
 	{
 		return (isset($this->routes['routeto'][$search])) ? '/'.$this->routeTofindReplace($this->routes['routeto'][$search],$params) : '';

@@ -144,7 +144,7 @@ switch ($_ENV['DEBUG'])
  * NO TRAILING SLASH!
  */
 
-	$view_folder = (VIEWFOLDER) ?? '';
+$view_folder = (defined('VIEWFOLDER')) ? VIEWFOLDER : '';
 
 
 /*
