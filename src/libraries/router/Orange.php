@@ -236,8 +236,6 @@ class Orange {
 	 */
 	protected function buildArray(array $routes,string $defaultMethod) : array
 	{
-		$allMethods = explode(',',$this->allMethods);
-
 		$attachMethod = function($input,$method) {
 			return (is_string($input) && strpos($input,'::') === false) ? $input .= '::'.$method : $input;
 		};
@@ -271,12 +269,15 @@ class Orange {
 			}
 
 			if ($httpMethod == '*') {
-				foreach ($allMethods as $httpMethod) {
-					$built[strtolower($httpMethod)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $url).'$#'] = $callback;
-				}
-			} else {
-				/* add CodeIgnitor "Defaults" */
-				$built[strtolower($httpMethod)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $url).'$#'] = $callback;
+				$httpMethod = $this->allMethods;
+			}
+
+			if (\is_string($httpMethod)) {
+				$httpMethod = explode(',',$httpMethod);
+			}
+
+			foreach ($httpMethod as $hm) {
+				$built[strtolower($hm)]['#^'.str_replace(array(':any',':num'), array('[^/]+','[0-9]+'), $url).'$#'] = $callback;
 			}
 		}
 
