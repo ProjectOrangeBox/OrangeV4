@@ -1,8 +1,5 @@
 <?php
 
-use \projectorangebox\orange\library\ServiceLocator;
-use \projectorangebox\orange\library\serviceLocator\ServiceLocator_interface;
-
 /**
  * ci
  *
@@ -61,9 +58,9 @@ if (!function_exists('create')) {
 }
 
 if (!function_exists('getServiceLocator')) {
-	function getServiceLocator(): ServiceLocator_interface
+	function getServiceLocator(): \projectorangebox\orange\library\serviceLocator\ServiceLocator_interface
 	{
-		return new ServiceLocator(loadConfigFile('services'));
+		return new \projectorangebox\orange\library\ServiceLocator(loadConfigFile('services'));
 	}
 }
 
