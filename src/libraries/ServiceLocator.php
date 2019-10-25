@@ -3,17 +3,17 @@
 namespace projectorangebox\orange\library;
 
 use Exception;
+use projectorangebox\orange\library\ServiceLocatorInterface;
 use projectorangebox\orange\library\exceptions\Internal\MethodNotFoundException;
 use projectorangebox\orange\library\exceptions\MVC\ServiceException;
-use projectorangebox\orange\library\serviceLocator\ServiceLocator_interface;
 
-class ServiceLocator implements ServiceLocator_interface
+class ServiceLocator implements ServiceLocatorInterface
 {
-	protected $config = [];
+	static protected $config = [];
 
 	public function __construct(array $config)
 	{
-		$this->config = &$config;
+		self::$config = &$config;
 	}
 
 	/**
@@ -51,15 +51,15 @@ class ServiceLocator implements ServiceLocator_interface
 		$type = strtolower($type);
 		$name = strtolower($name);
 
-		if (!isset($this->config[$type])) {
+		if (!isset(self::$config[$type])) {
 			throw new ServiceException(sprintf('Could not locate a %s type.', $type));
 		}
 
-		if (!isset($this->config[$type][$name])) {
+		if (!isset(self::$config[$type][$name])) {
 			throw new ServiceException(sprintf('Could not locate a %s type named %s.',$type,$name));
 		}
 
-		return $this->config[$type][$name];
+		return self::$config[$type][$name];
 	}
 
 	public function add(string $type,string $name,string $serviceClass): bool
@@ -67,11 +67,11 @@ class ServiceLocator implements ServiceLocator_interface
 		$type = strtolower($type);
 		$name = strtolower($name);
 
-		if (!isset($this->config[$type])) {
-			$this->config[$type] = [];
+		if (!isset(self::$config[$type])) {
+			self::$config[$type] = [];
 		}
 
-		$this->config[$type][$name] = $serviceClass;
+		self::$config[$type][$name] = $serviceClass;
 
 		return true;
 	}
@@ -85,7 +85,7 @@ class ServiceLocator implements ServiceLocator_interface
  */
 	public function addAlias(string $alias, string $real): void
 	{
-		$this->config['alias'][strtolower($alias)] = $real;
+		self::$config['alias'][strtolower($alias)] = $real;
 	}
 
 /**
@@ -96,7 +96,7 @@ class ServiceLocator implements ServiceLocator_interface
  */
 	public function alias(string $name): string
 	{
-		return $this->config['alias'][strtolower($name)] ?? $name;
+		return self::$config['alias'][strtolower($name)] ?? $name;
 	}
 
 	/**

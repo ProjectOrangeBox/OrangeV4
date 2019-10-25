@@ -2,6 +2,8 @@
 
 namespace projectorangebox\orange\library\router;
 
+use projectorangebox\orange\library\exceptions\MVC\RouterException;
+
 /* Total Rewrite therefore we are NOT extending */
 class Orange {
 	/**
@@ -289,6 +291,11 @@ class Orange {
 		$routeTo = [];
 
 		foreach ($routes as $route) {
+			/* incorrect format */
+			if (!is_array($route)) {
+				throw new RouterException($route.' is not an array. Check the format of your routes.php configuration file.');
+			}
+
 			switch (count($route)) {
 				case 2:
 					$sectionRoute = $route[0];

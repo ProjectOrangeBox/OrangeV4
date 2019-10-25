@@ -33,11 +33,6 @@ if (!function_exists('ci')) {
 		/* did we attach the service locator yet? */
 		if (!$serviceLocator) {
 			$serviceLocator = getServiceLocator();
-
-			if (!($serviceLocator instanceof ServiceLocator_interface)) {
-				throw new Exception('getServiceLocator did not return a instance of ServiceLocator_interface.');
-			}
-
 		}
 
 		/* a little messy but since I control the service locator... */
@@ -58,7 +53,7 @@ if (!function_exists('create')) {
 }
 
 if (!function_exists('getServiceLocator')) {
-	function getServiceLocator(): \projectorangebox\orange\library\serviceLocator\ServiceLocator_interface
+	function getServiceLocator(): \projectorangebox\orange\library\ServiceLocatorInterface
 	{
 		return new \projectorangebox\orange\library\ServiceLocator(loadConfigFile('services'));
 	}
