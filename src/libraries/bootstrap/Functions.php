@@ -1,5 +1,13 @@
 <?php
 
+/* you can override this function if you need to return a different server locator */
+if (!function_exists('getServiceLocator')) {
+	function getServiceLocator(): \projectorangebox\orange\library\ServiceLocatorInterface
+	{
+		return new \projectorangebox\orange\library\ServiceLocator(loadConfigFile('services'));
+	}
+}
+
 /**
  * ci
  *
@@ -32,7 +40,13 @@ if (!function_exists('ci')) {
 
 		/* did we attach the service locator yet? */
 		if (!$serviceLocator) {
+			/* this function can be overridden if needed */
 			$serviceLocator = getServiceLocator();
+
+			if (!$serviceLocator instanceof \projectorangebox\orange\library\ServiceLocatorInterface) {
+				die('Your service locator does not implement "projectorangebox\orange\library\ServiceLocatorInterface"');
+			}
+
 		}
 
 		/* a little messy but since I control the service locator... */
@@ -49,13 +63,6 @@ if (!function_exists('create')) {
 	function create(string $name = null, array $userConfig = []): object
 	{
 		return ci($name,$userConfig,true);
-	}
-}
-
-if (!function_exists('getServiceLocator')) {
-	function getServiceLocator(): \projectorangebox\orange\library\ServiceLocatorInterface
-	{
-		return new \projectorangebox\orange\library\ServiceLocator(loadConfigFile('services'));
 	}
 }
 
