@@ -3,7 +3,7 @@
 namespace projectorangebox\orange\library;
 
 use CI_Config;
-use Exception;
+use projectorangebox\orange\library\exceptions\MVC\ConfigException;
 
 /**
  * Orange
@@ -290,7 +290,7 @@ class Config extends CI_Config
 
 			if (!isset($config[$name])) {
 				if ($default === null) {
-					throw new Exception('Could not locate a configuration value '.$group.'.'.$name.' and no default was provided.');
+					throw new ConfigException('Could not locate a configuration value '.$group.'.'.$name.' and no default was provided.');
 				}
 
 				$config[$name] = $default;
@@ -332,7 +332,7 @@ class Config extends CI_Config
 		$fileConfig[$filename] = (array) $returnedEnvironmentConfig + (array) $returnedApplicationConfig + (array) $$variableVariable;
 
 		if (!$configFound && $throwException) {
-			throw new \Exception(sprintf('Could not location a configuration file named "%s".', APPPATH . 'config/' . $filename . '.php'));
+			throw new ConfigException(sprintf('Could not location a configuration file named "%s".', APPPATH . 'config/' . $filename . '.php'));
 		}
 
 		return $fileConfig[$filename];

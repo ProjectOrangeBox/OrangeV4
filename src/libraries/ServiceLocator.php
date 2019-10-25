@@ -3,6 +3,8 @@
 namespace projectorangebox\orange\library;
 
 use Exception;
+use projectorangebox\orange\library\exceptions\Internal\MethodNotFoundException;
+use projectorangebox\orange\library\exceptions\MVC\ServiceException;
 use projectorangebox\orange\library\serviceLocator\ServiceLocator_interface;
 
 class ServiceLocator implements ServiceLocator_interface
@@ -38,7 +40,7 @@ class ServiceLocator implements ServiceLocator_interface
 		} elseif(substr($name,0,3) === 'add') {
 			$return = $this->add(substr($name,3),$arguments[0],$arguments[1]);
 		}	else {
-			throw new Exception(sprintf('No method named "%s" found.', $name));
+			throw new MethodNotFoundException(sprintf('No method named "%s" found.', $name));
 		}
 
 		return $return;
@@ -50,11 +52,11 @@ class ServiceLocator implements ServiceLocator_interface
 		$name = strtolower($name);
 
 		if (!isset($this->config[$type])) {
-			throw new Exception(sprintf('Could not locate a %s type.', $type));
+			throw new ServiceException(sprintf('Could not locate a %s type.', $type));
 		}
 
 		if (!isset($this->config[$type][$name])) {
-			throw new Exception(sprintf('Could not locate a %s type named %s.',$type,$name));
+			throw new ServiceException(sprintf('Could not locate a %s type named %s.',$type,$name));
 		}
 
 		return $this->config[$type][$name];
