@@ -15,7 +15,6 @@ class App
 	app::globr(...) // recursive glob
 	app::remove_php_file_from_opcache(...) // remove a opcached PHP file based on it's absolute file path
 
-
 	"duplicate" many PHP functions to support the applications root folder
 
 	app::file_get_contents(...)

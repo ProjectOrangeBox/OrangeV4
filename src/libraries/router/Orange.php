@@ -311,7 +311,7 @@ class Orange {
 				break;
 			}
 
-			$routeTo['<'.$sectionHttpMethod.'>'.$sectionMatch] = $sectionRoute;
+			$routeTo[$sectionMatch] = $sectionRoute;
 		}
 
 		return $routeTo;
@@ -497,10 +497,10 @@ class Orange {
 	/**
 	 *
 	 * If your route is ['test/(:num)','*','Test::test$1'] for example
-	 * you would search for '<*>Test::test$1'
+	 * you would search for 'Test::test$1'
 	 * this would return 'test/(:num)'
 	 * which is used to create the path 'test/(:num)' => test/option1
-	 * using: ci('router')->routeTo('<*>Test::test$1','option1');
+	 * using: ci('router')->routeTo('Test::test$1','option1');
 	 *
 	 * @param string $search
 	 * @param [type] ...$params
