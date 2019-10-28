@@ -4,6 +4,6 @@ namespace projectorangebox\orange\library\exceptions;
 
 use Exception;
 
-class PHPException extends Exception
+class InternalException extends Exception
 {
 }

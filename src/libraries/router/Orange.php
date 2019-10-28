@@ -2,6 +2,8 @@
 
 namespace projectorangebox\orange\library\router;
 
+use projectorangebox\orange\library\exceptions\Internal\ArrayKeyNotFoundException;
+use projectorangebox\orange\library\exceptions\Internal\ParameterException;
 use projectorangebox\orange\library\exceptions\MVC\RouterException;
 
 /* Total Rewrite therefore we are NOT extending */
@@ -311,7 +313,8 @@ class Orange {
 				break;
 			}
 
-			$routeTo[$sectionMatch] = $sectionRoute;
+			/* normalize */
+			$routeTo[strtolower($sectionMatch)] = $sectionRoute;
 		}
 
 		return $routeTo;
@@ -503,26 +506,38 @@ class Orange {
 	 * using: ci('router')->routeTo('Test::test$1','option1');
 	 *
 	 * @param string $search
-	 * @param [type] ...$params
+	 * @param $params
 	 * @return string
 	 */
 	public function routeTo(string $search, ...$params): string
 	{
-		return (isset($this->routes['routeto'][$search])) ? '/'.$this->routeTofindReplace($this->routes['routeto'][$search],$params) : '';
-	}
+		$parameters = \func_get_args();
 
-	protected function routeTofindReplace(string $found, ...$params): string
-	{
-		preg_match_all('/\(([^)]+)\)/', $found, $matches);
+		$search = strtolower(\array_shift($parameters));
+		$uri = '/';
 
-		if (count($matches[0]) > 0) {
-			foreach ($matches[0] as $idx=>$matchString) {
-				$string = (isset($params[0][$idx])) ? $params[0][$idx] : '';
-				$found = preg_replace('/'.preg_quote($matchString, '/').'/', $string, $found, 1);
+		if (isset($this->routes['routeto'][$search])) {
+			$uri .= $this->routes['routeto'][$search];
+
+			if (preg_match_all('/\(([^)]+)\)/', $uri, $matches)) {
+				$matchCount = count($matches[0]);
+				$parameterCount = count($parameters);
+
+				/* make sure we got enough parameters (more is better than not enough) */
+				if ($matchCount > $parameterCount) {
+					throw new ParameterException('expected '.$matchCount.' received: '.$parameterCount);
+				}
+
+				foreach ($matches[0] as $idx=>$matchString) {
+					$string = (isset($parameters[$idx])) ? $parameters[$idx] : '';
+					$uri = preg_replace('/'.preg_quote($matchString, '/').'/', $string, $uri, 1);
+				}
 			}
+		} else {
+			throw new ArrayKeyNotFoundException($search);
 		}
 
-		return $found;
+		return $uri;
 	}
 
 } /* end class */
