@@ -100,6 +100,8 @@ class Orange {
 	 */
 	public function __construct()
 	{
+		log_message('info', 'Initializing Orange Route Class');
+
 		/* reference to CodeIgniter URI Object */
 		$uri = load_class('URI');
 		$input = load_class('Input');
@@ -111,7 +113,7 @@ class Orange {
 		$this->requestMethod = $input->get_http_method(); /* http method (get,put,post,patch,delete... or cli */
 		$this->requestType = $input->get_request_type(); /* http, cli, ajax */
 
-    log_message('info',sprintf('Route: the HTTP method of "%s" is of type "%s".',$this->requestMethod,$this->requestType));
+    log_message('info',sprintf('Route: the HTTP request method is "%s" the request type is "%s".',$this->requestMethod,$this->requestType));
 
 		/* load our routes from the routes configuration file */
 		$this->loadRouterConfig();

@@ -1,6 +1,6 @@
 <?php
 
-#namespace \;
+#namespace \; // Global
 
 use projectorangebox\orange\library\exceptions\IO\FileOperationFailedException;
 use projectorangebox\orange\library\exceptions\IO\FileNotFoundException;
@@ -9,7 +9,30 @@ use projectorangebox\orange\library\exceptions\IO\FolderNotWritableException;
 
 class App
 {
-	/* "duplicate" many PHP functions to support the application __ROOT__ */
+	/*
+
+	app::path(...) // return complete path based on applications root folder ie. __ROOT__
+	app::globr(...) // recursive glob
+	app::remove_php_file_from_opcache(...) // remove a opcached PHP file based on it's absolute file path
+
+
+	"duplicate" many PHP functions to support the applications root folder
+
+	app::file_get_contents(...)
+	app::pathinfo(...)
+	app::readfile(...)
+	app::file(...)
+	app::file_exists(...)
+	app::file_put_contents(...)
+	app::fopen(...)
+	app::glob(...)
+	app::include(...)
+	app::mkdir(...)
+	app::parse_ini_file(...)
+	app::rename(...)
+	app::unlink(...)
+
+	*/
 
 	/* Add Root if it's not already there (ie. glob function array will already have it no need to have you strip it) */
 	static public function path(string $path,bool $throw = false): string
