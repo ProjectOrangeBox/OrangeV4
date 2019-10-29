@@ -3,7 +3,6 @@
 namespace projectorangebox\orange\library;
 
 use projectorangebox\orange\library\exceptions\IO\FileNotFoundException;
-use projectorangebox\orange\library\input\RequestRemap;
 
 class Orange
 {
@@ -93,7 +92,7 @@ class Orange
 	 */
 	public function console(/* mixed */$var, string $type = 'log'): void
 	{
-		echo '<script type="text/javascript">console.' . $type . '(' . json_encode($var) . ')</script>';
+		echo '<script>console.' . $type . '(' . json_encode($var) . ')</script>';
 	}
 
 	/**
