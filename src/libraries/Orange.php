@@ -253,20 +253,6 @@ class Orange
 	}
 
 	/**
-	 * remapInputStream
-	 *
-	 * Preprocess the raw input stream
-	 *
-	 * @param array $rules
-	 * @param mixed bool
-	 * @return void
-	 */
-	public function remapInputStream(array $rules) /* mixed */
-	{
-		ci('input')->set_request((new RequestRemap)->processRaw($rules, ci('input')->get_raw_input_stream())->get(), true);
-	}
-
-	/**
 	 * getDotNotation
 	 *
 	 * @param array $array

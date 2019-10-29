@@ -44,7 +44,12 @@ use \projectorangebox\orange\library\input\Dot;
 
 </form>
 
-$remap = ['model.repeatable.#.parent_id'=>'model.id','model.copied'=>'model.moveme','model.removeme','model.moveme'];
+$remap = [
+	// to this position from this position
+	'model.repeatable.#.parent_id'=>'model.id',
+	'model.copied'=>'model.moveme',
+	'model.removeme','model.moveme'
+];
 
 $output = ci('input')->requestRemap($remap); /* optional boolean replace input request
 

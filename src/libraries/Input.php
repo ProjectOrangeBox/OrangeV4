@@ -3,6 +3,7 @@
 namespace projectorangebox\orange\library;
 
 use CI_Input;
+use projectorangebox\orange\library\input\RequestRemap;
 
 /**
  * Orange
@@ -110,6 +111,25 @@ class Input extends CI_Input
 		$this->requestMethod = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'cli';
 
 		log_message('info', 'Orange Input Class Initialized');
+	}
+
+	public function remap(array $rules,bool $replace = false): Input
+	{
+		$remap = new RequestRemap;
+		$rawInput = $this->get_raw_input_stream();
+		$returns = $this;
+		$remapped = $remap->processRaw($rules, $rawInput)->get();
+
+		/* replace entire request */
+		if ($replace) {
+			$this->set_request($remapped, true);
+		} else {
+			/* return a new instance of input */
+			$returns = new Input;
+			$returns->set_request($remapped, true);
+		}
+
+		return $returns;
 	}
 
 	/**
