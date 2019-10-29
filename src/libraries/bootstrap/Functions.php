@@ -1,7 +1,12 @@
 <?php
 
-use \projectorangebox\orange\library\ServiceLocator;
-use \projectorangebox\orange\library\serviceLocator\ServiceLocator_interface;
+/* you can override this function if you need to return a different server locator */
+if (!function_exists('getServiceLocator')) {
+	function getServiceLocator(): \projectorangebox\orange\library\ServiceLocatorInterface
+	{
+		return new \projectorangebox\orange\library\ServiceLocator(loadConfigFile('services'));
+	}
+}
 
 /**
  * ci
@@ -35,10 +40,11 @@ if (!function_exists('ci')) {
 
 		/* did we attach the service locator yet? */
 		if (!$serviceLocator) {
+			/* this function can be overridden if needed */
 			$serviceLocator = getServiceLocator();
 
-			if (!($serviceLocator instanceof ServiceLocator_interface)) {
-				throw new Exception('getServiceLocator did not return a instance of ServiceLocator_interface.');
+			if (!$serviceLocator instanceof \projectorangebox\orange\library\ServiceLocatorInterface) {
+				die('Your service locator does not implement "projectorangebox\orange\library\ServiceLocatorInterface"');
 			}
 
 		}
@@ -57,13 +63,6 @@ if (!function_exists('create')) {
 	function create(string $name = null, array $userConfig = []): object
 	{
 		return ci($name,$userConfig,true);
-	}
-}
-
-if (!function_exists('getServiceLocator')) {
-	function getServiceLocator(): ServiceLocator_interface
-	{
-		return new ServiceLocator(loadConfigFile('services'));
 	}
 }
 
@@ -315,7 +314,7 @@ if (!function_exists('site_url')) {
 	 * $url = site_url('/{www theme}/assets/css');
 	 * ```
 	 */
-	function site_url(string $uri = '', string $protocol = null): string
+	function site_url($uri = '', string $protocol = null): string
 	{
 		/* Call CodeIgniter version first if it has a protocol if not just use ours */
 		if ($protocol) {

@@ -2,6 +2,10 @@
 
 namespace projectorangebox\orange\library\router;
 
+use projectorangebox\orange\library\exceptions\Internal\ArrayKeyNotFoundException;
+use projectorangebox\orange\library\exceptions\Internal\ParameterException;
+use projectorangebox\orange\library\exceptions\MVC\RouterException;
+
 /* Total Rewrite therefore we are NOT extending */
 class Orange {
 	/**
@@ -98,6 +102,8 @@ class Orange {
 	 */
 	public function __construct()
 	{
+		log_message('info', 'Initializing Orange Route Class');
+
 		/* reference to CodeIgniter URI Object */
 		$uri = load_class('URI');
 		$input = load_class('Input');
@@ -109,7 +115,7 @@ class Orange {
 		$this->requestMethod = $input->get_http_method(); /* http method (get,put,post,patch,delete... or cli */
 		$this->requestType = $input->get_request_type(); /* http, cli, ajax */
 
-    log_message('info',sprintf('Route: the HTTP method of "%s" is of type "%s".',$this->requestMethod,$this->requestType));
+    log_message('info',sprintf('Route: the HTTP request method is "%s" the request type is "%s".',$this->requestMethod,$this->requestType));
 
 		/* load our routes from the routes configuration file */
 		$this->loadRouterConfig();
@@ -289,6 +295,11 @@ class Orange {
 		$routeTo = [];
 
 		foreach ($routes as $route) {
+			/* incorrect format */
+			if (!is_array($route)) {
+				throw new RouterException($route.' is not an array. Check the format of your routes.php configuration file.');
+			}
+
 			switch (count($route)) {
 				case 2:
 					$sectionRoute = $route[0];
@@ -302,7 +313,8 @@ class Orange {
 				break;
 			}
 
-			$routeTo['<'.$sectionHttpMethod.'>'.$sectionMatch] = $sectionRoute;
+			/* normalize */
+			$routeTo[strtolower($sectionMatch)] = $sectionRoute;
 		}
 
 		return $routeTo;
@@ -488,32 +500,44 @@ class Orange {
 	/**
 	 *
 	 * If your route is ['test/(:num)','*','Test::test$1'] for example
-	 * you would search for '<*>Test::test$1'
+	 * you would search for 'Test::test$1'
 	 * this would return 'test/(:num)'
 	 * which is used to create the path 'test/(:num)' => test/option1
-	 * using: ci('router')->routeTo('<*>Test::test$1','option1');
+	 * using: ci('router')->routeTo('Test::test$1','option1');
 	 *
 	 * @param string $search
-	 * @param [type] ...$params
+	 * @param $params
 	 * @return string
 	 */
 	public function routeTo(string $search, ...$params): string
 	{
-		return (isset($this->routes['routeto'][$search])) ? '/'.$this->routeTofindReplace($this->routes['routeto'][$search],$params) : '';
-	}
+		$parameters = \func_get_args();
 
-	protected function routeTofindReplace(string $found, ...$params): string
-	{
-		preg_match_all('/\(([^)]+)\)/', $found, $matches);
+		$search = strtolower(\array_shift($parameters));
+		$uri = '/';
 
-		if (count($matches[0]) > 0) {
-			foreach ($matches[0] as $idx=>$matchString) {
-				$string = (isset($params[0][$idx])) ? $params[0][$idx] : '';
-				$found = preg_replace('/'.preg_quote($matchString, '/').'/', $string, $found, 1);
+		if (isset($this->routes['routeto'][$search])) {
+			$uri .= $this->routes['routeto'][$search];
+
+			if (preg_match_all('/\(([^)]+)\)/', $uri, $matches)) {
+				$matchCount = count($matches[0]);
+				$parameterCount = count($parameters);
+
+				/* make sure we got enough parameters (more is better than not enough) */
+				if ($matchCount > $parameterCount) {
+					throw new ParameterException('expected '.$matchCount.' received: '.$parameterCount);
+				}
+
+				foreach ($matches[0] as $idx=>$matchString) {
+					$string = (isset($parameters[$idx])) ? $parameters[$idx] : '';
+					$uri = preg_replace('/'.preg_quote($matchString, '/').'/', $string, $uri, 1);
+				}
 			}
+		} else {
+			throw new ArrayKeyNotFoundException($search);
 		}
 
-		return $found;
+		return $uri;
 	}
 
 } /* end class */

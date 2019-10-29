@@ -3,6 +3,7 @@
 namespace projectorangebox\orange\library;
 
 use CI_Input;
+use projectorangebox\orange\library\exceptions\MVC\RequestException;
 use projectorangebox\orange\library\input\RequestRemap;
 
 /**
@@ -255,7 +256,7 @@ class Input extends CI_Input
 
 		/* options include cli, ajax, html */
 		if (!in_array($requestType, ['cli','ajax','html'])) {
-			throw new \Exception(__METHOD__.' unknown type '.$requestType.'.');
+			throw new RequestException(__METHOD__.' unknown type '.$requestType.'.');
 		}
 
 		$this->requestType = $requestType;
@@ -275,7 +276,7 @@ class Input extends CI_Input
 
 		/* options include cli, ajax, html */
 		if (!in_array($requestMethod, ['cli','get','head','post','put','delete','connect','options','trace','patch'])) {
-			throw new \Exception(__METHOD__.' unknown type '.$requestMethod.'.');
+			throw new RequestException(__METHOD__.' unknown type '.$requestMethod.'.');
 		}
 
 		$this->requestMethod = $requestMethod;

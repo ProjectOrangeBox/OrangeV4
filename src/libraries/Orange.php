@@ -2,6 +2,7 @@
 
 namespace projectorangebox\orange\library;
 
+use projectorangebox\orange\library\exceptions\IO\FileNotFoundException;
 use projectorangebox\orange\library\input\RequestRemap;
 
 class Orange
@@ -310,7 +311,7 @@ class Orange
 		$completePath = __ROOT__.'/'.trim($path,'/');
 
 		if (!\file_exists($completePath)) {
-			throw new Exception('Output could not locate the image at '.$path);
+			throw new FileNotFoundException('Output could not locate the image at '.$path);
 		}
 
 		/* Read image path, convert to base64 encoding */

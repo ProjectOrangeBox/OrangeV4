@@ -3,6 +3,7 @@
 namespace projectorangebox\orange\library;
 
 use CI_Model;
+use projectorangebox\orange\library\exceptions\MVC\ModelException;
 
 /**
  * Orange
@@ -127,7 +128,7 @@ class Model extends CI_Model
 		$value = ci('orange')->getDotNotation($this->rules,$dotNotation,NOVALUE);
 
 		if ($value == NOVALUE) {
-			throw new \Exception(sprintf('No rule found in "%s" for "%s".',$this->object,$dotNotation));
+			throw new ModelException(sprintf('No rule found in "%s" for "%s".',$this->object,$dotNotation));
 		}
 
 		return $value;

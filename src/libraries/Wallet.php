@@ -145,18 +145,25 @@ class Wallet
 		/* where did we come from? */
 		$this->httpReferer = ci('input')->server('HTTP_REFERER');
 
+		/* if it's empty then default to home page */
+		if (empty($this->httpReferer)) {
+			$this->httpReferer = '/';
+		}
+
 		/* What msg types should be considered "sticky" */
 		$this->stickyTypes = $this->config['sticky types'] ?? ['red','danger','warning','yellow'];
 		$this->initialPause = $this->config['initial pause'] ?? 3;
 		$this->pauseForEach = $this->config['pause for each'] ?? 1000;
 		$this->defaultType = $this->config['default type'] ?? 'info';
 
-		/* are there any messages in cold storage? */
-		if (is_array($previousMessages = $this->session->flashdata($this->msgKey))) {
+		/* Are there any messages in cold storage? */
+		$previousMessages = $this->session->flashdata($this->msgKey);
+
+		if (is_array($previousMessages)) {
 			$this->messages = $previousMessages;
 		}
 
-		/* set the view variable for this page */
+		/* set the view variable for this page based on what is in $this->messages */
 		$this->setViewVariable();
 
 		log_message('info', 'Orange Wallet Class Initialized');
@@ -201,13 +208,13 @@ class Wallet
 
 	public function redirect(string $redirect) : void
 	{
-		// /* if it starts with @ then pick up the referer *
+		/* store this in a session variable for redirect */
+		$this->session->set_flashdata($this->msgKey, $this->messages);
+
+		/* if it starts with @ then pick up the referer */
 		if ($redirect[0] == '@') {
 			$redirect = $this->httpReferer;
 		}
-
-		/* store this in a session variable for redirect */
-		$this->session->set_flashdata($this->msgKey, $this->messages);
 
 		redirect($redirect);
 	}
