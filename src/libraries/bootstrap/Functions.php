@@ -72,6 +72,7 @@ if (!function_exists('load_class')) {
 	 * CodeIgniter Startup Load Order
 	 *
 	 * Benchmark
+	 * Exceptions
 	 * Hooks
 	 * Config
 	 * Log
