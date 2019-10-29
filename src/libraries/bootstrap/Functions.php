@@ -314,7 +314,7 @@ if (!function_exists('site_url')) {
 	 * $url = site_url('/{www theme}/assets/css');
 	 * ```
 	 */
-	function site_url(string $uri = '', string $protocol = null): string
+	function site_url($uri = '', string $protocol = null): string
 	{
 		/* Call CodeIgniter version first if it has a protocol if not just use ours */
 		if ($protocol) {

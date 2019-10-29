@@ -17,12 +17,17 @@ use projectorangebox\orange\library\exceptions\MVC\ViewNotFoundException;
  * $parser->php = new NormalHandler($config);
  * $parser->hbs = new HandlebarsHandler($config);
  *
+ *	$parser->hbs->parse('main/index',['data'=>'foobar']);
  *
+ *	Determine from found template key
+ *	$parser->parse('main/index',['data'=>'foobar']);
  *
  */
 class Parser
 {
 	protected $parsers = [];
+
+	protected $fourohfour = '404';
 
 	/* pass thru based on extension ...parser->html->parse(...) */
 	public function __get(string $extension)
@@ -46,6 +51,7 @@ class Parser
 	{
 		$key = $this->normailizedKey($key);
 
+		/* ok who has this view? if nobody look for the 404 view */
 		try {
 			$extension = $this->findView($key);
 		} catch (ViewNotFoundException $e) {
@@ -71,6 +77,7 @@ class Parser
 
 		return $this->parsers[$extension]->parse_string($string,$data,true);
 	}
+
 	public function normailizedKey(string $key): string
 	{
 		return strtolower(trim($key,'/'));

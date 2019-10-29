@@ -470,13 +470,18 @@ class Errors
 	 */
 	public function has_any() : bool
 	{
-		foreach ($this->errors as $group=>$errors) {
+		$has = false;
+
+		/* do we have at least 1 error */
+		foreach (\array_keys($this->errors) as $group) {
 			if (count($this->errors[$group])) {
-				return true;
+				$has = true;
+
+				break;
 			}
 		}
 
-		return false;
+		return $has;
 	}
 
 	/**
@@ -735,8 +740,8 @@ class Errors
 		/* remap the view to another based on it's name */
 		$view = (isset($this->config['named'][$view])) ? $this->config['named'][$view] : $view;
 
-		$data['heading'] = $data['heading'] ?? 'Fatal Error '.$status_code;
-		$data['message'] = $data['message'] ?? 'Unknown Error';
+		$data['heading'] = $data['heading'] ?? 'Error '.$status_code;
+		$data['message'] = $data['message'] ?? (string)$this; /* get "as" using __toString */
 
 		switch ($output_format) {
 			case 'cli':
@@ -761,9 +766,6 @@ class Errors
 
 		$view_folder = ($override['view_folder']) ? $override['view_folder'] : $view_folder;
 		$view_path = $view_folder.'/error_'.str_replace('.php', '', $view);
-
-		/* get "as" using __toString */
-		$data['message'] = (string)$this;
 
 		$charset = isset($override['charset']) ? $override['charset'] : $charset;
 		$mime_type = isset($override['mime_type']) ? $override['mime_type'] : $mime_type;
@@ -826,4 +828,5 @@ class Errors
 		/* return the current buffer contents and delete current output buffer */
 		return ob_get_clean();
 	}
+
 } /* end class */

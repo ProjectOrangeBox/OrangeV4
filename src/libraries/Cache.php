@@ -2,6 +2,9 @@
 
 namespace projectorangebox\orange\library;
 
+use projectorangebox\orange\library\exceptions\Internal\MethodNotFoundException;
+use projectorangebox\orange\library\exceptions\MVC\UnsupportedException;
+
 /**
  * Extension to the CodeIgniter Cache Library
  *
@@ -72,7 +75,7 @@ class Cache
 		$this->adapter = $this->config['cache_default'];
 
 		if (!$this->driver($this->adapter)->is_supported()) {
-			throw new \Exception('Cache Driver '.$this->adapter.' is a unsupported.');
+			throw new UnsupportedException($this->adapter);
 		}
 
 		log_message('info', 'Orange Cache Class Initialized');
@@ -100,7 +103,7 @@ class Cache
 	{
 		/* test for supported methods */
 		if (!in_array($name,['get','save','delete','increment','decrement','clean','cache_info','get_metadata','cache','deleteByTags','ttl'])) {
-			throw new \Exception($name.' is a unsupported method.');
+			throw new MethodNotFoundException($name);
 		}
 
 		return call_user_func_array([$this->driver($this->adapter),$name],$arguments);
