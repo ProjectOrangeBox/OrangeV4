@@ -2,8 +2,6 @@
 
 namespace projectorangebox\orange\library\cache\traits;
 
-use projectorangebox\orange\library\Cache;
-
 trait Ttl {
 
 	/**

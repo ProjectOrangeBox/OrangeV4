@@ -53,9 +53,10 @@ $remap = [
 
 $output = ci('input')->requestRemap($remap); /* optional boolean replace input request
 
-*/
+ */
 
-class RequestRemap {
+class RequestRemap
+{
 	/**
 	 * $formData
 	 *
@@ -94,7 +95,7 @@ class RequestRemap {
 	 * @param string $rawStream raw HTTP request string
 	 * @return array
 	 */
-	public function processRaw(array $remap = [],string $rawStream) : Dot
+	public function processRaw(array $remap = [], string $rawStream): Dot
 	{
 		/* fresh instance */
 		$this->dotArray = new Dot;
@@ -103,11 +104,11 @@ class RequestRemap {
 		$this->buildArray($rawStream);
 
 		/* run thought rules - they are either copy or delete */
-		foreach ($remap as $key=>$value) {
+		foreach ($remap as $key => $value) {
 			/* if it has a key & value it's a copy if not it's a remove */
 			if (!is_integer($key)) {
 				/* copy from one location to another with repeating support */
-				$this->copyValue($key,$value);
+				$this->copyValue($key, $value);
 			} else {
 				/* delete the value */
 				$this->dotArray->delete($value);
@@ -118,17 +119,17 @@ class RequestRemap {
 		return $this->dotArray;
 	}
 
-	public function processArray(array $remap = [],array $array) : Dot
+	public function processArray(array $remap = [], array $array): Dot
 	{
 		/* fresh instance */
 		$this->dotArray = new Dot($array);
 
 		/* run thought rules - they are either copy or delete */
-		foreach ($remap as $key=>$value) {
+		foreach ($remap as $key => $value) {
 			/* if it has a key & value it's a copy if not it's a remove */
 			if (!is_integer($key)) {
 				/* copy from one location to another with repeating support */
-				$this->copyValue($key,$value);
+				$this->copyValue($key, $value);
 			} else {
 				/* delete the value */
 				$this->dotArray->delete($value);
@@ -139,11 +140,11 @@ class RequestRemap {
 		return $this->dotArray;
 	}
 
-	protected function buildArray(string $rawStream) : void
+	protected function buildArray(string $rawStream): void
 	{
 		/* convert raw stream to key value pairs */
-		foreach (explode('&',$rawStream) as $section) {
-			list($key,$value) = explode('=',$section,2);
+		foreach (explode('&', $rawStream) as $section) {
+			list($key, $value) = explode('=', $section, 2);
 
 			/* now that's it split up we can decode the key */
 			$key = urldecode($key);
@@ -151,26 +152,25 @@ class RequestRemap {
 			/* test if is set so we don't throw a index not found error - then get the next value for this repeating */
 			$this->repeatKeys[$key] = (!isset($this->repeatKeys[$key])) ? 0 : ++$this->repeatKeys[$key];
 
-			$this->dotArray->set(str_replace($this->inputRepeatingKey,$this->repeatKeys[$key],$key),urldecode($value));
+			$this->dotArray->set(str_replace($this->inputRepeatingKey, $this->repeatKeys[$key], $key), urldecode($value));
 		}
 	}
 
-	protected function copyValue(string $copyTo,string $copyFrom) : void
+	protected function copyValue(string $copyTo, string $copyFrom): void
 	{
 		/* is it a repeater or regular? */
-		if (strpos($copyTo,$this->inputRepeatingKey) === false) {
-			$oldValue = $this->dotArray->get($copyFrom,null);
+		if (strpos($copyTo, $this->inputRepeatingKey) === false) {
+			$oldValue = $this->dotArray->get($copyFrom, null);
 
 			if ($oldValue !== null) {
-				$this->dotArray->set($copyTo,$oldValue);
+				$this->dotArray->set($copyTo, $oldValue);
 			}
 		} else {
-			list($dotnotation,$newKey) = explode($this->inputRepeatingKey,$copyTo);
+			list($dotnotation, $newKey) = explode($this->inputRepeatingKey, $copyTo);
 
-			foreach (array_keys($this->dotArray->get(trim($dotnotation,'.'),[])) as $index) {
-				$this->dotArray->set($dotnotation.$index.$newKey,$this->dotArray->get($copyFrom));
+			foreach (array_keys($this->dotArray->get(trim($dotnotation, '.'), [])) as $index) {
+				$this->dotArray->set($dotnotation . $index . $newKey, $this->dotArray->get($copyFrom));
 			}
 		}
 	}
-
 } /* end class */

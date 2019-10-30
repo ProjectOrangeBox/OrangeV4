@@ -25,7 +25,7 @@ class Orange
 		extract($__data, EXTR_PREFIX_INVALID, '_');
 
 		/* if the view isn't there then findView will throw an error BEFORE output buffering is turned on */
-		$__path = __ROOT__ . ci('servicelocator')->find('view',$__view);
+		$__path = __ROOT__ . ci('servicelocator')->find('view', $__view);
 
 		/* turn on output buffering */
 		ob_start();
@@ -55,7 +55,7 @@ class Orange
 			if (is_dir($packageFolder)) {
 				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)), '#^' . $regex . '$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
 					if (!is_dir($match[0])) {
-						$match[0] = getRootPath($match[0]);
+						$match[0] = App::removeRoot($match[0]);
 
 						$found[$match[0]] = $match;
 					}
@@ -305,22 +305,21 @@ class Orange
 		$array[$key] = $value;
 	}
 
-	public function datauri(string $path,bool $html = true): string
+	public function datauri(string $path, bool $html = true): string
 	{
-		$completePath = __ROOT__.'/'.trim($path,'/');
+		$completePath = __ROOT__ . '/' . trim($path, '/');
 
 		if (!\file_exists($completePath)) {
-			throw new FileNotFoundException('Output could not locate the image at '.$path);
+			throw new FileNotFoundException('Output could not locate the image at ' . $path);
 		}
 
 		/* Read image path, convert to base64 encoding */
 		$imageData = base64_encode(file_get_contents($completePath));
 
 		/* Format the image SRC:  data:{mime};base64,{data}; */
-		$src = 'data: '.mime_content_type($completePath).';base64,'.$imageData;
+		$src = 'data: ' . mime_content_type($completePath) . ';base64,' . $imageData;
 
 		/* Echo out a sample image */
-		return ($html) ? '<img src="'.$src.'">' : $src;
+		return ($html) ? '<img src="' . $src . '">' : $src;
 	}
-
 } /* end class */

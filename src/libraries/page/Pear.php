@@ -49,7 +49,7 @@ class Pear
 	 */
 	protected static $loadedPlugins = [];
 
-	protected static $autoloadHelpers = ['html','form','date','inflector','language','number','text'];
+	protected static $autoloadHelpers = ['html', 'form', 'date', 'inflector', 'language', 'number', 'text'];
 
 	/**
 	 * unified place holder for pear fragments
@@ -75,7 +75,7 @@ class Pear
 	 */
 	public static function __callStatic(string $name, array $arguments = [])
 	{
-		log_message('debug', 'Pear::__callStatic::'.$name);
+		log_message('debug', 'Pear::__callStatic::' . $name);
 
 		/**
 		 * Load as a class and save in loaded
@@ -87,7 +87,7 @@ class Pear
 		/* Was this plugin loaded from the action above? */
 		if (isset(self::$loadedPlugins[$name])) {
 			if (method_exists(self::$loadedPlugins[$name], 'render')) {
-				return call_user_func_array([self::$loadedPlugins[$name],'render'], $arguments);
+				return call_user_func_array([self::$loadedPlugins[$name], 'render'], $arguments);
 			} else {
 				/* if render does not exist perhaps the constructor was used? */
 				return;
@@ -102,8 +102,8 @@ class Pear
 		}
 
 		/* Is this a CodeIgniter form_XXX function? */
-		if (function_exists('form_'.$name)) {
-			return call_user_func_array('form_'.$name, $arguments);
+		if (function_exists('form_' . $name)) {
+			return call_user_func_array('form_' . $name, $arguments);
 		}
 
 		/* A PHP function or CodeIgniter html, date, inflector, language, number, text function */
@@ -112,7 +112,7 @@ class Pear
 		}
 
 		/* beats me */
-		throw new \Exception('Plugin missing "'.$name.'"');
+		throw new \Exception('Plugin missing "' . $name . '"');
 	}
 
 	/**
@@ -129,16 +129,16 @@ class Pear
 	 * @return void
 	 *
 	 */
-	public static function plugin(string $name, bool $throwError = true) : void
+	public static function plugin(string $name, bool $throwError = true): void
 	{
 		if (!isset(self::$loadedPlugins[$name])) {
 			/* this will throw an error if this service does not exist */
-			$className = ci('servicelocator')->find('pear',str_replace('pear_', '',strtolower($name)));
+			$className = ci('servicelocator')->find('pear', str_replace('pear_', '', strtolower($name)));
 
 			if (class_exists($className, true)) {
 				self::$loadedPlugins[$name] = new $className;
 			} elseif ($throwError) {
-				throw new \Exception('Could not load "'.$className.'"');
+				throw new \Exception('Could not load "' . $className . '"');
 			}
 		}
 	}

@@ -17,6 +17,8 @@ class App
 
 	"duplicate" many PHP functions to support the applications root folder
 
+	These are all stateless functions (based on __ROOT__) therefore static
+
 	app::file_get_contents(...)
 	app::pathinfo(...)
 	app::readfile(...)
@@ -34,9 +36,9 @@ class App
 	*/
 
 	/* Add Root if it's not already there (ie. glob function array will already have it no need to have you strip it) */
-	static public function path(string $path,bool $throw = false): string
+	static public function path(string $path, bool $throw = false): string
 	{
-		$path = (substr($path,0,strlen(__ROOT__)) != __ROOT__) ? __ROOT__.'/'.\trim($path,'/') : \rtrim($path,'/');
+		$path = (substr($path, 0, strlen(__ROOT__)) != __ROOT__) ? __ROOT__ . '/' . \trim($path, '/') : \rtrim($path, '/');
 
 		if ($throw && !\file_exists($path)) {
 			throw new FileNotFoundException($path);
@@ -45,56 +47,79 @@ class App
 		return $path;
 	}
 
+	static public function removeRoot(string $path)
+	{
+		/* remove anything below the __ROOT__ folder from the passed path */
+		$path = (substr($path, 0, strlen(__ROOT__)) == __ROOT__) ? substr($path, strlen(__ROOT__)) : $path;
+
+		return rtrim($path, '/');
+	}
+
 	/* read */
 
-	static public function globr(string $pattern,int $flags = 0): array
+	static public function globr(string $pattern, int $flags = 0): array
 	{
-		return self::_globr(self::path($pattern),$flags);
+		return self::_globr(self::path($pattern), $flags);
 	}
 
-	static public function glob(string $pattern,int $flags = 0): array
+	static public function glob(string $pattern, int $flags = 0): array
 	{
-		return \glob(self::path($pattern),$flags);
+		return \glob(self::path($pattern), $flags);
 	}
 
-	static public function file_get_contents(string $filename,bool $throw = true): string
+	static public function file_get_contents(string $filename, bool $throw = true): string
 	{
-		return \file_get_contents(self::path($filename,$throw));
+		return \file_get_contents(self::path($filename, $throw));
 	}
 
-	static public function pathinfo(string $path, int $options = PATHINFO_DIRNAME | PATHINFO_BASENAME | PATHINFO_EXTENSION | PATHINFO_FILENAME,bool $throw = true)
+	static public function basename(string $path, string $suffix, bool $throw = true): string
 	{
-		return \pathinfo(self::path($path,$throw),$options);
+		return \basename(self::path($path, $throw), $suffix);
 	}
 
-	static public function readfile(string $filename,bool $throw = true): int
+	static public function pathinfo(string $path, int $options = PATHINFO_DIRNAME | PATHINFO_BASENAME | PATHINFO_EXTENSION | PATHINFO_FILENAME, bool $throw = true)
 	{
-		return \readfile(self::path($filename,$throw));
+		return \pathinfo(self::path($path, $throw), $options);
 	}
 
-	static public function include(string $filename,bool $throw = true)
+	static public function readfile(string $filename, bool $throw = true): int
 	{
-		return include self::path($filename,$throw);
+		return \readfile(self::path($filename, $throw));
 	}
 
-	static public function parse_ini_file(string $filename, bool $process_sections = FALSE, int $scanner_mode = INI_SCANNER_NORMAL,bool $throw = true): array
+	static public function filesize(string $filename, bool $throw = true): int
 	{
-		return \parse_ini_file(self::path($filename,$throw),$process_sections,$scanner_mode);
+		return \filesize(self::path($filename, $throw));
 	}
 
-	static public function file_exists(string $filename,bool $throw = false): bool
+	static public function include(string $filename, bool $throw = true)
 	{
-		return \file_exists(self::path($filename,$throw));
+		return include(self::path($filename, $throw));
 	}
 
-	static public function file(string $filename,int $flags = 0,bool $throw = false): array
+	static public function is_file(string $filename, bool $throw = true): bool
 	{
-		return \file(self::path($filename,$throw),$flags);
+		return \is_file(self::path($filename, $throw));
 	}
 
-	static public function fopen(string $filename, string $mode,bool $throw = false)
+	static public function parse_ini_file(string $filename, bool $process_sections = FALSE, int $scanner_mode = INI_SCANNER_NORMAL, bool $throw = true): array
 	{
-		return \fopen(self::path($filename,$throw),$mode);
+		return \parse_ini_file(self::path($filename, $throw), $process_sections, $scanner_mode);
+	}
+
+	static public function file_exists(string $filename): bool
+	{
+		return \file_exists(self::path($filename));
+	}
+
+	static public function file(string $filename, int $flags = 0, bool $throw = true): array
+	{
+		return \file(self::path($filename, $throw), $flags);
+	}
+
+	static public function fopen(string $filename, string $mode, bool $throw = true)
+	{
+		return \fopen(self::path($filename, $throw), $mode);
 	}
 
 	/* write */
@@ -134,7 +159,7 @@ class App
 
 		/* move it into place - this is the atomic function */
 		if (\rename($tmpfname, $filepath) === false) {
-			throw new FileOperationFailedException($tmpfname.' > '.$filepath);
+			throw new FileOperationFailedException($tmpfname . ' > ' . $filepath);
 		}
 
 		/* if it's cached we need to flush it out so the old one isn't loaded */
@@ -144,12 +169,12 @@ class App
 		return $bytes;
 	}
 
-	static public function unlink(string $filename,bool $throw = false): bool
+	static public function unlink(string $filename, bool $throw = false): bool
 	{
-		return unlink(self::path($filename,$throw));
+		return \unlink(self::path($filename, $throw));
 	}
 
-	static public function mkdir(string $pathname,int $mode = 0777,bool $recursive = true): bool
+	static public function mkdir(string $pathname, int $mode = 0777, bool $recursive = true): bool
 	{
 		$pathname = self::path($pathname);
 
@@ -164,15 +189,15 @@ class App
 		return $bool;
 	}
 
-	static public function rename(string $oldname,string $newname,bool $throw = true): bool
+	static public function rename(string $oldname, string $newname, bool $throw = true): bool
 	{
-		return \rename(self::path($oldname,$throw),self::path($newname));
+		return \rename(self::path($oldname, $throw), self::path($newname));
 	}
 
-	/* protected */
-
-	static protected function remove_php_file_from_opcache(string $filepath) : bool
+	static public function remove_php_file_from_opcache(string $filepath): bool
 	{
+		$filepath = self::path($filepath);
+
 		$success = true;
 
 		/* flush from the cache */
@@ -185,15 +210,27 @@ class App
 		return $success;
 	}
 
-	static protected function _globr(string $pattern,int $flags = 0): array
+	static public function var_export_file(string $cacheFilePath,/* mixed */ $data): bool
+	{
+		if (is_array($data) || is_object($data)) {
+			$data = '<?php return ' . str_replace(['Closure::__set_state', 'stdClass::__set_state'], '(object)', var_export($data, true)) . ';';
+		} elseif (is_scalar($data)) {
+			$data = '<?php return "' . str_replace('"', '\"', $data) . '";';
+		} else {
+			throw new \Exception('Cache export save unknown data type.');
+		}
+
+		return (bool) self::file_put_contents($cacheFilePath, $data);
+	}
+
+	static public function _globr(string $pattern, int $flags = 0): array
 	{
 		$files = \glob($pattern, $flags);
 
-		foreach (\glob(\dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
-			$files = \array_merge($files, self::_globr($dir.'/'.\basename($pattern), $flags));
+		foreach (\glob(\dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+			$files = \array_merge($files, self::_globr($dir . '/' . \basename($pattern), $flags));
 		}
 
 		return $files;
 	}
-
 } /* end app */

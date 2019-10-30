@@ -92,7 +92,7 @@ abstract class Validation_rule
 	 * @return Validate
 	 *
 	 */
-	public function field(&$field) : Validation_rule
+	public function field(&$field): Validation_rule
 	{
 		$this->field = &$field;
 
@@ -111,7 +111,7 @@ abstract class Validation_rule
 	 * @return bool
 	 *
 	 */
-	public function validate(&$field, string $options = '') : bool
+	public function validate(&$field, string $options = ''): bool
 	{
 		return false;
 	}
@@ -131,7 +131,7 @@ abstract class Validation_rule
 	 * $this->field($value)->length(8);
 	 * ```
 	 */
-	public function length($length = null) : Validation_rule
+	public function length($length = null): Validation_rule
 	{
 		if (is_numeric($length)) {
 			if ((int) $length > 0) {
@@ -157,7 +157,7 @@ abstract class Validation_rule
 	 * $this->field($value)->trim();
 	 * ```
 	 */
-	public function trim() : Validation_rule
+	public function trim(): Validation_rule
 	{
 		$this->field = trim($this->field);
 
@@ -179,7 +179,7 @@ abstract class Validation_rule
 	 * $this->field($value)->human();
 	 * ```
 	 */
-	public function human() : Validation_rule
+	public function human(): Validation_rule
 	{
 		$this->field = preg_replace("/[^\\x20-\\x7E]/mi", '', $this->field);
 
@@ -202,7 +202,7 @@ abstract class Validation_rule
 	 * $this->field($value)->human_plus();
 	 * ```
 	 */
-	public function human_plus() : Validation_rule
+	public function human_plus(): Validation_rule
 	{
 		$this->field = preg_replace("/[^\\x20-\\x7E\\n\\t\\r]/mi", '', $this->field);
 
@@ -225,7 +225,7 @@ abstract class Validation_rule
 	 * $this->field($value)->strip('!@#$%^&*()');
 	 * ```
 	 */
-	public function strip($strip) : Validation_rule
+	public function strip($strip): Validation_rule
 	{
 		$this->field = str_replace(str_split($strip), '', $this->field);
 
@@ -247,7 +247,7 @@ abstract class Validation_rule
 	 * $this->field($value)->is_bol();
 	 * ```
 	 */
-	public function is_bol($field) : bool
+	public function is_bol($field): bool
 	{
 		return (in_array(strtolower($field), array_merge($this->true_array, $this->false_array), true)) ? true : false;
 	}
@@ -273,13 +273,13 @@ abstract class Validation_rule
 		$file = trim($file, '/');
 
 		/* is it based off the www folder? */
-		if (file_exists(WWW.'/'.$file)) {
-			return WWW.'/'.$file;
+		if (file_exists(WWW . '/' . $file)) {
+			return WWW . '/' . $file;
 		}
 
 		/* is it based off the rootpath folder? */
-		if (file_exists(__ROOT__.'/'.$file)) {
-			return __ROOT__.'/'.$file;
+		if (file_exists(__ROOT__ . '/' . $file)) {
+			return __ROOT__ . '/' . $file;
 		}
 
 		/* not sure where it is */

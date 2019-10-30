@@ -4,7 +4,7 @@
 if (!function_exists('getServiceLocator')) {
 	function getServiceLocator(): \projectorangebox\orange\library\ServiceLocatorInterface
 	{
-		return new \projectorangebox\orange\library\ServiceLocator(loadConfigFile('services'));
+		return new \projectorangebox\orange\library\ServiceLocator(\loadConfigFile('services'));
 	}
 }
 
@@ -56,13 +56,6 @@ if (!function_exists('ci')) {
 
 		/* Are we looking for a named service? factory or singleton? CodeIgniter "super" object? */
 		return ($name) ? ($as === true) ? $serviceLocator->create($name, $userConfig) : $serviceLocator->get($name, $userConfig, $as) : get_instance();
-	}
-}
-
-if (!function_exists('create')) {
-	function create(string $name = null, array $userConfig = []): object
-	{
-		return ci($name,$userConfig,true);
 	}
 }
 
@@ -146,88 +139,6 @@ if (!function_exists('_assert_handler')) {
 		}
 
 		exit(1);
-	}
-}
-
-/**
- * Write a string to a file with atomic uninterruptible
- *
- * @param string $filename path to the file where to write the data.
- * @param mixed $data The data to write. Can be either a string, an array or a stream resource.
- *
- * @return int This function returns the number of bytes that were written to the file.
- */
-if (!function_exists('atomic_file_put_contents')) {
-	function atomic_file_put_contents(string $filename,/* mixed */ $data): int
-	{
-		/* get the path where you want to save this file so we can put our file in the same file */
-		$dirname = dirname($filename);
-
-		/* is the directory writeable */
-		if (!is_writable($dirname)) {
-			throw new \Exception('atomic file put contents folder "' . $dirname . '" not writable');
-		}
-
-		/* create file with unique file name with prefix */
-		$tmpfname = tempnam($dirname, 'afpc_');
-
-		/* did we get a temporary filename */
-		if ($tmpfname === false) {
-			throw new \Exception('atomic file put contents could not create temp file');
-		}
-
-		/* write to the temporary file */
-		$bytes = file_put_contents($tmpfname, $data);
-
-		/* did we write anything? */
-		if ($bytes === false) {
-			throw new \Exception('atomic file put contents could not file put contents');
-		}
-
-		/* changes file permissions so I can read/write and everyone else read */
-		if (chmod($tmpfname, 0644) === false) {
-			throw new \Exception('atomic file put contents could not change file mode');
-		}
-
-		/* move it into place - this is the atomic function */
-		if (rename($tmpfname, $filename) === false) {
-			throw new \Exception('atomic file put contents could not make atomic switch');
-		}
-
-		/* if it's cached we need to flush it out so the old one isn't loaded */
-		remove_php_file_from_opcache($filename);
-
-		/* if log message function is loaded at this point log a debug entry */
-		if (function_exists('log_message')) {
-			log_message('debug', 'atomic_file_put_contents wrote ' . $filename . ' ' . $bytes . ' bytes');
-		}
-
-		/* return the number of bytes written */
-		return (int) $bytes;
-	}
-}
-
-/**
- * invalidate it if it's a cached script
- *
- * @param $fullpath
- *
- * @return
- *
- */
-if (!function_exists('remove_php_file_from_opcache')) {
-	function remove_php_file_from_opcache(string $filename): bool
-	{
-		$success = true;
-
-		/* flush from the cache */
-		if (function_exists('opcache_invalidate')) {
-			$success = opcache_invalidate($filename, true);
-		} elseif (function_exists('apc_delete_file')) {
-			$success = apc_delete_file($filename);
-		}
-
-		return (bool) $success;
 	}
 }
 
@@ -337,7 +248,7 @@ if (!function_exists('site_url')) {
 				}
 			}
 
-			var_export_file($cacheFilePath, $array);
+			App::var_export_file($cacheFilePath, $array);
 		} else {
 			$array = include $cacheFilePath;
 		}
@@ -346,52 +257,6 @@ if (!function_exists('site_url')) {
 		return str_replace($array['keys'], $array['values'], $uri);
 	}
 }
-
-/* wrapper */
-if (!function_exists('path')) {
-	function path(string $path): string
-	{
-		return site_url($path);
-	}
-}
-
-if (!function_exists('getRootPath')) {
-	/**
-	 * getAppPath
-	 *
-	 * @param string $path
-	 * @return void
-	 */
-	function getRootPath(string $path): string
-	{
-		/* remove anything below the __ROOT__ folder from the passed path */
-		return (substr($path, 0, strlen(__ROOT__)) == __ROOT__) ? substr($path, strlen(__ROOT__)) : $path;
-	}
-}
-
-if (!function_exists('var_export_file')) {
-	/**
-	 * named this way to match PHPs var_export
-	 * var_export_file
-	 *
-	 * @param string $cacheFilePath
-	 * @param mixed $data
-	 * @return void
-	 */
-	function var_export_file(string $cacheFilePath,/* mixed */ $data): bool
-	{
-		if (is_array($data) || is_object($data)) {
-			$data = '<?php return ' . str_replace(['Closure::__set_state', 'stdClass::__set_state'], '(object)', var_export($data, true)) . ';';
-		} elseif (is_scalar($data)) {
-			$data = '<?php return "' . str_replace('"', '\"', $data) . '";';
-		} else {
-			throw new \Exception('Cache export save unknown data type.');
-		}
-
-		return (bool) atomic_file_put_contents($cacheFilePath, $data);
-	}
-}
-
 
 if (!function_exists('loadConfigFile')) {
 	/**

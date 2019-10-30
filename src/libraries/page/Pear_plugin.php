@@ -25,5 +25,4 @@ namespace projectorangebox\orange\library\page;
  */
 
 abstract class Pear_plugin
-{
-} /* end this */
+{ } /* end this */

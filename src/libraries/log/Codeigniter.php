@@ -59,14 +59,14 @@ class Codeigniter extends CI_Log
 	 * @var Array
 	 */
 	protected $psr_levels = [
-			'EMERGENCY' => 1,
-			'ALERT'     => 2,
-			'CRITICAL'  => 4,
-			'ERROR'     => 8,
-			'WARNING'   => 16,
-			'NOTICE'    => 32,
-			'INFO'      => 64,
-			'DEBUG'     => 128,
+		'EMERGENCY' => 1,
+		'ALERT'     => 2,
+		'CRITICAL'  => 4,
+		'ERROR'     => 8,
+		'WARNING'   => 16,
+		'NOTICE'    => 32,
+		'INFO'      => 64,
+		'DEBUG'     => 128,
 	];
 
 	/**
@@ -75,14 +75,14 @@ class Codeigniter extends CI_Log
 	 * @var Array
 	 */
 	protected $rfc_log_levels = [
-			'DEBUG'     => 100,
-			'INFO'      => 200,
-			'NOTICE'    => 250,
-			'WARNING'   => 300,
-			'ERROR'     => 400,
-			'CRITICAL'  => 500,
-			'ALERT'     => 550,
-			'EMERGENCY' => 600,
+		'DEBUG'     => 100,
+		'INFO'      => 200,
+		'NOTICE'    => 250,
+		'WARNING'   => 300,
+		'ERROR'     => 400,
+		'CRITICAL'  => 500,
+		'ALERT'     => 550,
+		'EMERGENCY' => 600,
 	];
 
 	/**
@@ -95,7 +95,7 @@ class Codeigniter extends CI_Log
 	public function __construct(array &$config = [])
 	{
 		/* we need to go low level here because other services might try to log therefore create a loop */
-		$this->config = array_replace(\loadConfigFile('config'),$config);
+		$this->config = array_replace(\loadConfigFile('config'), $config);
 
 		$this->init();
 
@@ -119,16 +119,16 @@ class Codeigniter extends CI_Log
 	 * @return Log
 	 *
 	 */
-	public function __call(string $name, array $arguments) : Codeigniter
+	public function __call(string $name, array $arguments): Codeigniter
 	{
-			if (substr($name, 0, 4) == 'log_') {
-					$this->config[$name] = $arguments[0];
+		if (substr($name, 0, 4) == 'log_') {
+			$this->config[$name] = $arguments[0];
 
-					/* resetup */
-					$this->init();
-			}
+			/* resetup */
+			$this->init();
+		}
 
-			return $this;
+		return $this;
 	}
 
 	/**
@@ -146,27 +146,27 @@ class Codeigniter extends CI_Log
 	 * @return bool
 	 *
 	 */
-	public function write_log($level, $msg) : bool
+	public function write_log($level, $msg): bool
 	{
-			/**
-			 * This function has multiple exit points
-			 * because we try to bail as soon as possible
-			 * if no logging is needed to keep it a little faster
-			 */
-			if (!$this->_enabled) {
-					return false;
-			}
+		/**
+		 * This function has multiple exit points
+		 * because we try to bail as soon as possible
+		 * if no logging is needed to keep it a little faster
+		 */
+		if (!$this->_enabled) {
+			return false;
+		}
 
-			/* normalize */
-			$level = strtoupper($level);
+		/* normalize */
+		$level = strtoupper($level);
 
-			/* bitwise PSR 3 Mode */
-			if ((!array_key_exists($level, $this->psr_levels)) || (!($this->_threshold & $this->psr_levels[$level]))) {
-					return false;
-			}
+		/* bitwise PSR 3 Mode */
+		if ((!array_key_exists($level, $this->psr_levels)) || (!($this->_threshold & $this->psr_levels[$level]))) {
+			return false;
+		}
 
-			/* logging level check passed - log something! */
-			return $this->ci_write_log($level, $msg);
+		/* logging level check passed - log something! */
+		return $this->ci_write_log($level, $msg);
 	}
 
 	/**
@@ -178,11 +178,11 @@ class Codeigniter extends CI_Log
 	 * @return string
 	 *
 	 */
-	public function get_log_file() : string
+	public function get_log_file(): string
 	{
-			$file = $this->build_log_file_path();
+		$file = $this->build_log_file_path();
 
-			return (file_exists($file)) ? file_get_contents($file) : '';
+		return (file_exists($file)) ? file_get_contents($file) : '';
 	}
 
 	/**
@@ -198,9 +198,9 @@ class Codeigniter extends CI_Log
 	 * @return Bool
 	 *
 	 */
-	public function is_enabled() : Bool
+	public function is_enabled(): Bool
 	{
-			return $this->_enabled;
+		return $this->_enabled;
 	}
 
 	/**
@@ -212,9 +212,9 @@ class Codeigniter extends CI_Log
 	 * @return string
 	 *
 	 */
-	protected function build_log_file_path() : string
+	protected function build_log_file_path(): string
 	{
-			return rtrim($this->_log_path, '/').'/log-'.date('Y-m-d').'.'.$this->_file_ext;
+		return rtrim($this->_log_path, '/') . '/log-' . date('Y-m-d') . '.' . $this->_file_ext;
 	}
 
 	/**
@@ -231,38 +231,38 @@ class Codeigniter extends CI_Log
 	 * @return bool success
 	 *
 	 */
-	protected function ci_write_log(string $level, string $msg) : bool
+	protected function ci_write_log(string $level, string $msg): bool
 	{
-			$filepath = $this->build_log_file_path();
-			$message = '';
+		$filepath = $this->build_log_file_path();
+		$message = '';
 
-			if (!file_exists($filepath)) {
-					$newfile = true;
-					/* Only add protection to php files */
-					if ($this->_file_ext === 'php') {
-							$message .= "<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>\n\n";
-					}
+		if (!file_exists($filepath)) {
+			$newfile = true;
+			/* Only add protection to php files */
+			if ($this->_file_ext === 'php') {
+				$message .= "<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>\n\n";
 			}
+		}
 
-			/* Instantiating DateTime with microseconds appended to initial date is needed for proper support of this format */
-			if (strpos($this->_date_fmt, 'u') !== false) {
-					$microtime_full = microtime(true);
-					$microtime_short = sprintf("%06d", ($microtime_full - floor($microtime_full)) * 1000000);
-					$date = new DateTime(date('Y-m-d H:i:s.'.$microtime_short, $microtime_full));
-					$date = $date->format($this->_date_fmt);
-			} else {
-					$date = date($this->_date_fmt);
-			}
+		/* Instantiating DateTime with microseconds appended to initial date is needed for proper support of this format */
+		if (strpos($this->_date_fmt, 'u') !== false) {
+			$microtime_full = microtime(true);
+			$microtime_short = sprintf("%06d", ($microtime_full - floor($microtime_full)) * 1000000);
+			$date = new DateTime(date('Y-m-d H:i:s.' . $microtime_short, $microtime_full));
+			$date = $date->format($this->_date_fmt);
+		} else {
+			$date = date($this->_date_fmt);
+		}
 
-			$message .= $this->_format_line($level, $date, $msg);
+		$message .= $this->_format_line($level, $date, $msg);
 
-			$result = file_put_contents($filepath, $message, FILE_APPEND | LOCK_EX);
+		$result = file_put_contents($filepath, $message, FILE_APPEND | LOCK_EX);
 
-			if (isset($newfile) && $newfile === true) {
-					chmod($filepath, $this->_file_permissions);
-			}
+		if (isset($newfile) && $newfile === true) {
+			chmod($filepath, $this->_file_permissions);
+		}
 
-			return is_int($result);
+		return is_int($result);
 	}
 
 	/**
@@ -272,73 +272,73 @@ class Codeigniter extends CI_Log
 	 * @access protected
 	 *
 	 */
-	protected function init() : void
+	protected function init(): void
 	{
-			if (isset($this->config['log_threshold'])) {
-					$log_threshold = $this->config['log_threshold'];
+		if (isset($this->config['log_threshold'])) {
+			$log_threshold = $this->config['log_threshold'];
 
-					/* if they sent in a string split it into a array */
-					if (is_string($log_threshold)) {
-							$log_threshold = explode(',', $log_threshold);
-					}
-
-					/* is the array empty? */
-					if (is_array($log_threshold)) {
-							if (count($log_threshold) == 0) {
-									$log_threshold = 0;
-							}
-					}
-
-					/* Is all in the array (uppercase or lowercase?) */
-					if (is_array($log_threshold)) {
-							if (array_search('all', $log_threshold) !== false) {
-									$log_threshold = 255;
-							}
-					}
-
-					/* build the bitwise integer */
-					if (is_array($log_threshold)) {
-							$int = 0;
-
-							foreach ($log_threshold as $t) {
-									$t = strtoupper($t);
-
-									if (isset($this->psr_levels[$t])) {
-											$int += $this->psr_levels[$t];
-									}
-							}
-
-							$log_threshold = $int;
-					}
-
-					$this->_threshold = (int)$log_threshold;
-
-					$this->_enabled = ($this->_threshold > 0);
+			/* if they sent in a string split it into a array */
+			if (is_string($log_threshold)) {
+				$log_threshold = explode(',', $log_threshold);
 			}
 
-			isset(self::$func_overload) || self::$func_overload = (extension_loaded('mbstring') && ini_get('mbstring.func_overload'));
-
-			if (isset($this->config['log_file_extension'])) {
-					$this->_file_ext = (!empty($this->config['log_file_extension'])) 	? ltrim($this->config['log_file_extension'], '.') : 'php';
+			/* is the array empty? */
+			if (is_array($log_threshold)) {
+				if (count($log_threshold) == 0) {
+					$log_threshold = 0;
+				}
 			}
 
-			if (isset($this->config['log_path'])) {
-					$this->_log_path = ($this->config['log_path'] !== '') ? $this->config['log_path'] : APPPATH.'logs/';
+			/* Is all in the array (uppercase or lowercase?) */
+			if (is_array($log_threshold)) {
+				if (array_search('all', $log_threshold) !== false) {
+					$log_threshold = 255;
+				}
+			}
 
-					file_exists($this->_log_path) || mkdir($this->_log_path, 0755, true);
+			/* build the bitwise integer */
+			if (is_array($log_threshold)) {
+				$int = 0;
 
-					if (!is_dir($this->_log_path) || !is_really_writable($this->_log_path)) {
-							/* can't write */
-							$this->_enabled = false;
+				foreach ($log_threshold as $t) {
+					$t = strtoupper($t);
+
+					if (isset($this->psr_levels[$t])) {
+						$int += $this->psr_levels[$t];
 					}
+				}
+
+				$log_threshold = $int;
 			}
 
-			if (!empty($this->config['log_date_format'])) {
-					$this->_date_fmt = $this->config['log_date_format'];
-			}
+			$this->_threshold = (int) $log_threshold;
 
-			if (!empty($this->config['log_file_permissions']) && is_int($this->config['log_file_permissions'])) {
-					$this->_file_permissions = $this->config['log_file_permissions'];
+			$this->_enabled = ($this->_threshold > 0);
+		}
+
+		isset(self::$func_overload) || self::$func_overload = (extension_loaded('mbstring') && ini_get('mbstring.func_overload'));
+
+		if (isset($this->config['log_file_extension'])) {
+			$this->_file_ext = (!empty($this->config['log_file_extension'])) 	? ltrim($this->config['log_file_extension'], '.') : 'php';
+		}
+
+		if (isset($this->config['log_path'])) {
+			$this->_log_path = ($this->config['log_path'] !== '') ? $this->config['log_path'] : APPPATH . 'logs/';
+
+			file_exists($this->_log_path) || mkdir($this->_log_path, 0755, true);
+
+			if (!is_dir($this->_log_path) || !is_really_writable($this->_log_path)) {
+				/* can't write */
+				$this->_enabled = false;
 			}
+		}
+
+		if (!empty($this->config['log_date_format'])) {
+			$this->_date_fmt = $this->config['log_date_format'];
+		}
+
+		if (!empty($this->config['log_file_permissions']) && is_int($this->config['log_file_permissions'])) {
+			$this->_file_permissions = $this->config['log_file_permissions'];
+		}
 	}
 } /* End of Class */

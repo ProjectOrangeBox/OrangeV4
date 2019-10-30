@@ -2,7 +2,6 @@
 
 namespace projectorangebox\orange\library\output;
 
-use Exception;
 use projectorangebox\orange\library\output\Output;
 
 class OutputPiped extends Output
@@ -32,8 +31,8 @@ class OutputPiped extends Output
 	{
 		$this->echo($output);
 
-		foreach ($this->inject as $name=>$output) {
-			$this->inject($name,$output);
+		foreach ($this->inject as $name => $output) {
+			$this->inject($name, $output);
 		}
 
 		return $this;
@@ -72,7 +71,7 @@ class OutputPiped extends Output
 	 */
 	public function injector(bool $send = true): string
 	{
-		$injector = '<script>function '.$this->functionName.'(i,c){let e=document.getElementById(i);if(e){e.outerHTML=c}}</script>';
+		$injector = '<script>function ' . $this->functionName . '(i,c){let e=document.getElementById(i);if(e){e.outerHTML=c}}</script>';
 
 		if (!$send) {
 			$this->echo($injector);
@@ -88,7 +87,7 @@ class OutputPiped extends Output
 	 * @param string $output
 	 * @return void
 	 */
-	public function addInjection(string $name,string $output): Output
+	public function addInjection(string $name, string $output): Output
 	{
 		/* else save for final display */
 		$this->inject[$name] = $output;
@@ -106,9 +105,8 @@ class OutputPiped extends Output
 	public function inject(string $name, string $output): Output
 	{
 		/* must have wrapping <script> tags so it can be run ASAP (no need to wait for the closing script tag) */
-		$this->echo('<script>'.$this->functionName.'("'.$name.'",'.json_encode($output).');</script>');
+		$this->echo('<script>' . $this->functionName . '("' . $name . '",' . json_encode($output) . ');</script>');
 
 		return $this;
 	}
-
 } /* end class */

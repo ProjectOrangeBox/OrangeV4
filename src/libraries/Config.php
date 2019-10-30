@@ -200,13 +200,13 @@ class Config extends CI_Config
 			foreach (glob(APPPATH.'/config/*.php') as $filepath) {
 				$basename = basename($filepath, '.php');
 
-				foreach ($this->loadConfigFile($basename) as $key=>$value) {
+				foreach (\loadConfigFile($basename) as $key=>$value) {
 					/* normalize */
 					$fileConfig[$this->_normalize($basename)][$this->_normalize($key)] = $value;
 				}
 			}
 
-			var_export_file($cacheFilePath,$fileConfig);
+			\App::var_export_file($cacheFilePath,$fileConfig);
 		} else {
 			$fileConfig = include $cacheFilePath;
 		}
@@ -245,7 +245,7 @@ class Config extends CI_Config
 				}
 			}
 
-			var_export_file($cacheFilePath,$databaseConfig);
+			\App::var_export_file($cacheFilePath,$databaseConfig);
 		} else {
 			$databaseConfig = include $cacheFilePath;
 		}
@@ -298,44 +298,6 @@ class Config extends CI_Config
 		}
 
 		return $config;
-	}
-
-	/**
-	 * loadConfigFile
-	 *
-	 * @param string $filename
-	 * @param mixed bool
-	 * @param mixed string
-	 * @return void
-	 */
-	protected function loadConfigFile(string $filename, bool $throwException = true, string $variableVariable = 'config'): array
-	{
-		$fileConfig = [];
-
-		$filename = strtolower($filename);
-
-		/* did we load the file yet? */
-		$configFound = false;
-
-		/* they either return something or use the CI default $config['...'] format so set those up as empty */
-		$returnedApplicationConfig = $returnedEnvironmentConfig = $$variableVariable = [];
-
-		if (file_exists(APPPATH . 'config/' . $filename . '.php')) {
-			$configFound = true;
-			$returnedApplicationConfig = require APPPATH . 'config/' . $filename . '.php';
-		}
-
-		if (file_exists(APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php')) {
-			$returnedEnvironmentConfig = require APPPATH . 'config/' . ENVIRONMENT . '/' . $filename . '.php';
-		}
-
-		$fileConfig[$filename] = (array) $returnedEnvironmentConfig + (array) $returnedApplicationConfig + (array) $$variableVariable;
-
-		if (!$configFound && $throwException) {
-			throw new ConfigException(sprintf('Could not location a configuration file named "%s".', APPPATH . 'config/' . $filename . '.php'));
-		}
-
-		return $fileConfig[$filename];
 	}
 
 } /* end class */

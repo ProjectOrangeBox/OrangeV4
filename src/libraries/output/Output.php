@@ -63,13 +63,13 @@ class Output extends CI_Output
 	 * ci('output')->json(null,null,true); # use loader (view) variables
 	 * ```
 	 */
-	public function json($data = null, $val = null, $raw = false) : Output
+	public function json($data = null, $val = null, $raw = false): Output
 	{
 		/* what the heck do we have here... */
 		if ($raw && $data === null) {
 			$json = $val;
 		} elseif ($raw && $data !== null) {
-			$json = '{"'.$data.'":'.$val.'}';
+			$json = '{"' . $data . '":' . $val . '}';
 		} elseif (is_array($data) || is_object($data)) {
 			$json = json_encode($data, $this->jsonOptions);
 		} elseif (is_string($data) && $val === null) {
@@ -89,7 +89,7 @@ class Output extends CI_Output
 		return $this;
 	}
 
-	public function setJsonOptions(int $options) : Output
+	public function setJsonOptions(int $options): Output
 	{
 		$this->jsonOptions = $options;
 
@@ -105,7 +105,7 @@ class Output extends CI_Output
 	 * @return Output
 	 *
 	 */
-	public function nocache() : Output
+	public function nocache(): Output
 	{
 		$this
 			->set_header('Expires: Sat,26 Jul 1997 05:00:00 GMT')
@@ -134,7 +134,7 @@ class Output extends CI_Output
 	 * @return Output
 	 *
 	 */
-	public function set_cookie($name = '', string $value = '', int $expire = 0, string $domain = '', string $path = '/', string $prefix = '', bool $secure = false, bool $httponly = false) : Output
+	public function set_cookie($name = '', string $value = '', int $expire = 0, string $domain = '', string $path = '/', string $prefix = '', bool $secure = false, bool $httponly = false): Output
 	{
 		ci('input')->set_cookie($name, $value, $expire, $domain, $path, $prefix, $secure, $httponly);
 
@@ -150,9 +150,9 @@ class Output extends CI_Output
 	 * @return Output
 	 *
 	 */
-	public function delete_all_cookies() : Output
+	public function delete_all_cookies(): Output
 	{
-		foreach (ci('input')->cookie() as $name=>$value) {
+		foreach (ci('input')->cookie() as $name => $value) {
 			ci('input')->set_cookie($name, $value, (time() - 3600), config('config.base_url'));
 		}
 
@@ -170,13 +170,13 @@ class Output extends CI_Output
 	 * @return void
 	 *
 	 */
-	public function _exit(int $code = 1) : void
+	public function _exit(int $code = 1): void
 	{
 		exit($code);
 	}
 
 	/* provide integer to string for HTTP status codes */
-	public function statusCode(int $code) : string
+	public function statusCode(int $code): string
 	{
 		$map = [
 			100 => 'Continue',
@@ -260,5 +260,4 @@ class Output extends CI_Output
 
 		return (isset($map[$code])) ? $map[$code] : '';
 	}
-
 } /* end class */

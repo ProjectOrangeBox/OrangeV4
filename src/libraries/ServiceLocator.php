@@ -130,7 +130,7 @@ class ServiceLocator implements ServiceLocatorInterface
 	}
 
 	/**
-	 * ciFactory
+	 * factory
 	 *
 	 * @param string $serviceName
 	 * @param mixed array

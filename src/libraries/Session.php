@@ -87,4 +87,5 @@ class Session extends CI_Session
 
 		return $data;
 	}
+
 } /* end class */

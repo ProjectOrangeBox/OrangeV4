@@ -1,6 +1,28 @@
 <?php
 
 /**
+ * Wrapper around site_url to look up paths
+ * Context sounds better for command line applications
+ */
+if (!function_exists('path')) {
+	function path(string $path): string
+	{
+		return site_url($path);
+	}
+}
+
+/**
+ * Wrapper to create a new class instance
+ * create a new instance wrapper
+ */
+if (!function_exists('create')) {
+	function create(string $name = null, array $userConfig = []): object
+	{
+		return ci($name, $userConfig, true);
+	}
+}
+
+/**
  * Wrapper for getting configure with dot notation from the orange config class
  * ci('config')->dot_item(...)
  *

@@ -4,7 +4,8 @@ namespace projectorangebox\orange\library\page;
 
 use projectorangebox\orange\library\Page;
 
-class Asset {
+class Asset
+{
 	/**
 	 * local storage of page's configuration
 	 *
@@ -28,7 +29,7 @@ class Asset {
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(Page $page, array &$config=[])
+	public function __construct(Page $page, array &$config = [])
 	{
 		$this->page = &$page;
 
@@ -53,7 +54,7 @@ class Asset {
 	 * $html = ci('page')->link_html('/assets/css/style.css');
 	 * ```
 	 */
-	public function link_html(string $file) : string
+	public function link_html(string $file): string
 	{
 		return $this->ary2element('link', array_merge($this->config['link_attributes'], ['href' => $file]));
 	}
@@ -75,7 +76,7 @@ class Asset {
 	 *
 	 * ```
 	 */
-	public function script_html(string $file) : string
+	public function script_html(string $file): string
 	{
 		return $this->ary2element('script', array_merge($this->config['script_attributes'], ['src' => $file]));
 	}
@@ -98,18 +99,17 @@ class Asset {
 	 * $html = ci('page')->ary2element('a',['class'=>'bold','id'=>'id3'],'link!');
 	 * ```
 	 */
-	public function ary2element(string $element, array $attributes, string $content = '',array $data = null) : string
+	public function ary2element(string $element, array $attributes, string $content = '', array $data = null): string
 	{
 		/* uses CodeIgniter Common.php _stringify_attributes function */
 		if (is_array($data)) {
-			foreach ($data as $key=>$value) {
-				$attributes['data-'.stripFromStart($key,'data-')] = $value;
+			foreach ($data as $key => $value) {
+				$attributes['data-' . stripFromStart($key, 'data-')] = $value;
 			}
 		}
 
-		return (in_array($element, ['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr'])) ?
-			'<'.$element._stringify_attributes($attributes).'/>' :
-			'<'.$element._stringify_attributes($attributes).'>'.$content.'</'.$element.'>';
+		return (in_array($element, ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'])) ?
+			'<' . $element . _stringify_attributes($attributes) . '/>' : '<' . $element . _stringify_attributes($attributes) . '>' . $content . '</' . $element . '>';
 	}
 
 	/**
@@ -132,13 +132,13 @@ class Asset {
 	 * ci('page')->meta('charset','UTF-8');
 	 * ```
 	 */
-	public function meta($attr, string $name = null, string $content = null, int $priority = PAGE::PRIORITY_NORMAL) : Asset
+	public function meta($attr, string $name = null, string $content = null, int $priority = PAGE::PRIORITY_NORMAL): Asset
 	{
 		if (is_array($attr)) {
 			extract($attr);
 		}
 
-		$this->page->add('meta', '<meta '.$attr.'="'.$name.'"'.(($content) ? ' content="'.$content.'"' : '').'>'.PHP_EOL, $priority);
+		$this->page->add('meta', '<meta ' . $attr . '="' . $name . '"' . (($content) ? ' content="' . $content . '"' : '') . '>' . PHP_EOL, $priority);
 
 		return $this;
 	}
@@ -159,9 +159,9 @@ class Asset {
 	 * ci('page')->script('alert("Page Ready!");');
 	 * ```
 	 */
-	public function script(string $script, int $priority = PAGE::PRIORITY_NORMAL) : Asset
+	public function script(string $script, int $priority = PAGE::PRIORITY_NORMAL): Asset
 	{
-		$this->page->add('script', $script.PHP_EOL, $priority);
+		$this->page->add('script', $script . PHP_EOL, $priority);
 
 		return $this;
 	}
@@ -182,9 +182,9 @@ class Asset {
 	 * ci('page')->domready('alert("Page Ready!");');
 	 * ```
 	 */
-	public function domready(string $script, int $priority = PAGE::PRIORITY_NORMAL) : Asset
+	public function domready(string $script, int $priority = PAGE::PRIORITY_NORMAL): Asset
 	{
-		$this->page->add('domready', $script.PHP_EOL, $priority);
+		$this->page->add('domready', $script . PHP_EOL, $priority);
 
 		return $this;
 	}
@@ -205,7 +205,7 @@ class Asset {
 	 * ci('page')->title('My Web Page');
 	 * ```
 	 */
-	public function title(string $title = '', int $priority = PAGE::PRIORITY_NORMAL) : Asset
+	public function title(string $title = '', int $priority = PAGE::PRIORITY_NORMAL): Asset
 	{
 		$this->page->add('title', $title, $priority);
 
@@ -228,9 +228,9 @@ class Asset {
 	 * ci('page')->style('. { font-size: 9px }');
 	 * ```
 	 */
-	public function style(string $style, int $priority = PAGE::PRIORITY_NORMAL) : Asset
+	public function style(string $style, int $priority = PAGE::PRIORITY_NORMAL): Asset
 	{
-		$this->page->add('style', $style.PHP_EOL, $priority);
+		$this->page->add('style', $style . PHP_EOL, $priority);
 
 		return $this;
 	}
@@ -253,7 +253,7 @@ class Asset {
 	 * ci('page')->script('/assets/javascript.js',PAGE::PRIORITY_HIGHEST);
 	 * ```
 	 */
-	public function js($file = '', int $priority = PAGE::PRIORITY_NORMAL) : Asset
+	public function js($file = '', int $priority = PAGE::PRIORITY_NORMAL): Asset
 	{
 		if (is_array($file)) {
 			foreach ($file as $f) {
@@ -262,7 +262,7 @@ class Asset {
 			return $this;
 		}
 
-		$this->page->add('js', $this->script_html($file).PHP_EOL, $priority);
+		$this->page->add('js', $this->script_html($file) . PHP_EOL, $priority);
 
 		return $this;
 	}
@@ -284,7 +284,7 @@ class Asset {
 	 * ci('page')->css('/assets/application.cs');
 	 * ```
 	 */
-	public function css($file = '', int $priority = PAGE::PRIORITY_NORMAL) : Asset
+	public function css($file = '', int $priority = PAGE::PRIORITY_NORMAL): Asset
 	{
 		if (is_array($file)) {
 			foreach ($file as $f) {
@@ -293,7 +293,7 @@ class Asset {
 			return $this;
 		}
 
-		$this->page->add('css', $this->link_html($file).PHP_EOL, $priority);
+		$this->page->add('css', $this->link_html($file) . PHP_EOL, $priority);
 
 		return $this;
 	}
@@ -317,12 +317,12 @@ class Asset {
 	 * ci('page')->js_variable('name','{name: "Johnny Appleseed"}',PAGE::PRIORITY_NORMAL,true);
 	 * ```
 	 */
-	public function js_variable(string $key, $value, int $priority = PAGE::PRIORITY_NORMAL, bool $raw = false) : Asset
+	public function js_variable(string $key, $value, int $priority = PAGE::PRIORITY_NORMAL, bool $raw = false): Asset
 	{
 		if ($raw) {
-			$value = 'var '.$key.'='.$value.';' ;
+			$value = 'var ' . $key . '=' . $value . ';';
 		} else {
-			$value = ((is_scalar($value)) ? 'var '.$key.'="'.str_replace('"', '\"', $value).'";' : 'var '.$key.'='.json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE).';');
+			$value = ((is_scalar($value)) ? 'var ' . $key . '="' . str_replace('"', '\"', $value) . '";' : 'var ' . $key . '=' . json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) . ';');
 		}
 
 		$this->page->add('js_variables', $value, $priority);
@@ -346,7 +346,7 @@ class Asset {
 	 * ci('page')->js_variables(['name'=>'Johnny','age'=>23]);
 	 * ```
 	 */
-	public function js_variables(array $array) : Asset
+	public function js_variables(array $array): Asset
 	{
 		foreach ($array as $k => $v) {
 			$this->js_variable($k, $v);
@@ -373,15 +373,14 @@ class Asset {
 	 * ci('page')->body_class(['body-wrapper','o-theme']);
 	 * ```
 	 */
-	public function body_class($class, int $priority = PAGE::PRIORITY_NORMAL) : Asset
+	public function body_class($class, int $priority = PAGE::PRIORITY_NORMAL): Asset
 	{
-		$classes = (is_string($class)) ? explode(' ',$class) : (array)$class;
+		$classes = (is_string($class)) ? explode(' ', $class) : (array) $class;
 
 		foreach ($classes as $class) {
-			$this->page->add('body_class', ' '.strtolower(trim($class)), $priority);
+			$this->page->add('body_class', ' ' . strtolower(trim($class)), $priority);
 		}
 
 		return $this;
 	}
-
 } /* end class */

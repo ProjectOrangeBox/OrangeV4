@@ -27,7 +27,7 @@ class Input
 	 * @param mixed $parent
 	 * @return void
 	 */
-	public function __construct(Validate $parent,CI_Input $input)
+	public function __construct(Validate $parent, CI_Input $input)
 	{
 		$this->parent = $parent;
 		$this->input = $input;
@@ -39,7 +39,7 @@ class Input
 	 * @param array $keysRules
 	 * @return void
 	 */
-	public function isValid(array $rules) : bool
+	public function isValid(array $rules): bool
 	{
 		$fields = $this->input->request();
 
@@ -52,7 +52,7 @@ class Input
 	 * @param array $keysRules
 	 * @return void
 	 */
-	public function filter(array $rules) : array
+	public function filter(array $rules): array
 	{
 		$fields = $this->input->request();
 
@@ -62,5 +62,4 @@ class Input
 
 		return $fields;
 	}
-
 } /* end class */

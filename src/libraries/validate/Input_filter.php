@@ -41,7 +41,6 @@ abstract class Input_filter extends Validation_rule
 	 * @return void always returns true in the calling class
 	 *
 	 */
-	public function filter(&$field, string $options = '') : void
-	{
-	}
+	public function filter(&$field, string $options = ''): void
+	{ }
 } /* end class */
