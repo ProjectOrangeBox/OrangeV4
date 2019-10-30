@@ -17,7 +17,7 @@ class Dummy extends CI_Cache_dummy
 	 *
 	 * @return array
 	 */
-	public function cache_keys() : array
+	public function cache_keys(): array
 	{
 		return [];
 	}
@@ -28,9 +28,8 @@ class Dummy extends CI_Cache_dummy
 	 * @param mixed int
 	 * @return void
 	 */
-	public function ttl(int $ttl = null) : int
+	public function ttl(int $ttl = null): int
 	{
 		return 0;
 	}
-
 } /* end class */

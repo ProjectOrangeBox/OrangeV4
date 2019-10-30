@@ -17,15 +17,14 @@ class File extends CI_Cache_file
 	 *
 	 * @return array
 	 */
-	public function cache_keys() : array
+	public function cache_keys(): array
 	{
 		$keys = [];
 
-		foreach (glob($this->_cache_path.'*') as $path) {
+		foreach (glob($this->_cache_path . '*') as $path) {
 			$keys[] = basename($path);
 		}
 
 		return $keys;
 	}
-
 } /* end class */

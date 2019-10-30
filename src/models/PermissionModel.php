@@ -2,12 +2,9 @@
 
 namespace projectorangebox\orange\model;
 
-use projectorangebox\orange\model\Database_model;
+use projectorangebox\orange\model\DatabaseModel;
 
 /**
- * O_permission_model
- * Insert description here
- *
  * @package CodeIgniter / Orange
  * @author Don Myers
  * @copyright 2018
@@ -23,15 +20,15 @@ use projectorangebox\orange\model\Database_model;
  * functions:
  *
  */
-class O_permission_model extends Database_model
+class PermissionModel extends DatabaseModel
 {
 	protected $table; /* picked up from auth config */
 	protected $additional_cache_tags = '.acl';
-	protected $entity = 'o_permission_entity';
+	protected $entity = 'projectorangebox\orange\model\entities\permissionEntity';
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-		'key'         => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.key.id]'],
-		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'required|max_length[255]|filter_input[255]|is_uniquem[o_permission_model.description.id]'],
+		'key'         => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower|max_length[255]|filter_input[255]|is_uniquem[PermissionModel.key.id]'],
+		'description' => ['field' => 'description', 'label' => 'Description', 'rules' => 'required|max_length[255]|filter_input[255]|is_uniquem[PermissionModel.description.id]'],
 		'group'       => ['field' => 'group', 'label' => 'Group', 'rules' => 'required|max_length[255]|filter_input[255]'],
 		'migration'   => ['field' => 'migration', 'label' => 'Migration', 'rules' => 'max_length[255]'],
 	];
@@ -57,7 +54,7 @@ class O_permission_model extends Database_model
 		parent::__construct();
 
 		/* ready to go */
-		log_message('info', 'o_permission_model Class Initialized');
+		log_message('info', 'PermissionModel Class Initialized');
 	}
 
 	/**
@@ -77,7 +74,7 @@ class O_permission_model extends Database_model
 	{
 		$dbc = $this->_database
 			->from(config('auth.role permission table'))
-			->join(config('auth.role table'), config('auth.role table').'.id = '.config('auth.role permission table').'.role_id')
+			->join(config('auth.role table'), config('auth.role table') . '.id = ' . config('auth.role permission table') . '.role_id')
 			->where(['permission_id' => (int) $role_id])
 			->get();
 
@@ -97,9 +94,9 @@ class O_permission_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function find_permission_id($permission) : int
+	public function find_permission_id($permission): int
 	{
-		return (int) ((int) $permission > 0) ? $permission : $this->o_permission_model->column('id')->get_by(['key' => $permission]);
+		return (int) ((int) $permission > 0) ? $permission : $this->PermissionModel->column('id')->get_by(['key' => $permission]);
 	}
 
 	/**
@@ -166,37 +163,36 @@ class O_permission_model extends Database_model
 
 		/* automatically adds permission to admin role */
 		foreach ($records as $record) {
-			ci('o_role_model')->add_permission(ADMIN_ROLE_ID, $record->id);
+			ci('RoleModel')->add_permission(ADMIN_ROLE_ID, $record->id);
 		}
 
 		/* makes sure nobody user has NO permissions */
-		ci('o_role_model')->remove_permission(NOBODY_USER_ID);
+		ci('RoleModel')->remove_permission(NOBODY_USER_ID);
 	}
 
 	/* migration */
-	public function migration_add($key=null, $group=null, $description=null, $migration=null)
+	public function migration_add($key = null, $group = null, $description = null, $migration = null)
 	{
 		$this->skip_rules = true;
 
 		/* we already verified the key that's the "real" primary key */
-		$success = (!$this->exists(['key'=>$key])) ? $this->insert(['key'=>$key,	'group'=>$group,'description'=>$description,'migration'=>$migration]) : false;
+		$success = (!$this->exists(['key' => $key])) ? $this->insert(['key' => $key,	'group' => $group, 'description' => $description, 'migration' => $migration]) : false;
 
 		$this->_refresh();
 
 		return $success;
 	}
 
-	public function migration_remove(string $migration=null) : bool
+	public function migration_remove(string $migration = null): bool
 	{
 		$this->skip_rules = true;
 
 		unset($this->has['delete_role']);
 
-		$success = $this->delete_by(['migration'=>$migration]);
+		$success = $this->delete_by(['migration' => $migration]);
 
 		$this->_refresh();
 
 		return $success;
 	}
-
 } /* end class */

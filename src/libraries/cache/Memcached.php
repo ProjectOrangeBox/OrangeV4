@@ -17,7 +17,7 @@ class Memcached extends CI_Cache_memcached
 	 *
 	 * @return array
 	 */
-	public function cache_keys() : array
+	public function cache_keys(): array
 	{
 		$keys = [];
 
@@ -25,5 +25,4 @@ class Memcached extends CI_Cache_memcached
 
 		return $keys;
 	}
-
 } /* end class */

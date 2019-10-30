@@ -2,11 +2,9 @@
 
 namespace projectorangebox\orange\model;
 
-use projectorangebox\orange\model\Database_model;
+use projectorangebox\orange\model\DatabaseModel;
 
 /**
- * O_setting_model
- * Insert description here
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -50,19 +48,19 @@ CREATE TABLE `orange_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 */
 
-class O_setting_model extends Database_model
+class SettingModel extends DatabaseModel
 {
 	protected $table = 'orange_settings';
 	protected $has = [
-		'read_role'=>'read_role_id',
-		'edit_role'=>'edit_role_id',
-		'delete_role'=>'delete_role_id',
-		'created_by'=>'created_by',
-		'created_on'=>'created_on',
-		'created_ip'=>'created_ip',
-		'updated_by'=>'updated_by',
-		'updated_on'=>'updated_on',
-		'updated_ip'=>'updated_ip',
+		'read_role' => 'read_role_id',
+		'edit_role' => 'edit_role_id',
+		'delete_role' => 'delete_role_id',
+		'created_by' => 'created_by',
+		'created_on' => 'created_on',
+		'created_ip' => 'created_ip',
+		'updated_by' => 'updated_by',
+		'updated_on' => 'updated_on',
+		'updated_ip' => 'updated_ip',
 	];
 	protected $rules = [
 		'id'             => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
@@ -89,7 +87,11 @@ class O_setting_model extends Database_model
 	 */
 	public function get_enabled()
 	{
-		return $this->ignore_read_role()->get_many_by(['enabled' => 1]);
+		$this->_database->where(['enabled' => 1]);
+
+		$dbc = $this->_database->get($this->table);
+
+		return $dbc->result();
 	}
 
 	/**
@@ -104,7 +106,7 @@ class O_setting_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	protected function delete_cache_by_tags() : Database_model
+	protected function delete_cache_by_tags(): DatabaseModel
 	{
 		ci('config')->flush();
 
@@ -112,39 +114,39 @@ class O_setting_model extends Database_model
 	}
 
 	/* migration */
-	public function migration_add($name=null, $group=null, $value=null, $help=null, $options=null, $migration=null, $optional=[])
+	public function migration_add($name = null, $group = null, $value = null, $help = null, $options = null, $migration = null, $optional = [])
 	{
 		$this->skip_rules = true;
 
 		$defaults = [
-			'read_role_id'=>ADMIN_ROLE_ID,
-			'edit_role_id'=>ADMIN_ROLE_ID,
-			'delete_role_id'=>ADMIN_ROLE_ID,
-			'created_on'=>date('Y-m-d H:i:s'),
-			'created_by'=>0,
-			'created_ip'=>'0.0.0.0',
-			'updated_on'=>date('Y-m-d H:i:s'),
-			'updated_by'=>0,
-			'updated_ip'=>'0.0.0.0',
+			'read_role_id' => ADMIN_ROLE_ID,
+			'edit_role_id' => ADMIN_ROLE_ID,
+			'delete_role_id' => ADMIN_ROLE_ID,
+			'created_on' => date('Y-m-d H:i:s'),
+			'created_by' => 0,
+			'created_ip' => '0.0.0.0',
+			'updated_on' => date('Y-m-d H:i:s'),
+			'updated_by' => 0,
+			'updated_ip' => '0.0.0.0',
 		];
 
-		$columns = array_merge($defaults, ['name'=>$name,'group'=>$group,'value'=>$value,'help'=>$help,'options'=>$options,'migration'=>$migration]);
+		$columns = array_merge($defaults, ['name' => $name, 'group' => $group, 'value' => $value, 'help' => $help, 'options' => $options, 'migration' => $migration]);
 
 		/* these override everything */
-		foreach ($optional as $key=>$val) {
+		foreach ($optional as $key => $val) {
 			$columns[$key] = $val;
 		}
 
 		/* we already verified the key that's the "real" primary key */
-		return (!$this->exists(['name'=>$name,'group'=>$group])) ? $this->insert($columns) : false;
+		return (!$this->exists(['name' => $name, 'group' => $group])) ? $this->insert($columns) : false;
 	}
 
-	public function migration_remove(string $migration=null) : bool
+	public function migration_remove(string $migration = null): bool
 	{
 		$this->skip_rules = true;
 
 		unset($this->has['delete_role']);
 
-		return $this->delete_by(['migration'=>$migration]);
+		return $this->delete_by(['migration' => $migration]);
 	}
 }

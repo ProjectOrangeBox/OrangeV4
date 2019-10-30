@@ -66,7 +66,7 @@ class Cache
 	 */
 	public function __construct(array &$config = [])
 	{
-		$this->config = ci('config')->merged('config',['cache_default'=>'dummy','cache_ttl'=>0],$config);
+		$this->config = ci('config')->merged('config', ['cache_default' => 'dummy', 'cache_ttl' => 0], $config);
 
 		/* Bring in my global namespace function */
 		require_once 'cache/Cache.functions.php';
@@ -102,11 +102,11 @@ class Cache
 	public function __call($name, $arguments)
 	{
 		/* test for supported methods */
-		if (!in_array($name,['get','save','delete','increment','decrement','clean','cache_info','get_metadata','cache','deleteByTags','ttl'])) {
+		if (!in_array($name, ['get', 'save', 'delete', 'increment', 'decrement', 'clean', 'cache_info', 'get_metadata', 'cache', 'deleteByTags', 'ttl'])) {
 			throw new MethodNotFoundException($name);
 		}
 
-		return call_user_func_array([$this->driver($this->adapter),$name],$arguments);
+		return call_user_func_array([$this->driver($this->adapter), $name], $arguments);
 	}
 
 	// ------------------------------------------------------------------------
@@ -131,7 +131,7 @@ class Cache
 	protected function driver(string $name) /* mixed */
 	{
 		if (!isset($this->drivers[$name])) {
-			$service = ci('servicelocator')->find('service','cache_driver_'.$name);
+			$service = ci('servicelocator')->find('service', 'cache_driver_' . $name);
 
 			/* attach driver */
 			$this->drivers[$name] = new $service($this->config);
@@ -153,7 +153,7 @@ class Cache
 	 * @return int
 	 *
 	 */
-	public function ttl(int $cacheTTL = null,bool $useWindow = true) : int
+	public function ttl(int $cacheTTL = null, bool $useWindow = true): int
 	{
 		$cacheTTL = $cacheTTL ?? $this->config['cache_ttl'];
 
@@ -171,5 +171,4 @@ class Cache
 
 		return $cacheTTL;
 	}
-
 } /* end class */

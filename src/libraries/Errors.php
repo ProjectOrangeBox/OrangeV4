@@ -139,7 +139,7 @@ class Errors
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(array &$config=null)
+	public function __construct(array &$config = null)
 	{
 		if (is_array($config)) {
 			$this->config = &$config;
@@ -156,7 +156,7 @@ class Errors
 		$this->default_group = $this->config['default error group'] ?? 'records';
 		$this->current_group = $this->default_group;
 
-		$this->errors_view_path = $this->config['errors view path'] ?? __ROOT__.'/application/views/errors/';
+		$this->errors_view_path = $this->config['errors view path'] ?? __ROOT__ . '/application/views/errors/';
 
 		if ($this->config['auto detect']) {
 			if ($this->input->is_cli_request()) {
@@ -180,7 +180,7 @@ class Errors
 	 * @return string
 	 *
 	 */
-	public function __toString() : string
+	public function __toString(): string
 	{
 		log_message('info', 'Errors::__toString');
 
@@ -192,13 +192,13 @@ class Errors
 	 *
 	 * @return void
 	 */
-	public function __debugInfo() : array
+	public function __debugInfo(): array
 	{
 		return [
-			'errors'=>$this->errors,
-			'current_group'=>$this->current_group,
-			'default_group'=>$this->default_group,
-			'request_type'=>$this->request_type
+			'errors' => $this->errors,
+			'current_group' => $this->current_group,
+			'default_group' => $this->default_group,
+			'request_type' => $this->request_type
 		];
 	}
 
@@ -211,7 +211,7 @@ class Errors
 	 * @return string
 	 *
 	 */
-	public function get_default_group() : string
+	public function get_default_group(): string
 	{
 		return $this->default_group;
 	}
@@ -225,7 +225,7 @@ class Errors
 	 * @return string
 	 *
 	 */
-	public function get_group() : string
+	public function get_group(): string
 	{
 		return $this->current_group;
 	}
@@ -241,11 +241,11 @@ class Errors
 	 * @return Errors
 	 *
 	 */
-	public function group(string $group) : Errors
+	public function group(string $group): Errors
 	{
 		$this->current_group = $group;
 
-		log_message('debug', 'Errors::group::'.$this->current_group);
+		log_message('debug', 'Errors::group::' . $this->current_group);
 
 		return $this;
 	}
@@ -263,7 +263,7 @@ class Errors
 	 * $array = ci('errors')->groups();
 	 * ```
 	 */
-	public function groups() : array
+	public function groups(): array
 	{
 		return array_keys($this->errors);
 	}
@@ -280,13 +280,13 @@ class Errors
 	 * @return Errors
 	 *
 	 */
-	public function set_request_type(string $request_type) : Errors
+	public function set_request_type(string $request_type): Errors
 	{
-		log_message('debug', 'Errors::as::'.$request_type);
+		log_message('debug', 'Errors::as::' . $request_type);
 
 		/* options include cli, ajax, html */
-		if (!in_array($request_type, ['cli','ajax','json','html','array'])) {
-			throw new \Exception(__METHOD__.' unknown type '.$request_type.'.');
+		if (!in_array($request_type, ['cli', 'ajax', 'json', 'html', 'array'])) {
+			throw new \Exception(__METHOD__ . ' unknown type ' . $request_type . '.');
 		}
 
 		$this->request_type = $request_type;
@@ -315,14 +315,14 @@ class Errors
 		switch ($this->request_type) {
 			case 'html':
 				$output = $this->as_html();
-			break;
+				break;
 			case 'cli':
 				$output = $this->as_cli();
-			break;
+				break;
 			case 'ajax':
 			case 'json':
 				$output = $this->as_json();
-			break;
+				break;
 			default:
 				$output = $this->as_array();
 		}
@@ -347,13 +347,13 @@ class Errors
 	 * ```
 	 *
 	 */
-	public function add(string $msg, string $fieldname = null, string $group = null) : Errors
+	public function add(string $msg, string $fieldname = null, string $group = null): Errors
 	{
 		$group = ($group) ?? $this->current_group;
 
-		log_message('debug', 'Errors::add::'.$msg.' '.$group);
+		log_message('debug', 'Errors::add::' . $msg . ' ' . $group);
 
-		$dup_key = md5($group.$msg.$fieldname);
+		$dup_key = md5($group . $msg . $fieldname);
 
 		if (!isset($this->duplicates[$dup_key])) {
 			if ($fieldname) {
@@ -369,10 +369,10 @@ class Errors
 		return $this;
 	}
 
-	public function collect(object $errors,string $group) : Errors
+	public function collect(object $errors, string $group): Errors
 	{
-		if (!method_exists($errors,'errors')) {
-			throw new \Exception('Errors could not collect from "'.get_class($errors).'" because it does not have a errors method.');
+		if (!method_exists($errors, 'errors')) {
+			throw new \Exception('Errors could not collect from "' . get_class($errors) . '" because it does not have a errors method.');
 		}
 
 		$this->errors[$group] = $errors->errors();
@@ -396,11 +396,11 @@ class Errors
 	 * ```
 	 *
 	 */
-	public function clear(string $group=null) : Errors
+	public function clear(string $group = null): Errors
 	{
 		$group = ($group) ? $group : $this->current_group;
 
-		log_message('debug', 'Errors::clear::'.$group);
+		log_message('debug', 'Errors::clear::' . $group);
 
 		$this->errors[$group] = [];
 
@@ -414,13 +414,13 @@ class Errors
 	 * @param string $group=null
 	 * @return void
 	 */
-	public function remove(string $group=null) : Errors
+	public function remove(string $group = null): Errors
 	{
 		$switch2default = ($this->current_group == $group);
 
 		$group = ($group) ? $group : $this->current_group;
 
-		log_message('debug', 'Errors::remove::'.$group);
+		log_message('debug', 'Errors::remove::' . $group);
 
 		unset($this->errors[$group]);
 
@@ -447,13 +447,13 @@ class Errors
 	 * ```
 	 *
 	 */
-	public function has(string $group=null) : bool
+	public function has(string $group = null): bool
 	{
 		$group = ($group) ? $group : $this->current_group;
 
-		$has = (isset($this->errors[$group])) ? (bool)count($this->errors[$group]) : 0;
+		$has = (isset($this->errors[$group])) ? (bool) count($this->errors[$group]) : 0;
 
-		log_message('debug', 'Errors::has::'.$group.' '.$has);
+		log_message('debug', 'Errors::has::' . $group . ' ' . $has);
 
 		/* do we have any errors? */
 		return $has;
@@ -468,7 +468,7 @@ class Errors
 	 * @return bool
 	 *
 	 */
-	public function has_any() : bool
+	public function has_any(): bool
 	{
 		$has = false;
 
@@ -499,7 +499,7 @@ class Errors
 	 * $array = ci('errors')->error_info();
 	 * ```
 	 */
-	public function error_info() : array
+	public function error_info(): array
 	{
 		return $this->errors;
 	}
@@ -523,9 +523,9 @@ class Errors
 	 * ```
 	 *
 	 */
-	public function as_array(string $group=null) : array
+	public function as_array(string $group = null): array
 	{
-		log_message('debug', 'Errors::as_array::'.$group);
+		log_message('debug', 'Errors::as_array::' . $group);
 
 		$array = $this->errors;
 
@@ -549,7 +549,7 @@ class Errors
 				$array = $multiple;
 			} else {
 				/* not multi leveled */
-				$array = [$groups[0]=>$this->errors[$groups[0]]];
+				$array = [$groups[0] => $this->errors[$groups[0]]];
 			}
 		}
 
@@ -569,9 +569,9 @@ class Errors
 	 * @return string
 	 *
 	 */
-	public function as_html(string $prefix = null, string $suffix = null, string $group = null) : string
+	public function as_html(string $prefix = null, string $suffix = null, string $group = null): string
 	{
-		log_message('debug', 'Errors::as_html::'.$group);
+		log_message('debug', 'Errors::as_html::' . $group);
 
 		$errors = $this->as_array($group);
 
@@ -590,16 +590,16 @@ class Errors
 			}
 
 			/* format the output */
-			foreach ($this->as_array($group) as $grouping=>$errors) {
+			foreach ($this->as_array($group) as $grouping => $errors) {
 				if (is_array($errors)) {
 					foreach ($errors as $val) {
 						if (!empty(trim($val))) {
-							$html .= str_replace($this->html_group_class, 'error-group-'.$grouping, $prefix.trim($val).$suffix);
+							$html .= str_replace($this->html_group_class, 'error-group-' . $grouping, $prefix . trim($val) . $suffix);
 						}
 					}
 				} else {
 					if (!empty(trim($errors))) {
-						$html .= str_replace($this->html_group_class, 'error-group-'.$grouping, $prefix.trim($errors).$suffix);
+						$html .= str_replace($this->html_group_class, 'error-group-' . $grouping, $prefix . trim($errors) . $suffix);
 					}
 				}
 			}
@@ -619,12 +619,12 @@ class Errors
 	 * @return string
 	 *
 	 */
-	public function as_cli(string $group = null) : string
+	public function as_cli(string $group = null): string
 	{
-		log_message('debug', 'Errors::as_cli::'.$group);
+		log_message('debug', 'Errors::as_cli::' . $group);
 
 		/* return as string with tabs and line-feeds */
-		return json_encode($this->as_array($group), JSON_PRETTY_PRINT).PHP_EOL;
+		return json_encode($this->as_array($group), JSON_PRETTY_PRINT) . PHP_EOL;
 	}
 
 	/**
@@ -638,9 +638,9 @@ class Errors
 	 * @return string
 	 *
 	 */
-	public function as_json(string $group = null) : string
+	public function as_json(string $group = null): string
 	{
-		log_message('debug', 'Errors::as_json::'.$group);
+		log_message('debug', 'Errors::as_json::' . $group);
 
 		return json_encode($this->as_array($group), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
 	}
@@ -663,14 +663,14 @@ class Errors
 	 * ```
 	 *
 	 */
-	public function die_on_error($view = 400, string $group = null) : Errors
+	public function die_on_error($view = 400, string $group = null): Errors
 	{
 		$group = ($group) ?? $this->current_group;
 
-		log_message('debug', 'Errors::die_on_error::'.$view.' '.$group);
+		log_message('debug', 'Errors::die_on_error::' . $view . ' ' . $group);
 
 		if ($this->has($group)) {
-			$this->display((string)$view);
+			$this->display((string) $view);
 		}
 
 		return $this;
@@ -694,10 +694,10 @@ class Errors
 	 * ```
 	 *
 	 */
-	public function show(string $message, int $status_code = 500, string $heading = 'An Error Was Encountered') : void
+	public function show(string $message, int $status_code = 500, string $heading = 'An Error Was Encountered'): void
 	{
 		/* show the errors */
-		$this->display('general', ['heading'=>$heading,'message'=>$message], $status_code);
+		$this->display('general', ['heading' => $heading, 'message' => $message], $status_code);
 	}
 
 	/**
@@ -719,12 +719,12 @@ class Errors
 	 * ```
 	 *
 	 */
-	public function display(string $view, array $data = [], int $status_code = 500, array $override = []) : void
+	public function display(string $view, array $data = [], int $status_code = 500, array $override = []): void
 	{
-		log_message('debug', 'Errors::view::'.$view.' '.$status_code);
+		log_message('debug', 'Errors::view::' . $view . ' ' . $status_code);
 
 		if (is_numeric($view)) {
-			$status_code = (int)$view;
+			$status_code = (int) $view;
 		}
 
 		if ($this->request_type) {
@@ -740,8 +740,8 @@ class Errors
 		/* remap the view to another based on it's name */
 		$view = (isset($this->config['named'][$view])) ? $this->config['named'][$view] : $view;
 
-		$data['heading'] = $data['heading'] ?? 'Error '.$status_code;
-		$data['message'] = $data['message'] ?? (string)$this; /* get "as" using __toString */
+		$data['heading'] = $data['heading'] ?? 'Error ' . $status_code;
+		$data['message'] = $data['message'] ?? (string) $this; /* get "as" using __toString */
 
 		switch ($output_format) {
 			case 'cli':
@@ -749,14 +749,14 @@ class Errors
 				$view_folder = 'cli';
 				$mime_type = '';
 				$charset = 'utf-8';
-			break;
+				break;
 			case 'json':
 			case 'ajax':
 				$this->set_request_type('ajax');
 				$view_folder = 'ajax';
 				$mime_type   = 'application/json';
 				$charset = 'utf-8';
-			break;
+				break;
 			default:
 				$this->set_request_type('html');
 				$view_folder = 'html';
@@ -765,14 +765,14 @@ class Errors
 		}
 
 		$view_folder = ($override['view_folder']) ? $override['view_folder'] : $view_folder;
-		$view_path = $view_folder.'/error_'.str_replace('.php', '', $view);
+		$view_path = $view_folder . '/error_' . str_replace('.php', '', $view);
 
 		$charset = isset($override['charset']) ? $override['charset'] : $charset;
 		$mime_type = isset($override['mime_type']) ? $override['mime_type'] : $mime_type;
 
 		$status_code = abs($status_code);
 
-		log_message('debug', 'Errors::display '.$status_code.' '.$mime_type.' '.$charset.' '.$view_path);
+		log_message('debug', 'Errors::display ' . $status_code . ' ' . $mime_type . ' ' . $charset . ' ' . $view_path);
 
 		if ($status_code < 100) {
 			$exit_status = $status_code + 9;
@@ -781,7 +781,7 @@ class Errors
 			$exit_status = 1;
 		}
 
-		log_message('error', 'Error: '.$view_path.' '.$status_code.' '.json_encode($data));
+		log_message('error', 'Error: ' . $view_path . ' ' . $status_code . ' ' . json_encode($data));
 
 		$this->event->trigger('errors.display', $view_path, $data, $mime_type, $charset, $exit_status);
 
@@ -807,13 +807,13 @@ class Errors
 	 * @return string
 	 *
 	 */
-	protected function error_view(string $_view, array $_data=[]) : string
+	protected function error_view(string $_view, array $_data = []): string
 	{
-		log_message('debug', 'Errors::error_view::'.$_view);
+		log_message('debug', 'Errors::error_view::' . $_view);
 
 		/* get a list of all the found views */
-		if (!$_file = realpath($this->errors_view_path.$_view.'.php')) {
-			throw new \Exception('Could not locate error view "'.$this->errors_view_path.$_view.'"');
+		if (!$_file = realpath($this->errors_view_path . $_view . '.php')) {
+			throw new \Exception('Could not locate error view "' . $this->errors_view_path . $_view . '"');
 		}
 
 		/* import variables into the current symbol table from an only prefix invalid/numeric variable names with _ 	*/
@@ -828,5 +828,4 @@ class Errors
 		/* return the current buffer contents and delete current output buffer */
 		return ob_get_clean();
 	}
-
 } /* end class */

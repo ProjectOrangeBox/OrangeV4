@@ -97,12 +97,12 @@ class Export
 	{
 		$get = false;
 
-		if (App::file_exists($this->config['cache_path'].$id.'.meta'.$this->suffix) && App::file_exists($this->config['cache_path'].$id.$this->suffix)) {
+		if (App::file_exists($this->config['cache_path'] . $id . '.meta' . $this->suffix) && App::file_exists($this->config['cache_path'] . $id . $this->suffix)) {
 			$meta = $this->get_metadata($id);
 			if (time() > $meta['expire']) {
 				$this->delete($id);
 			} else {
-				$get = App::include($this->config['cache_path'].$id.$this->suffix);
+				$get = App::include($this->config['cache_path'] . $id . $this->suffix);
 			}
 		}
 
@@ -131,19 +131,19 @@ class Export
 		$ttl = $this->ttl($ttl);
 
 		if (is_array($data) || is_object($data)) {
-			$data = '<?php return '.str_replace(['Closure::__set_state','stdClass::__set_state'], '(object)', var_export($data, true)).';';
+			$data = '<?php return ' . str_replace(['Closure::__set_state', 'stdClass::__set_state'], '(object)', var_export($data, true)) . ';';
 		} elseif (is_scalar($data)) {
-			$data = '<?php return "'.str_replace('"', '\"', $data).'";';
+			$data = '<?php return "' . str_replace('"', '\"', $data) . '";';
 		} else {
 			throw new \Exception('Cache export save unknown data type.');
 		}
 
-		App::file_put_contents($this->config['cache_path'].$id.'.meta'.$this->suffix, '<?php return '.var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true).';');
+		App::file_put_contents($this->config['cache_path'] . $id . '.meta' . $this->suffix, '<?php return ' . var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true) . ';');
 
-		$save = (App::file_put_contents($this->config['cache_path'].$id.$this->suffix, $data)) ? true : false;
+		$save = (App::file_put_contents($this->config['cache_path'] . $id . $this->suffix, $data)) ? true : false;
 
 		if ($include && $save) {
-			$save = App::include($this->config['cache_path'].$id.$this->suffix);
+			$save = App::include($this->config['cache_path'] . $id . $this->suffix);
 		}
 
 		return $save;
@@ -160,7 +160,7 @@ class Export
 	 * @return bool
 	 *
 	 */
-	public function delete(string $id) : bool
+	public function delete(string $id): bool
 	{
 		return (isset($this->config['cache_multiple_servers'])) ? $this->multi_delete($id) : $this->single_delete($id);
 	}
@@ -177,7 +177,7 @@ class Export
 	 * @return bool
 	 *
 	 */
-	public function increment(string $id, int $offset = 1) : bool
+	public function increment(string $id, int $offset = 1): bool
 	{
 		return false;
 	}
@@ -194,7 +194,7 @@ class Export
 	 * @return bool
 	 *
 	 */
-	public function decrement(string $id, int $offset = 1) : bool
+	public function decrement(string $id, int $offset = 1): bool
 	{
 		return false;
 	}
@@ -208,9 +208,9 @@ class Export
 	 * @return bool
 	 *
 	 */
-	public function clean() : bool
+	public function clean(): bool
 	{
-		array_map('unlink', App::glob($this->config['cache_path'].'*'.$this->suffix));
+		array_map('unlink', App::glob($this->config['cache_path'] . '*' . $this->suffix));
 
 		return true;
 	}
@@ -224,23 +224,23 @@ class Export
 	 * @return array
 	 *
 	 */
-	public function cache_info() : array
+	public function cache_info(): array
 	{
 		$info = [];
 
-		foreach (App::glob($this->config['cache_path'].'*.meta'.$this->suffix) as $path) {
-			$id = App::basename($path, '.meta'.$this->suffix);
+		foreach (App::glob($this->config['cache_path'] . '*.meta' . $this->suffix) as $path) {
+			$id = App::basename($path, '.meta' . $this->suffix);
 			$metadata = $this->get_metadata($id);
 
 			$info[$id] = [
-				'name'=>realpath($path),
-				'server_path'=>$path,
-				'size'=>App::filesize($path),
-				'expires'=>$metadata['expire'],
-				'created'=>$metadata['time'],
-				'ttl'=>$metadata['ttl'],
-				'meta'=>$id.'.meta'.$this->suffix,
-				'cache'=>$id.$this->suffix,
+				'name' => realpath($path),
+				'server_path' => $path,
+				'size' => App::filesize($path),
+				'expires' => $metadata['expire'],
+				'created' => $metadata['time'],
+				'ttl' => $metadata['ttl'],
+				'meta' => $id . '.meta' . $this->suffix,
+				'cache' => $id . $this->suffix,
 			];
 		}
 
@@ -260,7 +260,7 @@ class Export
 	 */
 	public function get_metadata(string $id)
 	{
-		return (!App::is_file($this->config['cache_path'].$id.'.meta'.$this->suffix) || !App::is_file($this->config['cache_path'].$id.$this->suffix)) ? false : App::include($this->config['cache_path'].$id.'.meta'.$this->suffix);
+		return (!App::is_file($this->config['cache_path'] . $id . '.meta' . $this->suffix) || !App::is_file($this->config['cache_path'] . $id . $this->suffix)) ? false : App::include($this->config['cache_path'] . $id . '.meta' . $this->suffix);
 	}
 
 	/**
@@ -273,7 +273,7 @@ class Export
 	 * @return bool
 	 *
 	 */
-	public function is_supported() : bool
+	public function is_supported(): bool
 	{
 		return true;
 	}
@@ -283,12 +283,12 @@ class Export
 	 *
 	 * @return array
 	 */
-	public function cache_keys() : array
+	public function cache_keys(): array
 	{
 		$keys = [];
 
-		foreach (App::glob($this->config['cache_path'].'*.meta'.$this->suffix) as $path) {
-			$keys[] = App::basename($path,'.meta'.$this->suffix);
+		foreach (App::glob($this->config['cache_path'] . '*.meta' . $this->suffix) as $path) {
+			$keys[] = App::basename($path, '.meta' . $this->suffix);
 		}
 
 		return $keys;
@@ -310,7 +310,7 @@ class Export
 	 * ci('cache')->export->endpoint_delete($request);
 	 * ```
 	 */
-	public function endpoint_delete(string $request) : void
+	public function endpoint_delete(string $request): void
 	{
 		if (!in_array($this->input->ip_address(), $this->config['cache_allowed'])) {
 			exit(13);
@@ -318,7 +318,7 @@ class Export
 
 		list($hmac, $id) = explode(chr(0), hex2bin($request));
 
-		if (md5($this->config['encryption_key'].$id) !== $hmac) {
+		if (md5($this->config['encryption_key'] . $id) !== $hmac) {
 			exit(13);
 		}
 
@@ -340,10 +340,10 @@ class Export
 	 * @return bool
 	 *
 	 */
-	protected function single_delete(string $id) : bool
+	protected function single_delete(string $id): bool
 	{
-		$php_file = $this->config['cache_path'].$id.$this->suffix;
-		$meta_file = $this->config['cache_path'].$id.'.meta'.$this->suffix;
+		$php_file = $this->config['cache_path'] . $id . $this->suffix;
+		$meta_file = $this->config['cache_path'] . $id . '.meta' . $this->suffix;
 
 		if (App::file_exists($php_file)) {
 			$php_file_deleted = App::unlink($php_file);
@@ -369,19 +369,19 @@ class Export
 	 * @return bool
 	 *
 	 */
-	protected function multi_delete(string $id) : bool
+	protected function multi_delete(string $id): bool
 	{
 		/* get the array of other servers */
 		$cache_servers =  $this->config['cache_servers'];
 
 		/* create the hmac key */
-		$hmac = bin2hex(md5($this->config['encryption_key'].$id).chr(0).$id);
+		$hmac = bin2hex(md5($this->config['encryption_key'] . $id) . chr(0) . $id);
 
 		/* multiple threaded curl to other web heads */
 		$mh = curl_multi_init();
 
-		foreach ($cache_servers as $idx=>$server) {
-			$url = 'http'.($this->config['cache_server_secure'] ? 's://' : '://').$server.'/'.trim($this->config['cache_url'], '/').'/'.$hmac;
+		foreach ($cache_servers as $idx => $server) {
+			$url = 'http' . ($this->config['cache_server_secure'] ? 's://' : '://') . $server . '/' . trim($this->config['cache_url'], '/') . '/' . $hmac;
 			$ch[$idx] = curl_init();
 			curl_setopt($ch[$idx], CURLOPT_URL, $url);
 			curl_setopt($ch[$idx], CURLOPT_HEADER, 0);

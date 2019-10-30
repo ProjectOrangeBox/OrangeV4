@@ -56,7 +56,7 @@ class Event
 	 * @return Event
 	 *
 	 */
-	public function register(string $name, $callable, int $priority = EVENT::PRIORITY_NORMAL) : Event
+	public function register(string $name, $callable, int $priority = EVENT::PRIORITY_NORMAL): Event
 	{
 		/* if they pass in a array treat it as a name=>closure pair */
 		if (is_array($name)) {
@@ -70,7 +70,7 @@ class Event
 		$name = $this->_normalize_name($name);
 
 		/* log a debug event */
-		log_message('debug', 'event::register::'.$name);
+		log_message('debug', 'event::register::' . $name);
 
 		$this->listeners[$name][0] = !isset($this->listeners[$name]); // Sorted?
 		$this->listeners[$name][1][] = $priority;
@@ -95,13 +95,13 @@ class Event
 	 * @access public
 	 *
 	 */
-	public function trigger(string $name, &...$arguments) : Event
+	public function trigger(string $name, &...$arguments): Event
 	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
 
 		/* log a debug event */
-		log_message('debug', 'event::trigger::'.$name);
+		log_message('debug', 'event::trigger::' . $name);
 
 		/* do we even have any events with this name? */
 		if (isset($this->listeners[$name])) {
@@ -131,7 +131,7 @@ class Event
 	 * @return bool
 	 *
 	 */
-	public function has(string $name) : bool
+	public function has(string $name): bool
 	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
@@ -152,7 +152,7 @@ class Event
 	 * @return array
 	 *
 	 */
-	public function events() : array
+	public function events(): array
 	{
 		return array_keys($this->listeners);
 	}
@@ -172,7 +172,7 @@ class Event
 	 * @return int
 	 *
 	 */
-	public function count(string $name) : int
+	public function count(string $name): int
 	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
@@ -193,7 +193,7 @@ class Event
 	 * @return bool
 	 *
 	 */
-	public function unregister(string $name,$matches = null) : bool
+	public function unregister(string $name, $matches = null): bool
 	{
 		/* clean up the name */
 		$name = $this->_normalize_name($name);
@@ -206,7 +206,7 @@ class Event
 
 				$removed = true;
 			} else {
-				foreach ($this->listeners[$name][2] as $index=>$check) {
+				foreach ($this->listeners[$name][2] as $index => $check) {
 					if ($check === $matches) {
 						unset($this->listeners[$name][1][$index]);
 						unset($this->listeners[$name][2][$index]);
@@ -234,7 +234,7 @@ class Event
 	 * @return \Event
 	 *
 	 */
-	public function unregisterAll() : Event
+	public function unregisterAll(): Event
 	{
 		$this->listeners = [];
 
@@ -253,7 +253,7 @@ class Event
 	 * @return string
 	 *
 	 */
-	protected function _normalize_name(string $name) : string
+	protected function _normalize_name(string $name): string
 	{
 		return trim(preg_replace('/[^a-z0-9]+/', '.', strtolower($name)), '.');
 	}
@@ -269,7 +269,7 @@ class Event
 	 * @return array
 	 *
 	 */
-	protected function _listeners(string $name) : array
+	protected function _listeners(string $name): array
 	{
 		$name = $this->_normalize_name($name);
 		$listeners = [];
@@ -289,5 +289,4 @@ class Event
 
 		return $listeners;
 	}
-
 } /* end class */

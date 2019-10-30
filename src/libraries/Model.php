@@ -82,7 +82,7 @@ class Model extends CI_Model
 	{
 		parent::__construct();
 
-		$this->validate = ci('validate',[],false); /* return new each time */
+		$this->validate = ci('validate', [], false); /* return new each time */
 
 		log_message('info', 'Orange Model Class Initialized');
 	}
@@ -95,7 +95,7 @@ class Model extends CI_Model
 	 * @return String
 	 *
 	 */
-	public function object() : string
+	public function object(): string
 	{
 		return $this->object;
 	}
@@ -108,7 +108,7 @@ class Model extends CI_Model
 	 * @return Array
 	 *
 	 */
-	public function rules() : array
+	public function rules(): array
 	{
 		return $this->rules;
 	}
@@ -121,14 +121,14 @@ class Model extends CI_Model
 	 * @return mixed
 	 *
 	 */
-	public function rule(string $dotNotation) : string
+	public function rule(string $dotNotation): string
 	{
-		log_message('info', 'orange model::rule '.$dotNotation);
+		log_message('info', 'orange model::rule ' . $dotNotation);
 
-		$value = ci('orange')->getDotNotation($this->rules,$dotNotation,NOVALUE);
+		$value = ci('orange')->getDotNotation($this->rules, $dotNotation, NOVALUE);
 
 		if ($value == NOVALUE) {
-			throw new ModelException(sprintf('No rule found in "%s" for "%s".',$this->object,$dotNotation));
+			throw new ModelException(sprintf('No rule found in "%s" for "%s".', $this->object, $dotNotation));
 		}
 
 		return $value;
@@ -152,7 +152,7 @@ class Model extends CI_Model
 	 * @return Bool Success
 	 *
 	 */
-	public function validate(array &$data,/* mixed array|string|bool */ $rules = true) : bool
+	public function validate(array &$data,/* mixed array|string|bool */ $rules = true): bool
 	{
 		log_message('info', 'orange model::validate');
 
@@ -209,7 +209,7 @@ class Model extends CI_Model
 	 *
 	 * @return void
 	 */
-	public function errors() : array
+	public function errors(): array
 	{
 		return $this->validate->errors();
 	}
@@ -228,7 +228,7 @@ class Model extends CI_Model
 	 * @return model
 	 *
 	 */
-	public function remove_columns(array &$data,/* mixed string|array */ $columns = []) : model
+	public function remove_columns(array &$data,/* mixed string|array */ $columns = []): model
 	{
 		log_message('info', 'orange model::remove_columns');
 
@@ -258,7 +258,7 @@ class Model extends CI_Model
 	 * @return model
 	 *
 	 */
-	public function only_columns(array &$data,/* mixed string|array */ $columns = []) : model
+	public function only_columns(array &$data,/* mixed string|array */ $columns = []): model
 	{
 		log_message('info', 'orange model::only_columns');
 
@@ -281,5 +281,4 @@ class Model extends CI_Model
 
 		return $this;
 	}
-
 } /* end class */

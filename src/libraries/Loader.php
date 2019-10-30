@@ -34,16 +34,15 @@ class Loader extends CI_Loader
 	protected function _findView(string $view): string
 	{
 		try {
-			$path = __ROOT__.ci('servicelocator')->find('view',trim($view,'/'));
+			$path = __ROOT__ . ci('servicelocator')->find('view', trim($view, '/'));
 		} catch (Exception $e) {
-			$path = VIEWPATH.trim($view,'/').'.php';
+			$path = VIEWPATH . trim($view, '/') . '.php';
 		}
 
 		if (!\file_exists($path)) {
-			\show_error(404,'Could not find the view file '.$view.'.');
+			\show_error(404, 'Could not find the view file ' . $view . '.');
 		}
 
 		return $path;
 	}
-
 } /* end class */

@@ -29,24 +29,24 @@ class ServiceLocator implements ServiceLocatorInterface
 	 * ci('serviceLocator')->add + a prefix(..,..);
 	 *
 	 */
-	public function __call(string $name,array $arguments)
+	public function __call(string $name, array $arguments)
 	{
 		$return = true;
 
 		$name = strtolower($name);
 
-		if (substr($name,0,4) == 'find') {
-			$return = $this->find(substr($name,4),$arguments[0]);
-		} elseif(substr($name,0,3) === 'add') {
-			$return = $this->add(substr($name,3),$arguments[0],$arguments[1]);
-		}	else {
+		if (substr($name, 0, 4) == 'find') {
+			$return = $this->find(substr($name, 4), $arguments[0]);
+		} elseif (substr($name, 0, 3) === 'add') {
+			$return = $this->add(substr($name, 3), $arguments[0], $arguments[1]);
+		} else {
 			throw new MethodNotFoundException(sprintf('No method named "%s" found.', $name));
 		}
 
 		return $return;
 	}
 
-	public function find(string $type,string $name): string
+	public function find(string $type, string $name): string
 	{
 		$type = strtolower($type);
 		$name = strtolower($name);
@@ -56,13 +56,13 @@ class ServiceLocator implements ServiceLocatorInterface
 		}
 
 		if (!isset(self::$config[$type][$name])) {
-			throw new ServiceException(sprintf('Could not locate a %s type named %s.',$type,$name));
+			throw new ServiceException(sprintf('Could not locate a %s type named %s.', $type, $name));
 		}
 
 		return self::$config[$type][$name];
 	}
 
-	public function add(string $type,string $name,string $serviceClass): bool
+	public function add(string $type, string $name, string $serviceClass): bool
 	{
 		$type = strtolower($type);
 		$name = strtolower($name);
@@ -76,24 +76,24 @@ class ServiceLocator implements ServiceLocatorInterface
 		return true;
 	}
 
-/**
- * addAlias
- *
- * @param string $alias
- * @param string $real
- * @return void
- */
+	/**
+	 * addAlias
+	 *
+	 * @param string $alias
+	 * @param string $real
+	 * @return void
+	 */
 	public function addAlias(string $alias, string $real): void
 	{
 		self::$config['alias'][strtolower($alias)] = $real;
 	}
 
-/**
- * serviceAlias
- *
- * @param string $name
- * @return void
- */
+	/**
+	 * serviceAlias
+	 *
+	 * @param string $name
+	 * @return void
+	 */
 	public function alias(string $name): string
 	{
 		return self::$config['alias'][strtolower($name)] ?? $name;
@@ -122,7 +122,7 @@ class ServiceLocator implements ServiceLocatorInterface
 
 		/* has this service been attached yet? */
 		if (!isset($instance->$serviceName)) {
-			$instance->$serviceName = $this->create($serviceName,$userConfig);
+			$instance->$serviceName = $this->create($serviceName, $userConfig);
 		}
 
 		/* now grab the reference */
@@ -148,7 +148,7 @@ class ServiceLocator implements ServiceLocatorInterface
 		if (isset($instance->config)) {
 			$serviceConfig = $instance->config->item($name);
 
-			$config = (is_array($serviceConfig)) ? array_replace($serviceConfig,$userConfig) : $userConfig;
+			$config = (is_array($serviceConfig)) ? array_replace($serviceConfig, $userConfig) : $userConfig;
 		}
 
 		try {
@@ -159,5 +159,4 @@ class ServiceLocator implements ServiceLocatorInterface
 
 		return new $serviceClass($config);
 	}
-
 } /* end class */

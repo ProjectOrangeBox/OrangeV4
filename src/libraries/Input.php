@@ -85,7 +85,7 @@ class Input extends CI_Input
 	public function __construct()
 	{
 		/* grab raw input for patch and such */
-		$this->set_raw_input_stream(file_get_contents('php://input'),true);
+		$this->set_raw_input_stream(file_get_contents('php://input'), true);
 
 		/* did we get anything? if not fall back to the posted input if any */
 		if (!count($this->_request)) {
@@ -97,8 +97,8 @@ class Input extends CI_Input
 
 		/* setup the request type based on a few things */
 		$isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
-		$isJson = (!empty($_SERVER['HTTP_ACCEPT']) && strpos(strtolower($_SERVER['HTTP_ACCEPT']),'application/json') !== false);
-		$isCli = (PHP_SAPI === 'cli' OR defined('STDIN'));
+		$isJson = (!empty($_SERVER['HTTP_ACCEPT']) && strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/json') !== false);
+		$isCli = (PHP_SAPI === 'cli' or defined('STDIN'));
 
 		if ($isAjax || $isJson) {
 			$this->requestType = 'ajax';
@@ -114,7 +114,7 @@ class Input extends CI_Input
 		log_message('info', 'Orange Input Class Initialized');
 	}
 
-	public function remap(array $rules,bool $replace = false): Input
+	public function remap(array $rules, bool $replace = false): Input
 	{
 		$remap = new RequestRemap;
 		$rawInput = $this->get_raw_input_stream();
@@ -154,7 +154,7 @@ class Input extends CI_Input
 	 */
 	public function request($index = null, $default = null, bool $xss_clean = false)
 	{
-		log_message('debug', 'Input::request::'.$index);
+		log_message('debug', 'Input::request::' . $index);
 
 		/* pull the value from our array and process with our built in function */
 		$value = $this->_fetch_from_array($this->_request, $index, $xss_clean);
@@ -175,12 +175,12 @@ class Input extends CI_Input
 	 * @return Input
 	 *
 	 */
-	public function set_request($index = null, $replace_value = null) : Input
+	public function set_request($index = null, $replace_value = null): Input
 	{
 		if (is_array($index) && $replace_value === true) {
 			$this->_request = $index;
 		} elseif (is_array($index)) {
-			foreach ($index as $i=>$v) {
+			foreach ($index as $i => $v) {
 				$this->set_request($i, $v);
 			}
 		} else {
@@ -218,7 +218,7 @@ class Input extends CI_Input
 		return ($xss_clean) ? $this->security->xss_clean($value) : $value;
 	}
 
-	public function get_raw_input_stream() : string
+	public function get_raw_input_stream(): string
 	{
 		return $this->_raw_input_stream;
 	}
@@ -229,7 +229,7 @@ class Input extends CI_Input
 	 * @param string $rawInputStream
 	 * @return void
 	 */
-	public function set_raw_input_stream(string $rawInputStream,bool $parse = true) : void
+	public function set_raw_input_stream(string $rawInputStream, bool $parse = true): void
 	{
 		$this->_raw_input_stream = $rawInputStream;
 
@@ -250,13 +250,13 @@ class Input extends CI_Input
 	 * @return \Input
 	 *
 	 */
-	public function set_request_type(string $requestType) : Input
+	public function set_request_type(string $requestType): Input
 	{
 		$requestType = strtolower($requestType);
 
 		/* options include cli, ajax, html */
-		if (!in_array($requestType, ['cli','ajax','html'])) {
-			throw new RequestException(__METHOD__.' unknown type '.$requestType.'.');
+		if (!in_array($requestType, ['cli', 'ajax', 'html'])) {
+			throw new RequestException(__METHOD__ . ' unknown type ' . $requestType . '.');
 		}
 
 		$this->requestType = $requestType;
@@ -270,13 +270,13 @@ class Input extends CI_Input
 	 * @param string $requestMethod
 	 * @return void
 	 */
-	public function set_http_method(string $requestMethod) : Input
+	public function set_http_method(string $requestMethod): Input
 	{
 		$requestMethod = strtolower($requestMethod);
 
 		/* options include cli, ajax, html */
-		if (!in_array($requestMethod, ['cli','get','head','post','put','delete','connect','options','trace','patch'])) {
-			throw new RequestException(__METHOD__.' unknown type '.$requestMethod.'.');
+		if (!in_array($requestMethod, ['cli', 'get', 'head', 'post', 'put', 'delete', 'connect', 'options', 'trace', 'patch'])) {
+			throw new RequestException(__METHOD__ . ' unknown type ' . $requestMethod . '.');
 		}
 
 		$this->requestMethod = $requestMethod;
@@ -289,7 +289,7 @@ class Input extends CI_Input
 	 *
 	 * @return void
 	 */
-	public function get_http_method() : string
+	public function get_http_method(): string
 	{
 		return strtolower($this->requestMethod);
 	}
@@ -299,7 +299,7 @@ class Input extends CI_Input
 	 *
 	 * @return void
 	 */
-	public function get_request_type() : string
+	public function get_request_type(): string
 	{
 		return $this->requestType;
 	}
@@ -313,7 +313,7 @@ class Input extends CI_Input
 	 * @return bool
 	 *
 	 */
-	public function is_ajax_request() : bool
+	public function is_ajax_request(): bool
 	{
 		return ($this->requestType == 'ajax');
 	}
@@ -326,7 +326,7 @@ class Input extends CI_Input
 	 * @return bool
 	 *
 	 */
-	public function is_cli_request() : bool
+	public function is_cli_request(): bool
 	{
 		return ($this->requestType == 'cli');
 	}
@@ -338,7 +338,7 @@ class Input extends CI_Input
 	 * @return \Input
 	 *
 	 */
-	public function stash() : Input
+	public function stash(): Input
 	{
 		/* is there even an array to store? */
 		if (is_array($this->_request)) {
@@ -355,7 +355,7 @@ class Input extends CI_Input
 	 * @return bool
 	 *
 	 */
-	public function unstash() : bool
+	public function unstash(): bool
 	{
 		/* read the stashed data if any */
 		$stashed = ci('session')->tempdata($this->stashKey);

@@ -107,14 +107,14 @@ class Validate
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(array &$config=null)
+	public function __construct(array &$config = null)
 	{
 		if (is_array($config)) {
 			$this->config = &$config;
 		}
 
 		/* setup the "chainable" request object */
-		$this->input = new Input($this,ci('input'));
+		$this->input = new Input($this, ci('input'));
 
 		log_message('info', 'Orange Validate Class Initialized');
 	}
@@ -136,7 +136,7 @@ class Validate
 	 * ci('validate')->attach('return_true',function(&$field, $options) { return true; });
 	 * ```
 	 */
-	public function attach(string $name, \closure $closure) : Validate
+	public function attach(string $name, \closure $closure): Validate
 	{
 		$this->attached[$name] = $closure;
 
@@ -152,13 +152,13 @@ class Validate
 	 * @param mixed $rules
 	 * @return void
 	 */
-	public function isValid($input,$rules) : bool
+	public function isValid($input, $rules): bool
 	{
 		/* one time validation */
 		$local = new Validate();
 
-		$data = is_array($input) ? $input : ['input'=>$input];
-		$rules = is_array($rules) ? $rules : ['input'=>$rules];
+		$data = is_array($input) ? $input : ['input' => $input];
+		$rules = is_array($rules) ? $rules : ['input' => $rules];
 
 		return $local->set_data($data)->set_rules($rules)->run()->success();
 	}
@@ -172,13 +172,13 @@ class Validate
 	 * @param mixed $rules
 	 * @return void
 	 */
-	public function filter($input,$rules) /* mixed */
+	public function filter($input, $rules) /* mixed */
 	{
 		/* one time validation */
 		$local = new Validate();
 
-		$data = is_array($input) ? $input : ['input'=>$input];
-		$rules = is_array($rules) ? $rules : ['input'=>$rules];
+		$data = is_array($input) ? $input : ['input' => $input];
+		$rules = is_array($rules) ? $rules : ['input' => $rules];
 
 		$local->set_data($data)->set_rules($rules)->run();
 
@@ -193,30 +193,30 @@ class Validate
 	 * @param mixed string
 	 * @return void
 	 */
-	public function run(string $namedGroup = 'default') : Validate
+	public function run(string $namedGroup = 'default'): Validate
 	{
 		if (!isset($this->rules[$namedGroup])) {
-			throw new Exception('Validate rule group "'.$namedGroup.'" was not found.');
+			throw new Exception('Validate rule group "' . $namedGroup . '" was not found.');
 		}
 
 		/* process each field and rule as a single rule, field, and human label */
 		foreach ($this->rules[$namedGroup] as $rule) {
-			$this->_single($rule['field'],$rule['rule'],$rule['human']);
+			$this->_single($rule['field'], $rule['rule'], $rule['human']);
 		}
 
 		return $this;
 	}
 
-	public function set_data(array &$fields) : Validate
+	public function set_data(array &$fields): Validate
 	{
 		$this->field_data = &$fields;
 
 		return $this;
 	}
 
-	public function set_rules(array $rules,string $key='default') : Validate
+	public function set_rules(array $rules, string $key = 'default'): Validate
 	{
-		foreach ($rules as $k=>$v) {
+		foreach ($rules as $k => $v) {
 			$rulesToUse = (isset($v['rules'])) ? $v['rules'] : $v;
 
 			$humanToUse = (isset($v['label'])) ? $v['label'] : $k;
@@ -224,7 +224,7 @@ class Validate
 
 			$fieldToUse = (isset($v['field'])) ? $v['field'] : $k;
 
-			$this->rules[$key][$fieldToUse] = ['rule'=>$rulesToUse,'human'=>$humanToUse,'field'=>$fieldToUse];
+			$this->rules[$key][$fieldToUse] = ['rule' => $rulesToUse, 'human' => $humanToUse, 'field' => $fieldToUse];
 		}
 
 		return $this;
@@ -235,19 +235,19 @@ class Validate
 	 *
 	 * @return void
 	 */
-	public function success() : bool
+	public function success(): bool
 	{
 		return count($this->errors) == 0;
 	}
 
-	public function reset() : Validate
+	public function reset(): Validate
 	{
 		$this->errors = [];
 
 		return $this;
 	}
 
-	public function errors() : array
+	public function errors(): array
 	{
 		return array_values($this->errors);
 	}
@@ -265,7 +265,7 @@ class Validate
 	 * @return Validate
 	 *
 	 */
-	protected function _single(string $key, string $rules, string $human = null) : Validate
+	protected function _single(string $key, string $rules, string $human = null): Validate
 	{
 		$rules = explode('|', $rules);
 
@@ -279,7 +279,7 @@ class Validate
 			$this->error_field_value =  $this->field_data[$key];
 
 			foreach ($rules as $rule) {
-				if ($this->_process_rule($key,$rule,$human) === false) {
+				if ($this->_process_rule($key, $rule, $human) === false) {
 					break; /* break from for each */
 				}
 			}
@@ -288,7 +288,7 @@ class Validate
 		return $this;
 	}
 
-	protected function _process_rule(string $key, string $rule, string $human) : bool
+	protected function _process_rule(string $key, string $rule, string $human): bool
 	{
 		/* no rule? exit processing of the $rules array */
 		if (empty($rule)) {
@@ -311,14 +311,14 @@ class Validate
 			$param = $matches['param'];
 		}
 
-		$this->_makeHumanLookNice($human,$rule);
+		$this->_makeHumanLookNice($human, $rule);
 		$this->_makeParamsLookNice($param);
 
 		/* take action on a validation or filter - filters MUST always start with "filter_" */
 		return (substr(strtolower($rule), 0, 7) == 'filter_') ? $this->_filter($key, $rule, $param) : $this->_validation($key, $rule, $param);
 	}
 
-	protected function _makeHumanLookNice($human,$rule)
+	protected function _makeHumanLookNice($human, $rule)
 	{
 		/* do we have a human readable field name? if not then try to make one */
 		$this->error_human = ($human) ? $human : strtolower(str_replace('_', ' ', $rule));
@@ -354,10 +354,10 @@ class Validate
 	 * @return bool
 	 *
 	 */
-	protected function _filter(string $key, string $rule, string $param = null) : bool
+	protected function _filter(string $key, string $rule, string $param = null): bool
 	{
 		/* filters start with filter_ */
-		$shortRule = substr($rule,7);
+		$shortRule = substr($rule, 7);
 		$className = $rule;
 
 		if (isset($this->attached[$className])) {
@@ -367,7 +367,7 @@ class Validate
 		} elseif (function_exists($shortRule)) {
 			$this->field_data[$key] = ($param) ? $shortRule($this->field_data[$key], $param) : $shortRule($this->field_data[$key]);
 		} else {
-			throw new Exception('Could not locate the filter named "'.$rule.'".');
+			throw new Exception('Could not locate the filter named "' . $rule . '".');
 		}
 
 		/* filters don't fail */
@@ -388,7 +388,7 @@ class Validate
 	 * @return bool
 	 *
 	 */
-	protected function _validation(string $key, string $rule, string $param = null) : bool
+	protected function _validation(string $key, string $rule, string $param = null): bool
 	{
 		/* rules don't start with anything */
 		$shortRule = $className = $rule;
@@ -403,7 +403,7 @@ class Validate
 		} elseif (function_exists($shortRule)) {
 			$success = ($param) ? $shortRule($this->field_data[$key], $param) : $shortRule($this->field_data[$key]);
 		} else {
-			throw new Exception('Could not locate the validate rule "'.$rule.'".');
+			throw new Exception('Could not locate the validate rule "' . $rule . '".');
 		}
 
 		/* if success is really really false then it's a error */
@@ -431,8 +431,8 @@ class Validate
 		$className = strtolower($className);
 
 		try {
-			$namedService = ci('servicelocator')->find('validation',$className);
-		} catch(Exception $e) {
+			$namedService = ci('servicelocator')->find('validation', $className);
+		} catch (Exception $e) {
 			$namedService = false;
 		}
 
@@ -441,15 +441,14 @@ class Validate
 
 	protected function findFilter(string $className) /* mixed */
 	{
-		$className = str_replace('filter_', '',strtolower($className));
+		$className = str_replace('filter_', '', strtolower($className));
 
 		try {
-			$namedService = ci('servicelocator')->find('filter',$className);
-		} catch(Exception $e) {
+			$namedService = ci('servicelocator')->find('filter', $className);
+		} catch (Exception $e) {
 			$namedService = false;
 		}
 
 		return $namedService;
 	}
-
 } /* end class */

@@ -2,7 +2,8 @@
 
 namespace projectorangebox\orange\library\cache\traits;
 
-trait DeleteByTag {
+trait DeleteByTag
+{
 
 	/**
 	 *
@@ -37,7 +38,7 @@ trait DeleteByTag {
 		}
 
 		/* log a debug entry */
-		log_message('debug', 'delete_cache_by_tags '.implode(', ', $tags));
+		log_message('debug', 'delete_cache_by_tags ' . implode(', ', $tags));
 
 		/* trigger a event incase somebody else needs to know send in our array of tags by reference */
 		ci('event')->trigger('delete.cache.by.tags', $tags, $this);
@@ -56,5 +57,4 @@ trait DeleteByTag {
 
 		return $this;
 	}
-
 } /* end trait */

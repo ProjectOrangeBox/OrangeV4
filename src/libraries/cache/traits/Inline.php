@@ -2,7 +2,8 @@
 
 namespace projectorangebox\orange\library\cache\traits;
 
-trait Inline {
+trait Inline
+{
 
 	/**
 	 *
@@ -31,5 +32,4 @@ trait Inline {
 
 		return $value;
 	}
-
 } /* end trait */

@@ -130,7 +130,7 @@ class Wallet
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(array &$config=null)
+	public function __construct(array &$config = null)
 	{
 		if (is_array($config)) {
 			$this->config = &$config;
@@ -151,7 +151,7 @@ class Wallet
 		}
 
 		/* What msg types should be considered "sticky" */
-		$this->stickyTypes = $this->config['sticky types'] ?? ['red','danger','warning','yellow'];
+		$this->stickyTypes = $this->config['sticky types'] ?? ['red', 'danger', 'warning', 'yellow'];
 		$this->initialPause = $this->config['initial pause'] ?? 3;
 		$this->pauseForEach = $this->config['pause for each'] ?? 1000;
 		$this->defaultType = $this->config['default type'] ?? 'info';
@@ -188,7 +188,7 @@ class Wallet
 	 * ci('wallet')->msg('oH No!','red','/folder/new');
 	 * ```
 	 */
-	public function msg(string $msg = '', string $type = null) : Wallet
+	public function msg(string $msg = '', string $type = null): Wallet
 	{
 		$type = ($type) ?? $this->defaultType;
 
@@ -198,7 +198,7 @@ class Wallet
 		/* trigger a event incase they need to do something */
 		$this->event->trigger('wallet.msg', $msg, $type, $sticky);
 
-		$this->messages[md5(trim($type.$msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
+		$this->messages[md5(trim($type . $msg))] = ['msg' => trim($msg), 'type' => $type, 'sticky' => $sticky];
 
 		/* put in view variable incase they want to use it on this page */
 		$this->setViewVariable();
@@ -206,7 +206,7 @@ class Wallet
 		return $this;
 	}
 
-	public function redirect(string $redirect) : void
+	public function redirect(string $redirect): void
 	{
 		/* store this in a session variable for redirect */
 		$this->session->set_flashdata($this->msgKey, $this->messages);
@@ -225,11 +225,11 @@ class Wallet
 	 * @param mixed bool
 	 * @return void
 	 */
-	public function getMessages(bool $detailed = false) : array
+	public function getMessages(bool $detailed = false): array
 	{
 		$messages = array_values($this->messages);
 
-		return ($detailed) ? ['messages'=>$messages,'count'=>count($this->messages),'initial_pause'=>$this->initialPause,'pause_for_each'=>$this->pauseForEach] : $messages;
+		return ($detailed) ? ['messages' => $messages, 'count' => count($this->messages), 'initial_pause' => $this->initialPause, 'pause_for_each' => $this->pauseForEach] : $messages;
 	}
 
 	/**
@@ -248,11 +248,11 @@ class Wallet
 	 * ci('wallet')->msgs(['Whoops!','Defcon 1'=>'red','Info']);
 	 * ```
 	 */
-	public function msgs(array $array, string $type = null) : Wallet
+	public function msgs(array $array, string $type = null): Wallet
 	{
 		$type = ($type) ?? $this->defaultType;
 
-		foreach ($array as $a=>$b) {
+		foreach ($array as $a => $b) {
 			if (is_numeric($a)) {
 				$this->msg($b, $type);
 			} else {
@@ -274,7 +274,7 @@ class Wallet
 	 * @return \Wallet
 	 *
 	 */
-	public function setViewVariable(string $variable = null) : Wallet
+	public function setViewVariable(string $variable = null): Wallet
 	{
 		$variable = ($variable) ?? $this->viewVariable;
 
@@ -282,5 +282,4 @@ class Wallet
 
 		return $this;
 	}
-
 } /* end class */

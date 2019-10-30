@@ -34,7 +34,7 @@ class Parser
 	{
 		$extension = $this->normalizeExtension($extension);
 
-		if (!\array_key_exists($extension,$this->parsers)) {
+		if (!\array_key_exists($extension, $this->parsers)) {
 			throw new ParserForExtentionNotFoundException($extension);
 		}
 
@@ -47,7 +47,7 @@ class Parser
 		$this->parsers[$this->normalizeExtension($extension)] = &$parser;
 	}
 
-	public function parse(string $key,array $data = []): string
+	public function parse(string $key, array $data = []): string
 	{
 		$key = $this->normailizedKey($key);
 
@@ -60,32 +60,32 @@ class Parser
 			try {
 				$extension = $this->findView($key);
 			} catch (ViewNotFoundException $e) {
-				throw new TemplateNotFoundException($key.' or '.$this->fourohfour);
+				throw new TemplateNotFoundException($key . ' or ' . $this->fourohfour);
 			}
 		}
 
-		return $this->parsers[$extension]->parse($key,$data,true);
+		return $this->parsers[$extension]->parse($key, $data, true);
 	}
 
-	public function parse_string(string $string,string $extension,array $data = []): string
+	public function parse_string(string $string, string $extension, array $data = []): string
 	{
 		$extension = $this->normalizeExtension($extension);
 
-		if (!\array_key_exists($extension,$this->parsers)) {
+		if (!\array_key_exists($extension, $this->parsers)) {
 			throw new ParserForExtentionNotFoundException($extension);
 		}
 
-		return $this->parsers[$extension]->parse_string($string,$data,true);
+		return $this->parsers[$extension]->parse_string($string, $data, true);
 	}
 
 	public function normailizedKey(string $key): string
 	{
-		return strtolower(trim($key,'/'));
+		return strtolower(trim($key, '/'));
 	}
 
 	public function normalizeExtension(string $extension): string
 	{
-		return strtolower(trim($extension,'.'));
+		return strtolower(trim($extension, '.'));
 	}
 
 	protected function findView(string $key): string
@@ -109,5 +109,4 @@ class Parser
 		/* return the handler that said they have the matching key */
 		return $extension;
 	}
-
 }

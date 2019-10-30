@@ -28,7 +28,7 @@ namespace projectorangebox\orange\model;
  *
  */
 
-abstract class Database_model_entity
+abstract class DatabaseModelEntity
 {
 	/**
 	 * The string name of the model this entity is attached to
@@ -60,18 +60,18 @@ abstract class Database_model_entity
 	 * @access public
 	 *
 	 */
-	public function __construct(&$config=[])
+	public function __construct(&$config = [])
 	{
 		if (isset($config['model'])) {
 			$this->_model_ref = &$config['model'];
 		} else {
 			/* if nothing provided on the child entity strip off the _entity part and replace with _model */
-			$model_name = (!is_string($this->_model_name)) ? strtolower(substr(get_called_class(), 0, -7).'_model') : $this->_model_name;
+			$model_name = (!is_string($this->_model_name)) ? strtolower(substr(get_called_class(), 0, -7) . '_model') : $this->_model_name;
 
 			$this->_model_ref = &ci($model_name);
 		}
 
-		log_message('info', 'Database_model_entity Class Initialized');
+		log_message('info', 'DatabaseModelEntity Class Initialized');
 	}
 
 	/**
@@ -83,7 +83,7 @@ abstract class Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function save() : bool
+	public function save(): bool
 	{
 		/* get the primary key */
 		$primary_id = $this->_model_ref->get_primary_key();
@@ -118,6 +118,6 @@ abstract class Database_model_entity
 		}
 
 		/* return boolean success */
-		return (bool)$success;
+		return (bool) $success;
 	}
 } /* end class */

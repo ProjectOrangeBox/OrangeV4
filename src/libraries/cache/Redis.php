@@ -17,7 +17,7 @@ class Redis extends CI_Cache_redis
 	 *
 	 * @return array
 	 */
-	public function cache_keys() : array
+	public function cache_keys(): array
 	{
 		$keys = [];
 
@@ -25,5 +25,4 @@ class Redis extends CI_Cache_redis
 
 		return $keys;
 	}
-
 } /* end class */

@@ -34,11 +34,10 @@ class Controller extends CI_Controller
 	public function _output($output)
 	{
 		/* we need to create a variable to pass by reference */
-		$output = (string)$output;
+		$output = (string) $output;
 
 		ci('router')->onResponse($output);
 
 		echo $output;
 	}
-
 } /* end class */

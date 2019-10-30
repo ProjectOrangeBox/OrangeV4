@@ -28,7 +28,7 @@ class Apc extends CI_Cache_apc
 	 *
 	 * @return void
 	 */
-	public function cache_keys() : array
+	public function cache_keys(): array
 	{
 		$keys = [];
 
@@ -40,5 +40,4 @@ class Apc extends CI_Cache_apc
 
 		return $keys;
 	}
-
 } /* end class */

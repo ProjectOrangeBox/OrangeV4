@@ -1,37 +1,38 @@
 <?php
+
 /**
  * Since we are using a service locator pattern this is where the services are loaded.
  * This of course can be overridden to mock services as need
  */
 
 return [
-	'exceptions'=>'\projectorangebox\orange\library\Exceptions',
-	'benchmark'=>'\projectorangebox\orange\library\Benchmark',
-	'hooks'=>'\projectorangebox\orange\library\Hooks',
-	'utf8'=>'\projectorangebox\orange\library\Utf8',
-	'uri'=>'\projectorangebox\orange\library\Uri',
-	'security'=>'\projectorangebox\orange\library\Security',
-	'lang'=>'\projectorangebox\orange\library\Lang',
-	'loader'=>'\projectorangebox\orange\library\Loader',
+	'exceptions' => '\projectorangebox\orange\library\Exceptions',
+	'benchmark' => '\projectorangebox\orange\library\Benchmark',
+	'hooks' => '\projectorangebox\orange\library\Hooks',
+	'utf8' => '\projectorangebox\orange\library\Utf8',
+	'uri' => '\projectorangebox\orange\library\Uri',
+	'security' => '\projectorangebox\orange\library\Security',
+	'lang' => '\projectorangebox\orange\library\Lang',
+	'loader' => '\projectorangebox\orange\library\Loader',
 
-	'auth'=>'\projectorangebox\orange\library\Auth',
-	'cache'=>'\projectorangebox\orange\library\Cache',
-	'errors'=>'\projectorangebox\orange\library\Errors',
-	'event'=>'\projectorangebox\orange\library\Event',
-	'page'=>'\projectorangebox\orange\library\Page',
-	'validate'=>'\projectorangebox\orange\library\Validate',
-	'wallet'=>'\projectorangebox\orange\library\Wallet',
-	'session'=>'\projectorangebox\orange\library\Session',
+	'auth' => '\projectorangebox\orange\library\Auth',
+	'cache' => '\projectorangebox\orange\library\Cache',
+	'errors' => '\projectorangebox\orange\library\Errors',
+	'event' => '\projectorangebox\orange\library\Event',
+	'page' => '\projectorangebox\orange\library\Page',
+	'validate' => '\projectorangebox\orange\library\Validate',
+	'wallet' => '\projectorangebox\orange\library\Wallet',
+	'session' => '\projectorangebox\orange\library\Session',
 
-	'config'=>'\projectorangebox\orange\library\Config',
-	'log'=>'\projectorangebox\orange\library\Log',
-	'router'=>'\projectorangebox\orange\library\Router',
-	'output'=>'\projectorangebox\orange\library\Output',
-	'input'=>'\projectorangebox\orange\library\Input',
+	'config' => '\projectorangebox\orange\library\Config',
+	'log' => '\projectorangebox\orange\library\Log',
+	'router' => '\projectorangebox\orange\library\Router',
+	'output' => '\projectorangebox\orange\library\Output',
+	'input' => '\projectorangebox\orange\library\Input',
 
-	'o_user_model'=>'\projectorangebox\orange\model\O_user_model',
+	'usermodel' => '\projectorangebox\orange\model\userModel',
 
-	'example_model'=>'\projectorangebox\theme\model\Example_model',
+	'example_model' => '\projectorangebox\theme\model\Example_model',
 
 	'cache_driver_apc' => '\projectorangebox\orange\library\cache\Apc',
 	'cache_driver_dummy' => '\projectorangebox\orange\library\cache\Dummy',

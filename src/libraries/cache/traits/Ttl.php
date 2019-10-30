@@ -2,7 +2,8 @@
 
 namespace projectorangebox\orange\library\cache\traits;
 
-trait Ttl {
+trait Ttl
+{
 
 	/**
 	 *
@@ -16,9 +17,8 @@ trait Ttl {
 	 * @return init
 	 *
 	 */
-	public function ttl(int $ttl = null) : int
+	public function ttl(int $ttl = null): int
 	{
 		return ci('cache')->ttl($ttl);
 	}
-
 } /* end trait */

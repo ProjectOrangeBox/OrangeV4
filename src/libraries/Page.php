@@ -112,16 +112,16 @@ class Page
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(array &$config=null)
+	public function __construct(array &$config = null)
 	{
 		if (is_array($config)) {
 			$this->config = &$config;
 		}
 
 		/* pear plugin is a static class which manages pear plugins and is loaded into the global namespace so views can use it easily */
-		require_once __DIR__.'/page/Pear.php';
+		require_once __DIR__ . '/page/Pear.php';
 
-		$this->asset = new Asset($this,$config);
+		$this->asset = new Asset($this, $config);
 
 		$this->load = ci('load');
 		$this->output = ci('output');
@@ -144,23 +144,23 @@ class Page
 	 * @return Page
 	 *
 	 */
-	public function render(string $view, array $data = null) : Page
+	public function render(string $view, array $data = null): Page
 	{
-		log_message('debug', 'page::render::'.$view);
+		log_message('debug', 'page::render::' . $view);
 
-		$view = trim(\stripFromEnd($view,'.php'),'/');
+		$view = trim(\stripFromEnd($view, '.php'), '/');
 
 		/* called everytime - use with caution */
 		$this->event->trigger('page.render', $this, $view);
 
 		/* called only when a trigger matches the view */
-		$this->event->trigger('page.render.'.$view, $this, $view);
+		$this->event->trigger('page.render.' . $view, $this, $view);
 
 		/* this is going to be the "main" section */
 		$view_content = $this->view($view, $data);
 
 		if ($this->extending) {
-			$view_content = $this->view((string)$this->extending);
+			$view_content = $this->view((string) $this->extending);
 		}
 
 		/* called everytime - use with caution  */
@@ -228,7 +228,7 @@ class Page
 	 * ci('page')->data(['name'=>'Johnny','age'=>23]);
 	 * ```
 	 */
-	public function data($name, $value = null) : Page
+	public function data($name, $value = null): Page
 	{
 		$this->load->vars($name, $value);
 
@@ -253,10 +253,10 @@ class Page
 	 * ci('page')->extend('_templates/default');
 	 * ```
 	 */
-	public function extend(string $template = null) : Page
+	public function extend(string $template = null): Page
 	{
 		if ($this->extending) {
-			throw new \Exception('You are already extending "'.$this->extending.'" therefore we cannot extend "'.$template.'".');
+			throw new \Exception('You are already extending "' . $this->extending . '" therefore we cannot extend "' . $template . '".');
 		}
 
 		$this->extending = $template;
@@ -280,13 +280,13 @@ class Page
 	 * $script_html = ci('page')->value('script');
 	 * ```
 	 */
-	public function value(string $name) : string
+	public function value(string $name): string
 	{
 		$html = $this->load->get_var($name);
 
 		/* if it's empty than maybe is it a page variable? */
 		if (empty($html)) {
-			$html = $this->load->get_var($this->page_variable_prefix.$name);
+			$html = $this->load->get_var($this->page_variable_prefix . $name);
 		}
 
 		/* does this variable key exist */
@@ -326,18 +326,17 @@ class Page
 	 * ci('page')->add('custom_var','<p>Custom Stuff!</p>');
 	 * ```
 	 */
-	public function add(string $name, string $value, int $priority = PAGE::PRIORITY_NORMAL, bool $prevent_duplicates = true) : Page
+	public function add(string $name, string $value, int $priority = PAGE::PRIORITY_NORMAL, bool $prevent_duplicates = true): Page
 	{
 		$key = md5($value);
 
 		if (!isset($this->variables[$name][3][$key]) || !$prevent_duplicates) {
 			$this->variables[$name][0] = !isset($this->variables[$name]); /* sorted */
-			$this->variables[$name][1][] = (int)$priority; /* unix priority */
+			$this->variables[$name][1][] = (int) $priority; /* unix priority */
 			$this->variables[$name][2][] = $value; /* actual html content (string) */
 			$this->variables[$name][3][$key] = true; /* prevent duplicates */
 		}
 
 		return $this;
 	}
-
 } /* end page */

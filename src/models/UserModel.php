@@ -2,11 +2,9 @@
 
 namespace projectorangebox\orange\model;
 
-use projectorangebox\orange\model\Database_model;
+use projectorangebox\orange\model\DatabaseModel;
 
 /**
- * O_user_model
- * Insert description here
  *
  * @package CodeIgniter / Orange
  * @author Don Myers
@@ -23,31 +21,31 @@ use projectorangebox\orange\model\Database_model;
  * functions:
  *
  */
-class O_user_model extends Database_model
+class UserModel extends DatabaseModel
 {
 	protected $table; /* picked up from auth config */
 	protected $additional_cache_tags = '.acl';
 	protected $has = [
-		'read_role'=>'read_role_id',
-		'edit_role'=>'edit_role_id',
-		'delete_role'=>'delete_role_id',
-		'created_by'=>'created_by',
-		'created_on'=>'created_on',
-		'created_ip'=>'created_ip',
-		'updated_by'=>'updated_by',
-		'updated_on'=>'updated_on',
-		'updated_ip'=>'updated_ip',
-		'deleted_by'=>'deleted_by',
-		'deleted_on'=>'deleted_on',
-		'deleted_ip'=>'deleted_ip',
-		'is_deleted'=>'is_deleted', /* soft deleted */
+		'read_role' => 'read_role_id',
+		'edit_role' => 'edit_role_id',
+		'delete_role' => 'delete_role_id',
+		'created_by' => 'created_by',
+		'created_on' => 'created_on',
+		'created_ip' => 'created_ip',
+		'updated_by' => 'updated_by',
+		'updated_on' => 'updated_on',
+		'updated_ip' => 'updated_ip',
+		'deleted_by' => 'deleted_by',
+		'deleted_on' => 'deleted_on',
+		'deleted_ip' => 'deleted_ip',
+		'is_deleted' => 'is_deleted', /* soft deleted */
 	];
-	protected $entity = 'o_user_entity';
+	protected $entity = 'projectorangebox\orange\model\entities\UserEntity';
 	protected $rules = [
 		'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
-		'username' => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|trim|is_uniquem[o_user_model.username.id]'],
+		'username' => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|trim|is_uniquem[userModel.username.id]'],
 		'password' => ['field' => 'password', 'label' => 'Password', 'rules' => 'required|max_length[255]|filter_input[255]'],
-		'email' => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|trim|strtolower|valid_email|is_uniquem[o_user_model.email.id]|max_length[255]|filter_input[255]'],
+		'email' => ['field' => 'email', 'label' => 'Email', 'rules' => 'required|trim|strtolower|valid_email|is_uniquem[userModel.email.id]|max_length[255]|filter_input[255]'],
 		'is_active' => ['field' => 'is_active', 'label' => 'Active', 'rules' => 'if_empty[0]|in_list[0,1]|filter_int[1]|max_length[1]|less_than[2]'],
 		'user_read_role_id' => ['field' => 'user_read_role_id', 'label' => 'User Read Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'user_edit_role_id' => ['field' => 'user_edit_role_id', 'label' => 'User Edit Role', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
@@ -81,7 +79,7 @@ class O_user_model extends Database_model
 		});
 
 		/* ready to go */
-		log_message('info', 'o_user_model Class Initialized');
+		log_message('info', 'userModel Class Initialized');
 	}
 
 	public function get_by_primary_ignore_read_role($primary_key)
@@ -159,7 +157,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	protected function _password_check(string $which, array &$data) : void
+	protected function _password_check(string $which, array &$data): void
 	{
 		$password_info = password_get_info($data['password']);
 
@@ -200,7 +198,7 @@ class O_user_model extends Database_model
 		$success = !ci('errors')->has();
 
 		if ($success) {
-			$this->update_by(['is_active'=>0], ['id'=>$user_id]);
+			$this->update_by(['is_active' => 0], ['id' => $user_id]);
 			$this->remove_role($user_id);
 		}
 
@@ -231,7 +229,7 @@ class O_user_model extends Database_model
 			return;
 		}
 
-		return $this->_database->replace(config('auth.user role table'), ['role_id' => (int) ci('o_role_model')->find_role_id($role), 'user_id' => (int) $user_id]);
+		return $this->_database->replace(config('auth.user role table'), ['role_id' => (int) ci('RoleModel')->find_role_id($role), 'user_id' => (int) $user_id]);
 	}
 
 	/**
@@ -261,7 +259,7 @@ class O_user_model extends Database_model
 		if ($role === null) {
 			$success = $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id]);
 		} else {
-			$success = $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id, 'role_id' => (int) ci('o_role_model')->find_role_id($role)]);
+			$success = $this->_database->delete(config('auth.user role table'), ['user_id' => (int) $user_id, 'role_id' => (int) ci('RoleModel')->find_role_id($role)]);
 		}
 
 		return $success;
@@ -280,11 +278,11 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function roles(int $user_id) : array
+	public function roles(int $user_id): array
 	{
 		$dbc = $this->_database
 			->from(config('auth.user role table'))
-			->join(config('auth.role table'), config('auth.role table').'.id = '.config('auth.user role table').'.role_id')
+			->join(config('auth.role table'), config('auth.role table') . '.id = ' . config('auth.user role table') . '.role_id')
 			->where(['user_id' => (int) $user_id])
 			->get();
 
@@ -304,7 +302,7 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function hash_password(string $password) : string
+	public function hash_password(string $password): string
 	{
 		$password_info = password_get_info($password);
 
@@ -382,11 +380,10 @@ class O_user_model extends Database_model
 	 * @throws
 	 * @example
 	 */
-	public function password(string $password) : bool
+	public function password(string $password): bool
 	{
 		$this->validate->single($this->rules['password']['rules'], $password);
 
 		return ci('errors')->has();
 	}
-
 } /* end class */

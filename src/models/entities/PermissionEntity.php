@@ -1,4 +1,9 @@
 <?php
+
+namespace projectorangebox\orange\model\entities;
+
+use projectorangebox\orange\model\DatabaseModelEntity;
+
 /**
  * Orange
  *
@@ -21,7 +26,7 @@
  *
  */
 
-class O_permission_entity extends \Database_model_entity
+class PermissionEntity extends DatabaseModelEntity
 {
 	/**
 	 * record id
@@ -71,7 +76,7 @@ class O_permission_entity extends \Database_model_entity
 		switch ($name) {
 			case 'roles':
 				return $this->roles();
-			break;
+				break;
 		}
 	}
 
@@ -84,8 +89,8 @@ class O_permission_entity extends \Database_model_entity
 	 * @return array
 	 *
 	 */
-	public function roles() : array
+	public function roles(): array
 	{
-		return ci()->o_permission_model->roles($this->id);
+		return ci('PermissionModel')->roles($this->id);
 	}
 } /* end class */

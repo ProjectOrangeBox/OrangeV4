@@ -17,7 +17,7 @@ class Wincache extends CI_Cache_wincache
 	 *
 	 * @return array
 	 */
-	public function cache_keys() : array
+	public function cache_keys(): array
 	{
 		$keys = [];
 
@@ -25,5 +25,4 @@ class Wincache extends CI_Cache_wincache
 
 		return $keys;
 	}
-
 } /* end class */

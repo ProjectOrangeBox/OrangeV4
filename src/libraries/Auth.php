@@ -26,7 +26,7 @@ use projectorangebox\orange\library\exceptions\Data\InvalidException;
  * @version v2.0
  * @filesource
  *
- * @uses # \o_user_model - Orange User Model
+ * @uses # \userModel - Orange User Model Service
  * @uses # \session - CodeIgniter Session
  * @uses # \event - Orange event
  * @uses # \errors - Orange errors
@@ -117,7 +117,7 @@ class Auth
 	 * @param array $config []
 	 *
 	 */
-	public function __construct(array &$config=null)
+	public function __construct(array &$config = null)
 	{
 		if (is_array($config)) {
 			$this->config = &$config;
@@ -127,7 +127,7 @@ class Auth
 		$this->event = ci('event');
 		$this->errors = ci('errors');
 
-		$this->user_model =& ci('o_user_model');
+		$this->user_model = &ci('userModel');
 
 		/* define some global Constants */
 		define('ADMIN_ROLE_ID', $this->config['admin role id']);
@@ -164,7 +164,7 @@ class Auth
 	 * @return Auth
 	 *
 	 */
-	public function switch_to_nobody() : Auth
+	public function switch_to_nobody(): Auth
 	{
 		$this->refresh_userdata($this->config['nobody user id'], false);
 
@@ -183,7 +183,7 @@ class Auth
 	 * @return Bool
 	 *
 	 */
-	public function login(string $user_primary_key, string $password) : Bool
+	public function login(string $user_primary_key, string $password): Bool
 	{
 		$success = $this->_login($user_primary_key, $password);
 
@@ -203,7 +203,7 @@ class Auth
 	 * @return Bool
 	 *
 	 */
-	public function logout() : Bool
+	public function logout(): Bool
 	{
 		log_message('info', 'Auth Class logout');
 
@@ -232,9 +232,9 @@ class Auth
 	 * @return String
 	 *
 	 */
-	public function refresh_userdata(String $user_primary_key, Bool $save_session) : Void
+	public function refresh_userdata(String $user_primary_key, Bool $save_session): Void
 	{
-		log_message('debug', 'Auth::refresh_userdata::'.$user_primary_key);
+		log_message('debug', 'Auth::refresh_userdata::' . $user_primary_key);
 
 		if (empty($user_primary_key)) {
 			throw new InvalidException('Auth session refresh user identifier empty.');
@@ -242,7 +242,7 @@ class Auth
 
 		$profile = $this->user_model->get_by_primary_ignore_read_role($user_primary_key);
 
-		if ((int)$profile->is_active === 1 && $profile instanceof O_user_entity) {
+		if ((int) $profile->is_active === 1 && $profile instanceof O_user_entity) {
 			/* no real need to have this floating around */
 			unset($profile->password);
 
@@ -270,12 +270,12 @@ class Auth
 	 * @return Bool
 	 *
 	 */
-	protected function _login(String $login, String $password) : Bool
+	protected function _login(String $login, String $password): Bool
 	{
 		/* Does login and password contain anything empty values are NOT permitted for any reason */
 		if ((strlen(trim($login)) == 0) or (strlen(trim($password)) == 0)) {
 			$this->errors->add($this->config['empty fields error']);
-			log_message('debug', 'auth->user '.config('auth.empty fields error'));
+			log_message('debug', 'auth->user ' . config('auth.empty fields error'));
 			return false;
 		}
 

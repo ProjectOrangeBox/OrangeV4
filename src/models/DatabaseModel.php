@@ -29,7 +29,7 @@ use projectorangebox\orange\library\Model;
  * @throws Exception
  *
  */
-class Database_model extends Model
+class DatabaseModel extends Model
 {
 	/**
 	 * Database config to use for _database if other than default
@@ -110,19 +110,19 @@ class Database_model extends Model
 	 * @var array
 	 */
 	protected $has_defaults = [
-		'read_role'=>false,
-		'edit_role'=>false,
-		'delete_role'=>false,
-		'created_by'=>false,
-		'created_on'=>false,
-		'created_ip'=>false,
-		'updated_by'=>false,
-		'updated_on'=>false,
-		'updated_ip'=>false,
-		'deleted_by'=>false,
-		'deleted_on'=>false,
-		'deleted_ip'=>false,
-		'is_deleted'=>false,
+		'read_role' => false,
+		'edit_role' => false,
+		'delete_role' => false,
+		'created_by' => false,
+		'created_on' => false,
+		'created_ip' => false,
+		'updated_by' => false,
+		'updated_on' => false,
+		'updated_ip' => false,
+		'deleted_by' => false,
+		'deleted_on' => false,
+		'deleted_ip' => false,
+		'is_deleted' => false,
 	];
 
 	protected $has = [];
@@ -244,7 +244,7 @@ class Database_model extends Model
 		/* setup MY_Model */
 		parent::__construct();
 
-		$this->has = \array_replace($this->has_defaults,$this->has);
+		$this->has = \array_replace($this->has_defaults, $this->has);
 
 		if (empty($this->table)) {
 			throw new \Exception('Database model table not specified.');
@@ -258,10 +258,10 @@ class Database_model extends Model
 		$this->object = strtolower($this->table);
 
 		/* setup the cache prefix for this model so we can flush the cache based on tags */
-		$this->cache_prefix = trim('database.'.$this->object.'.'.trim($this->additional_cache_tags, '.'), '.');
+		$this->cache_prefix = trim('database.' . $this->object . '.' . trim($this->additional_cache_tags, '.'), '.');
 
 		/* is db group set? then that's the connection config we will use */
-		log_message('debug', 'Database Model using "'.$this->object.'::'.$this->db_group.'" connection.');
+		log_message('debug', 'Database Model using "' . $this->object . '::' . $this->db_group . '" connection.');
 
 		/* use our specified connection */
 		$this->db = $this->load->database($this->db_group, true);
@@ -272,14 +272,14 @@ class Database_model extends Model
 
 		/* is read db group set? then that's the connection config we will use for reads */
 		if (isset($this->read_db_group)) {
-			log_message('debug', 'Database Model using read "'.$this->object.'::'.$this->db_group.'" connection.');
+			log_message('debug', 'Database Model using read "' . $this->object . '::' . $this->db_group . '" connection.');
 
 			$this->read_database = $this->load->database($this->read_db_group, true);
 		}
 
 		/* is write db group set? then that's the connection config we will use for writes */
 		if (isset($this->write_db_group)) {
-			log_message('debug', 'Database Model using write "'.$this->object.'::'.$this->db_group.'" connection.');
+			log_message('debug', 'Database Model using write "' . $this->object . '::' . $this->db_group . '" connection.');
 
 			$this->write_database = $this->load->database($this->write_db_group, true);
 		}
@@ -295,13 +295,13 @@ class Database_model extends Model
 		if ($this->entity) {
 			$this->entity_class = ci('load')->entity($this->entity, $this);
 
-			$this->default_return_on_single =& $this->entity_class;
+			$this->default_return_on_single = &$this->entity_class;
 		} else {
 			/* on single record return a class */
 			$this->default_return_on_single = new \stdClass();
 		}
 
-		log_message('info', 'Database_model Class Initialized');
+		log_message('info', 'DatabaseModel Class Initialized');
 	}
 
 	/**
@@ -317,16 +317,16 @@ class Database_model extends Model
 	 * @param array $arguments
 	 *
 	 * @throws Exception
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function __call(string $name, array $arguments) : Database_model
+	public function __call(string $name, array $arguments): DatabaseModel
 	{
 		/* pass thru */
 		if (method_exists($this->_database, $name)) {
-			call_user_func_array([$this->_database,$name], $arguments);
+			call_user_func_array([$this->_database, $name], $arguments);
 		} else {
-			throw new \Exception('Unknown method "'.$name.'".');
+			throw new \Exception('Unknown method "' . $name . '".');
 		}
 
 		return $this;
@@ -338,10 +338,10 @@ class Database_model extends Model
 	 *
 	 * @access public
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function reset_query() : Database_model
+	public function reset_query(): DatabaseModel
 	{
 		/* Reset the CodeIgniter Query Builder */
 		$this->_database->reset_query();
@@ -367,10 +367,10 @@ class Database_model extends Model
 	 *
 	 * @access public
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function ignore_read_role() : Database_model
+	public function ignore_read_role(): DatabaseModel
 	{
 		$this->ignore_read_role = true;
 
@@ -383,10 +383,10 @@ class Database_model extends Model
 	 *
 	 * @access public
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function ignore_edit_role() : Database_model
+	public function ignore_edit_role(): DatabaseModel
 	{
 		$this->ignore_edit_role = true;
 
@@ -399,10 +399,10 @@ class Database_model extends Model
 	 *
 	 * @access public
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function ignore_delete_role() : Database_model
+	public function ignore_delete_role(): DatabaseModel
 	{
 		$this->ignore_delete_role = true;
 
@@ -418,9 +418,9 @@ class Database_model extends Model
 	 * @return string
 	 *
 	 */
-	public function get_cache_prefix() : string
+	public function get_cache_prefix(): string
 	{
-		return (string)$this->cache_prefix;
+		return (string) $this->cache_prefix;
 	}
 
 	/**
@@ -431,9 +431,9 @@ class Database_model extends Model
 	 * @return string
 	 *
 	 */
-	public function get_tablename() : string
+	public function get_tablename(): string
 	{
-		return (string)$this->table;
+		return (string) $this->table;
 	}
 
 	/**
@@ -444,9 +444,9 @@ class Database_model extends Model
 	 * @return string
 	 *
 	 */
-	public function get_primary_key() : string
+	public function get_primary_key(): string
 	{
-		return (string)$this->primary_key;
+		return (string) $this->primary_key;
 	}
 
 	/**
@@ -457,7 +457,7 @@ class Database_model extends Model
 	 * @return boolean
 	 *
 	 */
-	public function get_soft_delete() : bool
+	public function get_soft_delete(): bool
 	{
 		return (is_string($this->has['is_deleted']));
 	}
@@ -467,10 +467,10 @@ class Database_model extends Model
 	 *
 	 * @access public
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function as_array() : Database_model
+	public function as_array(): DatabaseModel
 	{
 		$this->temporary_return_as_array = true;
 
@@ -482,12 +482,12 @@ class Database_model extends Model
 	 *
 	 * @param string $name name of the single column value to return
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function column(string $name) : Database_model
+	public function column(string $name): DatabaseModel
 	{
-		$this->temporary_column_name = (string)$name;
+		$this->temporary_column_name = (string) $name;
 		$this->limit_to = 1;
 
 		return $this;
@@ -498,10 +498,10 @@ class Database_model extends Model
 	 *
 	 * @param mixed $return
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function on_empty_return($return) : Database_model
+	public function on_empty_return($return): DatabaseModel
 	{
 		$this->default_return_on_single	= $return;
 		$this->default_return_on_many	= $return;
@@ -592,7 +592,7 @@ class Database_model extends Model
 		$this->switch_database('write');
 
 		/* convert the input to any array if it's not already */
-		$data = (array)$data;
+		$data = (array) $data;
 
 		/* is there are auto generated primary key? */
 		if ($this->auto_generated_primary) {
@@ -653,7 +653,7 @@ class Database_model extends Model
 	public function update(array $data)
 	{
 		/* convert the input to any array if it's not already */
-		$data = (array)$data;
+		$data = (array) $data;
 
 		/* the primary key must be set to use this command */
 		if (!isset($data[$this->primary_key])) {
@@ -682,7 +682,7 @@ class Database_model extends Model
 		$this->switch_database('write');
 
 		/* convert the input to any array if it's not already */
-		$data = (array)$data;
+		$data = (array) $data;
 
 		/* preform the validation if there are rules and skip rules is false only using the data input that has rules using the update rule set */
 		$success = (!$this->skip_rules && count($this->rules)) ? $this->add_additional_rules()->only_columns($data, $this->rules)->add_rule_set_columns($data, 'update')->validate($data) : true;
@@ -842,7 +842,7 @@ class Database_model extends Model
 	 * @return array records as objects
 	 *
 	 */
-	public function catalog(string $array_key = null, $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false, bool $ignore_read = false) : array
+	public function catalog(string $array_key = null, $select_columns = null, array $where = null, string $order_by = null, $cache_key = null, bool $with_deleted = false, bool $ignore_read = false): array
 	{
 		/**
 		 * if they provide a cache key then we will cache the responds
@@ -862,7 +862,7 @@ class Database_model extends Model
 
 		/* if it's a string from above or sent in directly */
 		if (is_string($cache_key)) {
-			$results = ci('cache')->get($this->cache_prefix.'.'.$cache_key);
+			$results = ci('cache')->get($this->cache_prefix . '.' . $cache_key);
 		}
 
 		/* if we didn't get results as a array then we need to run the catalog query */
@@ -891,7 +891,7 @@ class Database_model extends Model
 				$select = '*';
 			} else {
 				/* format the select to a comma sep list and add array key if needed */
-				$select = $array_key.','.$select_columns;
+				$select = $array_key . ',' . $select_columns;
 				if (strpos($select_columns, ',') === false) {
 					$single_column = $select_columns;
 				}
@@ -924,12 +924,12 @@ class Database_model extends Model
 				if ($single_column) {
 					$results[$dbr->$array_key] = $dbr->$single_column;
 				} else {
-					$results[$dbr->$array_key] = (array)$dbr;
+					$results[$dbr->$array_key] = (array) $dbr;
 				}
 			}
 
 			if ($cache_key) {
-				ci('cache')->save($this->cache_prefix.'.'.$cache_key, $results);
+				ci('cache')->save($this->cache_prefix . '.' . $cache_key, $results);
 			}
 
 			$this->has['read_role'] = $has_read_role;
@@ -955,7 +955,7 @@ class Database_model extends Model
 	 * $success = ci('foo_model')->is_uniquem('Johnny Appleseed','name','id');
 	 *
 	 */
-	public function is_uniquem(string $field, string $column, string $form_key) : Bool
+	public function is_uniquem(string $field, string $column, string $form_key): Bool
 	{
 		/**
 		 * run the query
@@ -963,7 +963,7 @@ class Database_model extends Model
 		 * Ignoring any read roles permissions
 		 * if it's not unique then clearly it's it's not unique
 		 */
-		$dbc = $this->_database->select($column.','.$this->primary_key)->where([$column=>$field])->get($this->table, 3);
+		$dbc = $this->_database->select($column . ',' . $this->primary_key)->where([$column => $field])->get($this->table, 3);
 
 		/* how many records where found? */
 		$rows_found = $dbc->num_rows();
@@ -998,7 +998,7 @@ class Database_model extends Model
 	public function exists($where)
 	{
 		/* did we get one or more columns */
-		return $this->on_empty_return(false)->get_by(((is_array($where)) ? $where : [$this->primary_key=>$where]));
+		return $this->on_empty_return(false)->get_by(((is_array($where)) ? $where : [$this->primary_key => $where]));
 	}
 
 	/**
@@ -1011,7 +1011,7 @@ class Database_model extends Model
 	 * @return int
 	 *
 	 */
-	public function count() : int
+	public function count(): int
 	{
 		return $this->count_by();
 	}
@@ -1030,9 +1030,9 @@ class Database_model extends Model
 	 * @return int
 	 *
 	 */
-	public function count_by(array $where = null) : int
+	public function count_by(array $where = null): int
 	{
-		$this->_database->select("count('".$this->primary_key."') as codeigniter_column_count");
+		$this->_database->select("count('" . $this->primary_key . "') as codeigniter_column_count");
 
 		if ($where) {
 			$this->_database->where($where);
@@ -1041,7 +1041,7 @@ class Database_model extends Model
 		/* get the results as a record */
 		$results = $this->_get(false);
 
-		return (int)$results->codeigniter_column_count;
+		return (int) $results->codeigniter_column_count;
 	}
 
 	/**
@@ -1085,7 +1085,7 @@ class Database_model extends Model
 	/**
 	 * do query with soft deleted
 	 */
-	public function with_deleted() : Database_model
+	public function with_deleted(): DatabaseModel
 	{
 		$this->deleted_where_clause = false;
 
@@ -1098,10 +1098,10 @@ class Database_model extends Model
 	 *
 	 * @access public
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	public function only_deleted() : Database_model
+	public function only_deleted(): DatabaseModel
 	{
 		$this->deleted_where_clause = [$this->has['is_deleted'] => 1];
 
@@ -1119,7 +1119,7 @@ class Database_model extends Model
 	 * @return int number of rows affected
 	 *
 	 */
-	public function restore($id) : int
+	public function restore($id): int
 	{
 		$rows = 0;
 
@@ -1131,15 +1131,15 @@ class Database_model extends Model
 
 			$this->delete_cache_by_tags()->log_last_query();
 
-			$rows = (int)$this->_database->affected_rows();
+			$rows = (int) $this->_database->affected_rows();
 		}
 
-		return (int)$rows;
+		return (int) $rows;
 	}
 
 	public function empty_record()
 	{
-		return ($this->entity_class) ? $this->entity_class : array_fill_keys(explode(',',$this->rule_sets['insert']),'');
+		return ($this->entity_class) ? $this->entity_class : array_fill_keys(explode(',', $this->rule_sets['insert']), '');
 	}
 
 	/**
@@ -1192,7 +1192,7 @@ class Database_model extends Model
 			} else {
 				/* more than 1 column found? this shouldn't be possible with the limit used above */
 				if (count($results) != 1) {
-					throw new \Exception(count($results).' rows found when trying to use column(...). This only works when your query returns a single record.');
+					throw new \Exception(count($results) . ' rows found when trying to use column(...). This only works when your query returns a single record.');
 				}
 
 				/* ok we got a single column so return the column value */
@@ -1253,13 +1253,13 @@ class Database_model extends Model
 	 * @param string $which [read|write]
 	 *
 	 * @throws \Exception
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function switch_database(string $which) : Database_model
+	protected function switch_database(string $which): DatabaseModel
 	{
-		if (!in_array($which, ['read','write'])) {
-			throw new \Exception('Cannot switch database connection '.__CLASS__.' '.$which);
+		if (!in_array($which, ['read', 'write'])) {
+			throw new \Exception('Cannot switch database connection ' . __CLASS__ . ' ' . $which);
 		}
 
 		if ($which == 'read' && $this->read_database) {
@@ -1284,19 +1284,19 @@ class Database_model extends Model
 	 * @return Array
 	 *
 	 */
-	protected function create_where($arg, bool $primary_id_required=false) : array
+	protected function create_where($arg, bool $primary_id_required = false): array
 	{
 		if (is_scalar($arg)) {
-			$where = [$this->primary_key=>$arg];
+			$where = [$this->primary_key => $arg];
 		} elseif (is_array($arg)) {
 			$where = $arg;
 		} else {
-			throw new \Exception('Unable to determine where clause in "'.__CLASS__.'"');
+			throw new \Exception('Unable to determine where clause in "' . __CLASS__ . '"');
 		}
 
 		if ($primary_id_required) {
 			if (!isset($where[$this->primary_key])) {
-				throw new \Exception('Unable to determine primary id where clause in "'.__CLASS__.'"');
+				throw new \Exception('Unable to determine primary id where clause in "' . __CLASS__ . '"');
 			}
 		}
 
@@ -1309,10 +1309,10 @@ class Database_model extends Model
 	 *
 	 * @access protected
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function where_can_read() : Database_model
+	protected function where_can_read(): DatabaseModel
 	{
 		if (!$this->ignore_read_role) {
 			if ($this->has['read_role']) {
@@ -1333,10 +1333,10 @@ class Database_model extends Model
 	 *
 	 * @param array $data
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function where_can_edit(array &$data) : Database_model
+	protected function where_can_edit(array &$data): DatabaseModel
 	{
 		if (!$this->ignore_edit_role) {
 			if ($this->has['edit_role']) {
@@ -1357,10 +1357,10 @@ class Database_model extends Model
 	 *
 	 * @param array $data
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function where_can_delete(array &$data) : Database_model
+	protected function where_can_delete(array &$data): DatabaseModel
 	{
 		if (!$this->ignore_delete_role) {
 			if ($this->has['delete_role']) {
@@ -1381,10 +1381,10 @@ class Database_model extends Model
 	 *
 	 * @param array $data
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_fields_on_insert(array &$data) : Database_model
+	protected function add_fields_on_insert(array &$data): DatabaseModel
 	{
 		if ($this->has['created_by']) {
 			$data[$this->has['created_by']] = $this->get_user_id();
@@ -1433,10 +1433,10 @@ class Database_model extends Model
 	 *
 	 * @param array $data
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_fields_on_update(array &$data) : Database_model
+	protected function add_fields_on_update(array &$data): DatabaseModel
 	{
 		if ($this->has['updated_by']) {
 			$data[$this->has['updated_by']] = $this->get_user_id();
@@ -1461,10 +1461,10 @@ class Database_model extends Model
 	 *
 	 * @param array $data
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_fields_on_delete(array &$data) : Database_model
+	protected function add_fields_on_delete(array &$data): DatabaseModel
 	{
 		if ($this->has['deleted_by']) {
 			$data[$this->has['deleted_by']] = $this->get_user_id();
@@ -1491,15 +1491,15 @@ class Database_model extends Model
 	 *
 	 * @access protected
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_where_on_select() : Database_model
+	protected function add_where_on_select(): DatabaseModel
 	{
 		return $this->where_deleted()->where_can_read();
 	}
 
-	protected function where_deleted() : Database_model
+	protected function where_deleted(): DatabaseModel
 	{
 		if ($this->get_soft_delete()) {
 			if (is_array($this->deleted_where_clause)) {
@@ -1518,10 +1518,10 @@ class Database_model extends Model
 	 *
 	 * @param $data
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_where_on_update(array &$data) : Database_model
+	protected function add_where_on_update(array &$data): DatabaseModel
 	{
 		return $this->where_can_edit($data);
 	}
@@ -1534,10 +1534,10 @@ class Database_model extends Model
 	 *
 	 * @param $data
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_where_on_insert(array &$data) : Database_model
+	protected function add_where_on_insert(array &$data): DatabaseModel
 	{
 		return $this;
 	}
@@ -1550,10 +1550,10 @@ class Database_model extends Model
 	 *
 	 * @param $data
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_where_on_delete(array &$data) : Database_model
+	protected function add_where_on_delete(array &$data): DatabaseModel
 	{
 		return $this->where_can_delete($data);
 	}
@@ -1574,11 +1574,11 @@ class Database_model extends Model
 	 * @return int
 	 *
 	 */
-	protected function get_user_id() : int
+	protected function get_user_id(): int
 	{
 		$this->_test_user_connected();
 
-		return (int)ci()->user->id;
+		return (int) ci()->user->id;
 	}
 
 	/**
@@ -1592,7 +1592,7 @@ class Database_model extends Model
 	 * @return array
 	 *
 	 */
-	protected function get_user_roles() : array
+	protected function get_user_roles(): array
 	{
 		$this->_test_user_connected();
 
@@ -1619,11 +1619,11 @@ class Database_model extends Model
 	 * @return int
 	 *
 	 */
-	protected function get_user_read_role_id() : int
+	protected function get_user_read_role_id(): int
 	{
 		$this->_test_user_connected();
 
-		return (int)ci()->user->user_read_role_id;
+		return (int) ci()->user->user_read_role_id;
 	}
 
 	/**
@@ -1635,11 +1635,11 @@ class Database_model extends Model
 	 * @return int
 	 *
 	 */
-	protected function get_user_edit_role_id() : int
+	protected function get_user_edit_role_id(): int
 	{
 		$this->_test_user_connected();
 
-		return (int)ci()->user->user_edit_role_id;
+		return (int) ci()->user->user_edit_role_id;
 	}
 
 	/**
@@ -1651,11 +1651,11 @@ class Database_model extends Model
 	 * @return int
 	 *
 	 */
-	protected function get_user_delete_role_id() : int
+	protected function get_user_delete_role_id(): int
 	{
 		$this->_test_user_connected();
 
-		return (int)ci()->user->user_delete_role_id;
+		return (int) ci()->user->user_delete_role_id;
 	}
 
 	/**
@@ -1665,10 +1665,10 @@ class Database_model extends Model
 	 *
 	 * @access protected
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_additional_rules() : Database_model
+	protected function add_additional_rules(): DatabaseModel
 	{
 		/**
 		 * does this model have rules? if so add the role validation rules
@@ -1698,10 +1698,10 @@ class Database_model extends Model
 	 * @param array $data fields to append columns to
 	 * @param string $rule_set rule set name ie. update, insert, delete, form_login
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function add_rule_set_columns(array &$fields, string $rule_set) : Database_model
+	protected function add_rule_set_columns(array &$fields, string $rule_set): DatabaseModel
 	{
 		if (isset($this->rule_sets[$rule_set])) {
 			foreach (explode(',', $this->rule_sets[$rule_set]) as $fieldname) {
@@ -1723,15 +1723,15 @@ class Database_model extends Model
 	 *
 	 * @access protected
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function log_last_query() : Database_model
+	protected function log_last_query(): DatabaseModel
 	{
 		if ($this->debug) {
 			$query  = $this->_database->last_query();
 			$output = (is_array($query)) ? print_r($query, true) : $query;
-			file_put_contents(LOGPATH.'/model.'.get_called_class().'.log', $output.chr(10), FILE_APPEND);
+			file_put_contents(LOGPATH . '/model.' . get_called_class() . '.log', $output . chr(10), FILE_APPEND);
 		}
 
 		return $this;
@@ -1744,10 +1744,10 @@ class Database_model extends Model
 	 *
 	 * @access protected
 	 *
-	 * @return Database_model
+	 * @return DatabaseModel
 	 *
 	 */
-	protected function delete_cache_by_tags() : Database_model
+	protected function delete_cache_by_tags(): DatabaseModel
 	{
 		ci('cache')->delete_by_tags($this->cache_prefix);
 
@@ -1765,7 +1765,7 @@ class Database_model extends Model
 	 * @return string
 	 *
 	 */
-	protected function get_date_stamp(string $format='Y-m-d H:i:s') : string
+	protected function get_date_stamp(string $format = 'Y-m-d H:i:s'): string
 	{
 		/* also handles unit testing hard coded timestamp */
 		$timestamp = (defined('PHPUNITTIMESTAMP')) ? PHPUNITTIMESTAMP : time();
@@ -1782,7 +1782,7 @@ class Database_model extends Model
 	 * @return string
 	 *
 	 */
-	protected function get_ip() : string
+	protected function get_ip(): string
 	{
 		return ci('input')->ip_address();
 	}

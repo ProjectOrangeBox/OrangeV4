@@ -31,7 +31,7 @@ use projectorangebox\orange\library\exceptions\MVC\ConfigException;
  * @version v2.0
  * @filesource
  *
- * @uses # o_setting_model - Orange Settings Model
+ * @uses # SettingModel - Orange Settings Model Service
  * @uses # export cache - Orange Export Cache
  * @uses # load_config() - Orange Config File Loader
  * @uses # convert_to_real() - Orange convert string values into PHP real values where possible
@@ -44,8 +44,6 @@ class Config extends CI_Config
 {
 	protected $fileCache = [];
 	protected $fileLoaded = false;
-
-	protected $databaseCache = [];
 	protected $databaseLoaded = false;
 
 	/**
@@ -54,13 +52,6 @@ class Config extends CI_Config
 	 * @var mixed string|bool
 	 */
 	protected $hasDatabase = false;
-
-	/**
-	 * $databaseReady
-	 *
-	 * @var boolean
-	 */
-	protected $databaseReady = false;
 
 	/**
 	 * __construct
@@ -91,7 +82,7 @@ class Config extends CI_Config
 	{
 		$this->_lazyLoad();
 
-		return (\strpos($item,'.') !== false) ? ci('orange')->getDotNotation($this->config,$item,$index) : parent::item($item,$index);
+		return (\strpos($item, '.') !== false) ? ci('orange')->getDotNotation($this->config, $item, $index) : parent::item($item, $index);
 	}
 
 	/**
@@ -107,7 +98,7 @@ class Config extends CI_Config
 	{
 		$this->_lazyLoad();
 
-		return (\strpos($item,'.') !== false) ? ci('orange')->setDotNotation($this->config,$item,$value) : parent::set_item($item,$value);
+		return (\strpos($item, '.') !== false) ? ci('orange')->setDotNotation($this->config, $item, $value) : parent::set_item($item, $value);
 	}
 
 	/**
@@ -120,7 +111,7 @@ class Config extends CI_Config
 	 * @return bool
 	 *
 	 */
-	public function flush(bool $clearThisSession = false) : bool
+	public function flush(bool $clearThisSession = false): bool
 	{
 		log_message('debug', 'Config::flush');
 
@@ -159,23 +150,15 @@ class Config extends CI_Config
 	 *
 	 * @return void
 	 */
-	protected function _lazyLoad() : void
+	protected function _lazyLoad(): void
 	{
 		if (!$this->fileLoaded) {
-			$this->fileCached = $this->getFileConfig();
-
-			$this->config = \array_replace($this->config,$this->fileCached);
-
-			$this->fileLoaded = true;
+			$this->config = \array_replace($this->config, $this->getFileConfig());
 		}
 
 		/* if this has a database model and the database is attached to CI then we can load again this time with the database */
 		if ($this->hasDatabase && function_exists('DB') && !$this->databaseLoaded) {
-			$this->databaseCached = $this->getDatabaseConfig();
-
-			$this->config = \array_replace($this->config,$this->databaseCached);
-
-			$this->databaseLoaded = true;
+			$this->config = \array_replace($this->config, $this->getDatabaseConfig());
 		}
 	}
 
@@ -184,8 +167,11 @@ class Config extends CI_Config
 	 *
 	 * @return void
 	 */
-	protected function getFileConfig() : array
+	protected function getFileConfig(): array
 	{
+		/* this keeps it from looping */
+		$this->fileLoaded = true;
+
 		$fileConfig = [];
 
 		$cacheFilePath = $this->getCacheFilePath('file');
@@ -197,16 +183,16 @@ class Config extends CI_Config
 			 * loadConfig we can as load the environmental
 			 * configuration files
 			 */
-			foreach (glob(APPPATH.'/config/*.php') as $filepath) {
+			foreach (glob(APPPATH . '/config/*.php') as $filepath) {
 				$basename = basename($filepath, '.php');
 
-				foreach (\loadConfigFile($basename) as $key=>$value) {
+				foreach (\loadConfigFile($basename) as $key => $value) {
 					/* normalize */
-					$fileConfig[$this->_normalize($basename)][$this->_normalize($key)] = $value;
+					$fileConfig[$this->_normalizeGroup($basename)][$this->_normalizeKey($key)] = $value;
 				}
 			}
 
-			\App::var_export_file($cacheFilePath,$fileConfig);
+			\App::var_export_file($cacheFilePath, $fileConfig);
 		} else {
 			$fileConfig = include $cacheFilePath;
 		}
@@ -220,9 +206,9 @@ class Config extends CI_Config
 	 * @param string $type
 	 * @return void
 	 */
-	protected function getCacheFilePath(string $type) : string
+	protected function getCacheFilePath(string $type): string
 	{
-		return $this->config['cache_path'].ENVIRONMENT.'.config.'.$type.'.php';
+		return $this->config['cache_path'] . ENVIRONMENT . '.config.' . $type . '.php';
 	}
 
 	/**
@@ -230,22 +216,25 @@ class Config extends CI_Config
 	 *
 	 * @return void
 	 */
-	protected function getDatabaseConfig() : array
+	protected function getDatabaseConfig(): array
 	{
+		/* this keeps it from looping */
+		$this->databaseLoaded = true;
+
 		$databaseConfig = [];
 
 		$cacheFilePath = $this->getCacheFilePath('database');
 
 		if (ENVIRONMENT == 'development' || !file_exists($cacheFilePath)) {
-			$config = ci($this->hasDatabase)->get_enabled();
+			$config = (new $this->hasDatabase)->get_enabled();
 
 			if (is_array($config)) {
 				foreach ($config as $record) {
-					$databaseConfig[$this->_normalize(str_replace(' ','_',$record->group))][$this->_normalize($record->name)] = convert_to_real($record->value);
+					$databaseConfig[$this->_normalizeGroup($record->group)][$this->_normalizeKey($record->name)] = ci('orange')->convertToReal($record->value);
 				}
 			}
 
-			\App::var_export_file($cacheFilePath,$databaseConfig);
+			\App::var_export_file($cacheFilePath, $databaseConfig);
 		} else {
 			$databaseConfig = include $cacheFilePath;
 		}
@@ -259,20 +248,25 @@ class Config extends CI_Config
 	 * @param string $string
 	 * @return void
 	 */
-	protected function _normalize(string $string) : string
+	protected function _normalizeKey(string $string): string
 	{
 		return strtolower($string);
 	}
 
+	protected function _normalizeGroup(string $groupName): string
+	{
+		return str_replace(' ', '_', strtolower($groupName));
+	}
+
 	/**
-	 * merged - can be used buy the library constructs to load & check required with defaults configuration
+	 * merged - can be used buy the class constructs to load & check required with defaults configuration
 	 *
 	 * @param string $group
 	 * @param array $required
 	 * @param mixed array
 	 * @return void
 	 */
-	public function merged(string $group, array $required, array $userConfig = []) : array
+	public function merged(string $group, array $required, array $userConfig = []): array
 	{
 		$config = parent::item($group);
 
@@ -280,9 +274,9 @@ class Config extends CI_Config
 			$config = [];
 		}
 
-		$config = \array_replace($config,$userConfig);
+		$config = \array_replace($config, $userConfig);
 
-		foreach ($required as $name=>$default) {
+		foreach ($required as $name => $default) {
 			if (\is_integer($name)) {
 				$name = $default;
 				$default = null;
@@ -290,7 +284,7 @@ class Config extends CI_Config
 
 			if (!isset($config[$name])) {
 				if ($default === null) {
-					throw new ConfigException('Could not locate a configuration value '.$group.'.'.$name.' and no default was provided.');
+					throw new ConfigException('Could not locate a configuration value ' . $group . '.' . $name . ' and no default was provided.');
 				}
 
 				$config[$name] = $default;
@@ -299,5 +293,4 @@ class Config extends CI_Config
 
 		return $config;
 	}
-
 } /* end class */

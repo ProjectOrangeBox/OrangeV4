@@ -1,4 +1,9 @@
 <?php
+
+namespace projectorangebox\orange\model\entities;
+
+use projectorangebox\orange\model\DatabaseModelEntity;
+
 /**
  * O_user_entity
  * Insert description here
@@ -18,7 +23,7 @@
  * functions:
  *
  */
-class O_user_entity extends \Database_model_entity
+class UserEntity extends DatabaseModelEntity
 {
 	/**
 	 * record id
@@ -144,18 +149,18 @@ class O_user_entity extends \Database_model_entity
 	public function __get(string $name)
 	{
 		switch ($name) {
-		case 'roles':
-			$this->_lazy_load();
-			return $this->roles;
-			break;
-		case 'permissions':
-			$this->_lazy_load();
-			return $this->permissions;
-			break;
+			case 'roles':
+				$this->_lazy_load();
+				return $this->roles;
+				break;
+			case 'permissions':
+				$this->_lazy_load();
+				return $this->permissions;
+				break;
 		}
 	}
 
-	public function refresh() : void
+	public function refresh(): void
 	{
 		$this->lazy_loaded = false;
 	}
@@ -169,7 +174,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return array
 	 *
 	 */
-	public function roles() : array
+	public function roles(): array
 	{
 		$this->_lazy_load();
 
@@ -187,7 +192,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function has_role(int $role_id) : bool
+	public function has_role(int $role_id): bool
 	{
 		$this->_lazy_load();
 
@@ -205,7 +210,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function can(string $resource) : bool
+	public function can(string $resource): bool
 	{
 		$this->_lazy_load();
 
@@ -221,7 +226,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return array
 	 *
 	 */
-	public function permissions() : array
+	public function permissions(): array
 	{
 		$this->_lazy_load();
 
@@ -239,7 +244,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function has_roles(array $roles) : bool
+	public function has_roles(array $roles): bool
 	{
 		foreach ($roles as $r) {
 			if (!$this->has_role($r)) {
@@ -261,7 +266,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function has_one_role_of(array $roles) : bool
+	public function has_one_role_of(array $roles): bool
 	{
 		foreach ((array) $roles as $r) {
 			if ($this->has_role($r)) {
@@ -283,7 +288,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function has_permissions(array $permissions) : bool
+	public function has_permissions(array $permissions): bool
 	{
 		foreach ($permissions as $p) {
 			if ($this->cannot($p)) {
@@ -305,7 +310,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function has_one_permission_of(array $permissions) : bool
+	public function has_one_permission_of(array $permissions): bool
 	{
 		foreach ($permissions as $p) {
 			if ($this->can($p)) {
@@ -327,7 +332,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function has_permission(string $permission) : bool
+	public function has_permission(string $permission): bool
 	{
 		return $this->can($permission);
 	}
@@ -343,7 +348,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function cannot(string $permission) : bool
+	public function cannot(string $permission): bool
 	{
 		return !$this->can($permission);
 	}
@@ -371,7 +376,7 @@ class O_user_entity extends \Database_model_entity
 	 * @return bool
 	 *
 	 */
-	public function is_admin() : bool
+	public function is_admin(): bool
 	{
 		return $this->has_role(ADMIN_ROLE_ID);
 	}
@@ -385,10 +390,10 @@ class O_user_entity extends \Database_model_entity
 	 * @return void
 	 *
 	 */
-	protected function _lazy_load() : void
+	protected function _lazy_load(): void
 	{
-		$user_id = (int)$this->id;
-		$cache_key = 'database.user_entity.'.$user_id.'.acl.php';
+		$user_id = (int) $this->id;
+		$cache_key = 'database.user_entity.' . $user_id . '.acl.php';
 		if (!$this->lazy_loaded) {
 			if (!$roles_permissions = ci('cache')->get($cache_key)) {
 				$roles_permissions = $this->_internal_query($user_id);
@@ -412,21 +417,21 @@ class O_user_entity extends \Database_model_entity
 	 * @return array
 	 *
 	 */
-	protected function _internal_query(int $user_id) : array
+	protected function _internal_query(int $user_id): array
 	{
 		$roles_permissions = [];
 
 		$sql = "select
 			`user_id`,
-			`".config('auth.role table')."`.`id` `orange_roles_id`,
-			`".config('auth.role table')."`.`name` `orange_roles_name`,
+			`" . config('auth.role table') . "`.`id` `orange_roles_id`,
+			`" . config('auth.role table') . "`.`name` `orange_roles_name`,
 			`permission_id`,
 			`key`
-			from ".config('auth.user role table')."
-			left join ".config('auth.role table')." on ".config('auth.role table').".id = ".config('auth.user role table').".role_id
-			left join ".config('auth.role permission table')." on ".config('auth.role permission table').".role_id = ".config('auth.role table').".id
-			left join ".config('auth.permission table')." on ".config('auth.permission table').".id = ".config('auth.role permission table').".permission_id
-			where ".config('auth.user role table').".user_id = ".$user_id;
+			from " . config('auth.user role table') . "
+			left join " . config('auth.role table') . " on " . config('auth.role table') . ".id = " . config('auth.user role table') . ".role_id
+			left join " . config('auth.role permission table') . " on " . config('auth.role permission table') . ".role_id = " . config('auth.role table') . ".id
+			left join " . config('auth.permission table') . " on " . config('auth.permission table') . ".id = " . config('auth.role permission table') . ".permission_id
+			where " . config('auth.user role table') . ".user_id = " . $user_id;
 
 		$dbc = ci('db')->query($sql);
 

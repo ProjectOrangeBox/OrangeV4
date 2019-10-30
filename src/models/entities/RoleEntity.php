@@ -1,4 +1,9 @@
 <?php
+
+namespace projectorangebox\orange\model\entities;
+
+use projectorangebox\orange\model\DatabaseModelEntity;
+
 /**
  * Orange
  *
@@ -21,7 +26,7 @@
  *
  */
 
-class O_role_entity extends \Database_model_entity
+class RoleEntity extends \DatabaseModelEntity
 {
 	/**
 	 * record id
@@ -60,10 +65,10 @@ class O_role_entity extends \Database_model_entity
 		switch ($name) {
 			case 'users':
 				return $this->users();
-			break;
+				break;
 			case 'permissions':
 				return $this->permissions();
-			break;
+				break;
 		}
 	}
 
@@ -80,7 +85,7 @@ class O_role_entity extends \Database_model_entity
 	 */
 	public function add_permission($permission)
 	{
-		return ci()->o_role_model->add_permission((int)$this->id, $permission);
+		return ci('RoleModel')->add_permission((int) $this->id, $permission);
 	}
 
 	/**
@@ -101,7 +106,7 @@ class O_role_entity extends \Database_model_entity
 	 */
 	public function remove_permission($permission)
 	{
-		return ci()->o_role_model->remove_permission((int)$this->id, $permission);
+		return ci('RoleModel')->remove_permission((int) $this->id, $permission);
 	}
 
 	/**
@@ -122,7 +127,7 @@ class O_role_entity extends \Database_model_entity
 	 */
 	public function permissions()
 	{
-		return ci()->o_role_model->permissions((int)$this->id);
+		return ci('RoleModel')->permissions((int) $this->id);
 	}
 
 	/**
@@ -143,6 +148,6 @@ class O_role_entity extends \Database_model_entity
 	 */
 	public function users()
 	{
-		return ci()->o_role_model->users((int)$this->id);
+		return ci('RoleModel')->users((int) $this->id);
 	}
 } /* end class */

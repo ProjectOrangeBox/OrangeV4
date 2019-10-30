@@ -46,7 +46,6 @@ if (!function_exists('ci')) {
 			if (!$serviceLocator instanceof \projectorangebox\orange\library\ServiceLocatorInterface) {
 				die('Your service locator does not implement "projectorangebox\orange\library\ServiceLocatorInterface"');
 			}
-
 		}
 
 		/* a little messy but since I control the service locator... */
@@ -99,7 +98,7 @@ if (!function_exists('load_class')) {
 			is_loaded($class);
 
 			/* this will throw an error if the service does not exist */
-			$name = ci('servicelocator')->find('service',$class);
+			$name = ci('servicelocator')->find('service', $class);
 
 			$_classes[$class] = new $name;
 		}

@@ -70,7 +70,7 @@ class Request
 		$this->config = &$config;
 	}
 
-	public function ttl(int $ttl = null) : int
+	public function ttl(int $ttl = null): int
 	{
 		return 0;
 	}
@@ -106,7 +106,7 @@ class Request
 	 * @return bool
 	 *
 	 */
-	public function save(string $id, $data, int $ttl = null, bool $raw = false) : bool
+	public function save(string $id, $data, int $ttl = null, bool $raw = false): bool
 	{
 		$this->cache[$id] = $data;
 
@@ -124,7 +124,7 @@ class Request
 	 * @return bool
 	 *
 	 */
-	public function delete(string $id) : bool
+	public function delete(string $id): bool
 	{
 		unset($this->cache[$id]);
 
@@ -145,7 +145,7 @@ class Request
 	 */
 	public function increment(string $id, int $offset = 1)
 	{
-		$new_value = (int)$this->get($id) + (int)$offset;
+		$new_value = (int) $this->get($id) + (int) $offset;
 
 		$this->save($id, $new_value);
 
@@ -166,7 +166,7 @@ class Request
 	 */
 	public function decrement(string $id, int $offset = 1)
 	{
-		$new_value = (int)$this->get($id) - (int)$offset;
+		$new_value = (int) $this->get($id) - (int) $offset;
 
 		$this->save($id, $new_value);
 
@@ -182,7 +182,7 @@ class Request
 	 * @return bool
 	 *
 	 */
-	public function clean() : bool
+	public function clean(): bool
 	{
 		$this->cache = [];
 
@@ -198,15 +198,15 @@ class Request
 	 * @return array
 	 *
 	 */
-	public function cache_info() : array
+	public function cache_info(): array
 	{
 		$info = [];
 
-		foreach ($this->cache as $key=>$value) {
+		foreach ($this->cache as $key => $value) {
 			$info[$key] = [
-				'value'=>$value,
-				'size'=>strlen($value),
-				'ttl'=>0,
+				'value' => $value,
+				'size' => strlen($value),
+				'ttl' => 0,
 			];
 		}
 
@@ -241,7 +241,7 @@ class Request
 	 * @return bool
 	 *
 	 */
-	public function is_supported() : bool
+	public function is_supported(): bool
 	{
 		return true;
 	}
@@ -251,9 +251,8 @@ class Request
 	 *
 	 * @return array
 	 */
-	public function cache_keys() : array
+	public function cache_keys(): array
 	{
 		return array_keys($this->cache);
 	}
-
 } /* end class */
