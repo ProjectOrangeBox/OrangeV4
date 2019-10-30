@@ -130,9 +130,9 @@ class Auth
 		$this->user_model = &ci('userModel');
 
 		/* define some global Constants */
-		define('ADMIN_ROLE_ID', $this->config['admin role id']);
-		define('NOBODY_USER_ID', $this->config['nobody user id']);
-		define('EVERYONE_ROLE_ID', $this->config['everyone role id']);
+		define('ADMIN_ROLE_ID', (int) $this->config['admin role id']);
+		define('NOBODY_USER_ID', (int) $this->config['nobody user id']);
+		define('EVERYONE_ROLE_ID', (int) $this->config['everyone role id']);
 
 		/* We all start off as nobody in life... */
 		$this->switch_to_nobody();
@@ -240,7 +240,7 @@ class Auth
 			throw new InvalidException('Auth session refresh user identifier empty.');
 		}
 
-		$profile = $this->user_model->get_by_primary_ignore_read_role($user_primary_key);
+		$profile = $this->user_model->ignore_read_role()->get($user_primary_key);
 
 		if ((int) $profile->is_active === 1 && $profile instanceof O_user_entity) {
 			/* no real need to have this floating around */

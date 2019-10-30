@@ -3,7 +3,7 @@
 namespace projectorangebox\orange\library;
 
 use projectorangebox\orange\library\exceptions\Internal\MethodNotFoundException;
-use projectorangebox\orange\library\exceptions\MVC\UnsupportedException;
+use projectorangebox\orange\library\exceptions\Internal\UnsupportedException;
 
 /**
  * Extension to the CodeIgniter Cache Library
@@ -46,7 +46,7 @@ class Cache
 	 *
 	 * @var mixed
 	 */
-	protected $adapter = 'dummy';
+	protected $defaultAdapter;
 
 	/**
 	 * $ttl
@@ -71,11 +71,12 @@ class Cache
 		/* Bring in my global namespace function */
 		require_once 'cache/Cache.functions.php';
 
-		/* setup the default adapter incase they don't specifiy one */
-		$this->adapter = $this->config['cache_default'];
+		$this->defaultAdapter = $this->config['cache_default'];
 
-		if (!$this->driver($this->adapter)->is_supported()) {
-			throw new UnsupportedException($this->adapter);
+		$defaultDriver = $this->getDriver($this->defaultAdapter);
+
+		if (!$this->is_supported($this->defaultAdapter)) {
+			throw new UnsupportedException($this->defaultAdapter);
 		}
 
 		log_message('info', 'Orange Cache Class Initialized');
@@ -90,23 +91,38 @@ class Cache
 	 */
 	public function defaultAdapter(): string
 	{
-		return $this->adapter;
+		return $this->defaultAdapter;
 	}
 
+	/**
+	 * pass thru on named drivers
+	 *
+	 * $cache->file->get('foobar');
+	 *
+	 * @param string $name
+	 * @return void
+	 */
 	public function __get($name)
 	{
-		/* if the driver doesn't exist the driver() method will throw a exception */
-		return $this->driver($name);
+		return $this->getDriver($name);
 	}
 
-	public function __call($name, $arguments)
+	/**
+	 * pass thru on default driver
+	 *
+	 * $cache->get('foobar');
+	 *
+	 * @param [type] $name
+	 * @return void
+	 */
+	public function __call($method, $arguments)
 	{
 		/* test for supported methods */
-		if (!in_array($name, ['get', 'save', 'delete', 'increment', 'decrement', 'clean', 'cache_info', 'get_metadata', 'cache', 'deleteByTags', 'ttl'])) {
-			throw new MethodNotFoundException($name);
+		if (!in_array($method, ['get', 'save', 'delete', 'increment', 'decrement', 'clean', 'cache_info', 'get_metadata', 'cache', 'deleteByTags', 'ttl'])) {
+			throw new MethodNotFoundException($method);
 		}
 
-		return call_user_func_array([$this->driver($this->adapter), $name], $arguments);
+		return call_user_func_array([$this->drivers[$this->defaultAdapter], $method], $arguments);
 	}
 
 	// ------------------------------------------------------------------------
@@ -117,27 +133,18 @@ class Cache
 	 * @param	string	$driver	The driver to test
 	 * @return	array
 	 */
-	public function is_supported($driver)
+	public function is_supported(string $driver): bool
 	{
-		return $this->driver($driver)->is_supported();
+		return $this->getDriver($driver)->is_supported();
 	}
 
-	/**
-	 * driver
-	 *
-	 * @param string $name
-	 * @return void
-	 */
-	protected function driver(string $name) /* mixed */
+	protected function getDriver(string $name)
 	{
-		if (!isset($this->drivers[$name])) {
-			$service = ci('servicelocator')->find('service', 'cache_driver_' . $name);
+		$name = strtolower($name);
 
-			/* attach driver */
-			$this->drivers[$name] = new $service($this->config);
-		}
+		/* this throws an error */
+		$this->drivers[$name] = ci('cache_driver_' . $name);
 
-		/* return the driver */
 		return $this->drivers[$name];
 	}
 

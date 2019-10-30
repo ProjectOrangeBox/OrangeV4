@@ -2,6 +2,7 @@
 
 namespace projectorangebox\orange\library\cache;
 
+use App;
 use CI_Cache_file;
 
 /* wrapper */
@@ -11,6 +12,13 @@ class File extends CI_Cache_file
 	use traits\DeleteByTag;
 	use traits\Inline;
 	use traits\Ttl;
+
+	public function __construct()
+	{
+		parent::__construct();
+
+		$this->_cache_path = App::path($this->_cache_path);
+	}
 
 	/**
 	 * cache_keys

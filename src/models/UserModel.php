@@ -40,7 +40,7 @@ class UserModel extends DatabaseModel
 		'deleted_ip' => 'deleted_ip',
 		'is_deleted' => 'is_deleted', /* soft deleted */
 	];
-	protected $entity = 'projectorangebox\orange\model\entities\UserEntity';
+	protected $entity = '\projectorangebox\orange\model\entities\UserEntity';
 	protected $rules = [
 		'id' => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'username' => ['field' => 'username', 'label' => 'User Name', 'rules' => 'required|trim|is_uniquem[userModel.username.id]'],
@@ -80,11 +80,6 @@ class UserModel extends DatabaseModel
 
 		/* ready to go */
 		log_message('info', 'userModel Class Initialized');
-	}
-
-	public function get_by_primary_ignore_read_role($primary_key)
-	{
-		return $this->ignore_read_role()->get($primary_key);
 	}
 
 	/**

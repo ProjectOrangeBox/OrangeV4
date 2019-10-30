@@ -24,7 +24,7 @@ class PermissionModel extends DatabaseModel
 {
 	protected $table; /* picked up from auth config */
 	protected $additional_cache_tags = '.acl';
-	protected $entity = 'projectorangebox\orange\model\entities\permissionEntity';
+	protected $entity = '\projectorangebox\orange\model\entities\permissionEntity';
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'key'         => ['field' => 'key', 'label' => 'Key', 'rules' => 'required|strtolower|max_length[255]|filter_input[255]|is_uniquem[PermissionModel.key.id]'],

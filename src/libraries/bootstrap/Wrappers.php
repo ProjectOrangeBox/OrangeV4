@@ -88,6 +88,11 @@ if (!function_exists('esc')) {
 	}
 }
 
+function getPublicObjectVars($obj)
+{
+	return get_object_vars($obj);
+}
+
 /**
  * Escape html special characters
  *

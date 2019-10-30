@@ -31,27 +31,21 @@ namespace projectorangebox\orange\model;
 abstract class DatabaseModelEntity
 {
 	/**
-	 * The string name of the model this entity is attached to
-	 * this is used to call the insert or update method on
-	 * if left blank on the entity it will try to determine the model name it self.
-	 *
-	 * @var string
-	 */
-	protected $_model_name = null;
-
-	/**
 	 * Reference to the parent model class
 	 *
 	 * @var null
 	 */
-	protected $_model_ref = null;
+	protected $_modelReference = null;
 
 	/**
 	 * Save only these columns
 	 *
 	 * @var null
 	 */
-	protected $_save_columns = null;
+	protected $_saveColumns = null;
+
+
+	protected $_primaryKey = null;
 
 	/**
 	 *
@@ -60,15 +54,14 @@ abstract class DatabaseModelEntity
 	 * @access public
 	 *
 	 */
-	public function __construct(&$config = [])
+	public function __construct(&$model = null, $primaryKey = null)
 	{
-		if (isset($config['model'])) {
-			$this->_model_ref = &$config['model'];
-		} else {
-			/* if nothing provided on the child entity strip off the _entity part and replace with _model */
-			$model_name = (!is_string($this->_model_name)) ? strtolower(substr(get_called_class(), 0, -7) . '_model') : $this->_model_name;
+		if ($model) {
+			$this->_modelReference = &$model;
+		}
 
-			$this->_model_ref = &ci($model_name);
+		if ($primaryKey) {
+			$this->_primaryKey = $primaryKey;
 		}
 
 		log_message('info', 'DatabaseModelEntity Class Initialized');
@@ -85,39 +78,24 @@ abstract class DatabaseModelEntity
 	 */
 	public function save(): bool
 	{
-		/* get the primary key */
-		$primary_id = $this->_model_ref->get_primary_key();
+		$saveData = [];
 
 		/* if save columns is set then only use those properties */
-		if (is_array($this->_save_columns)) {
-			foreach ($this->_save_columns as $col) {
-				$data[$col] = $this->$col;
+		if (is_array($this->_saveColumns)) {
+			foreach ($this->_saveColumns as $col) {
+				$saveData[$col] = $this->$col;
 			}
 		} else {
 			/* else use all public properties */
-			$data = get_object_vars($this);
+			$saveData = \getPublicObjectVars($this);
 		}
 
-		/**
-		 * if the primary id is empty then insert the entity
-		 * The following values are considered to be empty:
-		 *
-		 * "" (an empty string)
-		 * 0 (0 as an integer)
-		 * 0.0 (0 as a float)
-		 * "0" (0 as a string)
-		 * NULL
-		 * FALSE
-		 * array() (an empty array)
-		 */
-		if (empty($data[$primary_id])) {
-			$success = $this->$primary_id = $this->_model_ref->insert($data);
-		} else {
-			/* else it's a update */
-			$success = $this->_model_ref->update($data);
+		$primaryId = $this->_modelReference->save($saveData);
+
+		if ($primaryId !== false) {
+			$this->_primaryKey = $primaryId;
 		}
 
-		/* return boolean success */
-		return (bool) $success;
+		return ($primaryId !== false);
 	}
 } /* end class */

@@ -307,8 +307,8 @@ class Validate
 		$param = '';
 
 		if (preg_match(';(?<rule>.*)\[(?<param>.*)\];', $rule, $matches, PREG_OFFSET_CAPTURE, 0)) {
-			$rule = $matches['rule'];
-			$param = $matches['param'];
+			$rule = $matches['rule'][0];
+			$param = $matches['param'][0];
 		}
 
 		$this->_makeHumanLookNice($human, $rule);
@@ -327,14 +327,14 @@ class Validate
 	protected function _makeParamsLookNice($param)
 	{
 		/* try to format the parameters into something human readable incase they need this in there error message  */
-		if (strpos($param, ',') !== false) {
+		if (is_array($param)) {
+			$this->error_params = implode(', ', $param);
+		} elseif (strpos($param, ',') !== false) {
 			$this->error_params = str_replace(',', ', ', $param);
+		}
 
-			if (($pos = strrpos($this->error_params, ', ')) !== false) {
-				$this->error_params = substr_replace($this->error_params, ' or ', $pos, 2);
-			}
-		} else {
-			$this->error_params = $param;
+		if (($pos = strrpos($this->error_params, ', ')) !== false) {
+			$this->error_params = substr_replace($this->error_params, ' or ', $pos, 2);
 		}
 	}
 

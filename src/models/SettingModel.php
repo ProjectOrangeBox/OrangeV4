@@ -87,11 +87,7 @@ class SettingModel extends DatabaseModel
 	 */
 	public function get_enabled()
 	{
-		$this->_database->where(['enabled' => 1]);
-
-		$dbc = $this->_database->get($this->table);
-
-		return $dbc->result();
+		return $this->_database->where(['enabled' => 1])->get($this->table)->result();
 	}
 
 	/**

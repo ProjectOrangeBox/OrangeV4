@@ -3,6 +3,7 @@
 namespace projectorangebox\orange\model;
 
 use projectorangebox\orange\library\Model;
+use projectorangebox\orange\library\exceptions\Internal\MethodNotFoundException;
 
 /**
  * Orange
@@ -232,6 +233,8 @@ class DatabaseModel extends Model
 	 */
 	protected $deleted_where_clause = false;
 
+	protected $ignoreUser = false;
+
 	/**
 	 *
 	 * Constructor
@@ -293,7 +296,7 @@ class DatabaseModel extends Model
 
 		/* Is there are record entity attached? */
 		if ($this->entity) {
-			$this->entity_class = ci('load')->entity($this->entity, $this);
+			$this->entity_class = new $this->entity($this, $this->get_primary_key());
 
 			$this->default_return_on_single = &$this->entity_class;
 		} else {
@@ -302,6 +305,11 @@ class DatabaseModel extends Model
 		}
 
 		log_message('info', 'DatabaseModel Class Initialized');
+	}
+
+	public function getEmptyEntity()
+	{
+		return new $this->entity($this, $this->get_primary_key());
 	}
 
 	/**
@@ -326,7 +334,7 @@ class DatabaseModel extends Model
 		if (method_exists($this->_database, $name)) {
 			call_user_func_array([$this->_database, $name], $arguments);
 		} else {
-			throw new \Exception('Unknown method "' . $name . '".');
+			throw new MethodNotFoundException($name);
 		}
 
 		return $this;
@@ -1560,7 +1568,7 @@ class DatabaseModel extends Model
 
 	protected function _test_user_connected()
 	{
-		if (!is_object(ci()->user)) {
+		if (!is_object(ci('user')) && !$this->ignoreUser) {
 			throw new \Exception('User not attached to application.');
 		}
 	}
@@ -1578,7 +1586,7 @@ class DatabaseModel extends Model
 	{
 		$this->_test_user_connected();
 
-		return (int) ci()->user->id;
+		return (int) ci('user')->id;
 	}
 
 	/**
@@ -1596,7 +1604,7 @@ class DatabaseModel extends Model
 	{
 		$this->_test_user_connected();
 
-		$roles = ci()->user->roles();
+		$roles = ci('user')->roles();
 
 		/* we must return something for the in clause or every record will match which is not what we want */
 		$keys = [-1];
@@ -1623,7 +1631,7 @@ class DatabaseModel extends Model
 	{
 		$this->_test_user_connected();
 
-		return (int) ci()->user->user_read_role_id;
+		return (int) ci('user')->user_read_role_id;
 	}
 
 	/**
@@ -1639,7 +1647,7 @@ class DatabaseModel extends Model
 	{
 		$this->_test_user_connected();
 
-		return (int) ci()->user->user_edit_role_id;
+		return (int) ci('user')->user_edit_role_id;
 	}
 
 	/**
@@ -1655,7 +1663,7 @@ class DatabaseModel extends Model
 	{
 		$this->_test_user_connected();
 
-		return (int) ci()->user->user_delete_role_id;
+		return (int) ci('user')->user_delete_role_id;
 	}
 
 	/**
@@ -1785,5 +1793,22 @@ class DatabaseModel extends Model
 	protected function get_ip(): string
 	{
 		return ci('input')->ip_address();
+	}
+
+	public function save(array $saveData) /* mixed */
+	{
+		/**
+		 * if the primary id is empty then insert the entity
+		 * The following values are considered to be empty:
+		 *
+		 * "" (an empty string)
+		 * 0 (0 as an integer)
+		 * 0.0 (0 as a float)
+		 * "0" (0 as a string)
+		 * NULL
+		 * FALSE
+		 * array() (an empty array)
+		 */
+		return (empty($saveData[$this->get_primary_key()])) ? $this->insert($saveData) : $this->update($saveData);
 	}
 } /* end class */

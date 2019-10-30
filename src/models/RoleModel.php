@@ -24,7 +24,7 @@ class RoleModel extends DatabaseModel
 {
 	protected $table; /* picked up from auth config */
 	protected $additional_cache_tags = '.acl';
-	protected $entity = 'projectorangebox\orange\model\entities\RoleEntity';
+	protected $entity = '\projectorangebox\orange\model\entities\RoleEntity';
 	protected $rules = [
 		'id'          => ['field' => 'id', 'label' => 'Id', 'rules' => 'required|integer|max_length[10]|less_than[4294967295]|filter_int[10]'],
 		'name'        => ['field' => 'name', 'label' => 'Name', 'rules' => 'required|is_uniquem[RoleModel.name.id]|max_length[64]|filter_input[64]|is_uniquem[RoleModel.name.id]'],
