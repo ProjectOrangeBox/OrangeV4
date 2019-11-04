@@ -21,6 +21,9 @@ require __DIR__ . '/bootstrap/Functions.php';
 /* Load the "global" namespace wrappers functions */
 require __DIR__ . '/bootstrap/Wrappers.php';
 
+/* Bring the Application root path file traits in */
+require __DIR__ . '/AppTrait.php';
+
 /* static wrapper for file functions based on Application Root (__ROOT__) */
 require __DIR__ . '/bootstrap/App.php';
 
