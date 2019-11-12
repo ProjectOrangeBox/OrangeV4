@@ -304,7 +304,7 @@ if (!function_exists('loadConfigFile')) {
 }
 
 if (!function_exists('configMerge')) {
-	function merged(string $group, array $required, array &$userConfig = []): array
+	function configMerge(string $group, array $required, array &$userConfig = []): array
 	{
 		return ci('config')->merged($group, $required, $userConfig);
 	}
