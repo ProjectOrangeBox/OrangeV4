@@ -2,15 +2,27 @@
 
 namespace projectorangebox\orange\library;
 
-use Exception;
 use projectorangebox\orange\library\ServiceLocatorInterface;
 use projectorangebox\orange\library\exceptions\Internal\MethodNotFoundException;
 use projectorangebox\orange\library\exceptions\MVC\ServiceException;
 
 class ServiceLocator implements ServiceLocatorInterface
 {
+	/**
+	 * $config
+	 *
+	 * The services array
+	 *
+	 * @var array
+	 */
 	static protected $config = [];
 
+	/**
+	 * __construct
+	 *
+	 * @param array $config
+	 * @return this
+	 */
 	public function __construct(array $config)
 	{
 		self::$config = &$config;
@@ -28,45 +40,85 @@ class ServiceLocator implements ServiceLocatorInterface
 	 * ci('serviceLocator')->addService('cleanup','\library\validate\rules\Cleanup');
 	 * ci('serviceLocator')->add + a prefix(..,..);
 	 *
+	 * boolean = ci('serviceLocator')->hasService('cleanup');
+	 *
 	 */
 	public function __call(string $name, array $arguments)
 	{
-		$return = true;
-
 		$name = strtolower($name);
 
 		if (substr($name, 0, 4) == 'find') {
-			$return = $this->find(substr($name, 4), $arguments[0]);
+			$responds = $this->find(substr($name, 4), $arguments[0]);
 		} elseif (substr($name, 0, 3) === 'add') {
-			$return = $this->add(substr($name, 3), $arguments[0], $arguments[1]);
+			$responds = $this->add(substr($name, 3), $arguments[0], $arguments[1]);
+		} elseif (substr($name, 0, 3) === 'has') {
+			$responds = $this->has(substr($name, 3), $arguments[0]);
 		} else {
+			/* fatal */
 			throw new MethodNotFoundException(sprintf('No method named "%s" found.', $name));
 		}
 
-		return $return;
+		return $responds;
 	}
 
+	/**
+	 * find
+	 *
+	 * Search for a service based on type and named
+	 * If nothing found a fatal exception is thrown
+	 * Use "has" to check first if you need to
+	 *
+	 * @param string $type
+	 * @param string $name
+	 * @return string
+	 */
 	public function find(string $type, string $name): string
 	{
 		$type = strtolower($type);
 		$name = strtolower($name);
 
+		/* if the name you are looking for is missing it's fatal */
 		if (!isset(self::$config[$type])) {
 			throw new ServiceException(sprintf('Could not locate a %s type.', $type));
-		}
-
-		if (!isset(self::$config[$type][$name])) {
+		} elseif (!isset(self::$config[$type][$name])) {
 			throw new ServiceException(sprintf('Could not locate a %s type named %s.', $type, $name));
 		}
 
 		return self::$config[$type][$name];
 	}
 
+	/**
+	 * has
+	 *
+	 * Does this type and name exsist?
+	 *
+	 * @param string $type
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function has(string $type, string $name): bool
+	{
+		$type = strtolower($type);
+
+		return isset(self::$config[$type], self::$config[$type][$this->alias($name)]);
+	}
+
+	/**
+	 * add
+	 *
+	 * Add a service by type and name
+	 *
+	 * @param string $type
+	 * @param string $name
+	 * @param string $serviceClass
+	 * @return boolean
+	 */
 	public function add(string $type, string $name, string $serviceClass): bool
 	{
 		$type = strtolower($type);
 		$name = strtolower($name);
 
+		/* add the parent level if it's not there already */
 		if (!isset(self::$config[$type])) {
 			self::$config[$type] = [];
 		}
@@ -77,22 +129,12 @@ class ServiceLocator implements ServiceLocatorInterface
 	}
 
 	/**
-	 * addAlias
-	 *
-	 * @param string $alias
-	 * @param string $real
-	 * @return void
-	 */
-	public function addAlias(string $alias, string $real): void
-	{
-		self::$config['alias'][strtolower($alias)] = $real;
-	}
-
-	/**
 	 * serviceAlias
 	 *
+	 * Is there are service alias for this serivce based on name passed
+	 *
 	 * @param string $name
-	 * @return void
+	 * @return string
 	 */
 	public function alias(string $name): string
 	{
@@ -102,6 +144,8 @@ class ServiceLocator implements ServiceLocatorInterface
 	/**
 	 * singleton
 	 *
+	 * return the same instance each time
+	 *
 	 * $instance = singleton('user',['name'=>'Johnny']);
 	 * $instance = singleton('auth');
 	 *
@@ -109,53 +153,63 @@ class ServiceLocator implements ServiceLocatorInterface
 	 * $instance = singleton('\namespace\class',['name'=>'Johnny']);
 	 * $instance = singleton('\namespace\class',['name'=>'Johnny'],'user');
 	 *
-	 * @param string $name
+	 * @param string $serviceName
 	 * @param mixed array
 	 * @param mixed string
 	 * @return object
 	 */
-	public function get(string $name, array $userConfig = [], string $as = null): object
+	public function get(string $serviceName, array $userConfig = [], string $as = null): object
 	{
+		/* get the CodeIgniter Super Object */
 		$instance = get_instance();
 
-		$serviceName = ($as) ? $as : $this->alias($name);
+		/* is there are alias for this service name NOTE: these are NOT typed */
+		$singletonName = $as ?? $this->alias($serviceName);
+
+		/* normalize the instance */
+		$singletonName = strtolower($singletonName);
 
 		/* has this service been attached yet? */
-		if (!isset($instance->$serviceName)) {
-			$instance->$serviceName = $this->create($serviceName, $userConfig);
+		if (!isset($instance->$singletonName)) {
+			$instance->$singletonName = $this->create($serviceName, $userConfig);
 		}
 
 		/* now grab the reference */
-		return $instance->$serviceName;
+		return $instance->$singletonName;
 	}
 
 	/**
 	 * factory
 	 *
+	 * Create a new instance each time this is called
+	 *
 	 * @param string $serviceName
 	 * @param mixed array
 	 * @return object
 	 */
-	public function create(string $name, array $userConfig = []): object
+	public function create(string $serviceName, array $userConfig = []): object
 	{
 		$instance = get_instance();
 
-		$name = $this->alias($name);
+		$rawServiceName = $serviceName;
+
+		/* is this service known by an alias? */
+		$serviceName = $this->alias($serviceName);
+
+		/* normalize the instance */
+		$serviceName = strtolower($serviceName);
 
 		$config = [];
 
 		/* try to load it's configuration if configuration library loaded */
 		if (isset($instance->config)) {
-			$serviceConfig = $instance->config->item($name);
+			$serviceConfig = $instance->config->item($serviceName);
 
 			$config = (is_array($serviceConfig)) ? array_replace($serviceConfig, $userConfig) : $userConfig;
 		}
 
-		try {
-			$serviceClass = $this->findService($name, false);
-		} catch (Exception $e) {
-			$serviceClass = $name;
-		}
+		/* What is the namespaced class? */
+		$serviceClass = ($this->has('service', $serviceName)) ? $this->find('service', $serviceName) : $rawServiceName;
 
 		return new $serviceClass($config);
 	}
