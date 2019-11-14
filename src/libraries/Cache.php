@@ -66,14 +66,12 @@ class Cache
 	 */
 	public function __construct(array &$config = [])
 	{
-		$this->config = ci('config')->merged('config', ['cache_default' => 'dummy', 'cache_ttl' => 0], $config);
+		$this->config = \configMerge('config', ['cache_default' => 'dummy', 'cache_ttl' => 0], $config);
 
 		/* Bring in my global namespace function */
 		require_once 'cache/Cache.functions.php';
 
 		$this->defaultAdapter = $this->config['cache_default'];
-
-		$defaultDriver = $this->getDriver($this->defaultAdapter);
 
 		if (!$this->is_supported($this->defaultAdapter)) {
 			throw new UnsupportedException($this->defaultAdapter);

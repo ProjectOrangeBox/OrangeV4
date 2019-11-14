@@ -302,3 +302,10 @@ if (!function_exists('loadConfigFile')) {
 		return $fileConfig[$filename];
 	}
 }
+
+if (!function_exists('configMerge')) {
+	function configMerge(string $group, array $required, array &$userConfig = []): array
+	{
+		return ci('config')->merged($group, $required, $userConfig);
+	}
+}
