@@ -17,6 +17,8 @@ class ServiceLocator implements ServiceLocatorInterface
 	 */
 	static protected $config = [];
 
+	static protected $servicesKey = 'service';
+
 	/**
 	 * __construct
 	 *
@@ -113,7 +115,7 @@ class ServiceLocator implements ServiceLocatorInterface
 	 * @param string $serviceClass
 	 * @return boolean
 	 */
-	public function add(string $type, string $name, string $serviceClass): bool
+	public function add(string $type, string $name, string $value): bool
 	{
 		$type = strtolower($type);
 		$name = strtolower($name);
@@ -123,7 +125,7 @@ class ServiceLocator implements ServiceLocatorInterface
 			self::$config[$type] = [];
 		}
 
-		self::$config[$type][$name] = $serviceClass;
+		self::$config[$type][$name] = $value;
 
 		return true;
 	}
@@ -209,7 +211,7 @@ class ServiceLocator implements ServiceLocatorInterface
 		}
 
 		/* What is the namespaced class? */
-		$serviceClass = ($this->has('service', $serviceName)) ? $this->find('service', $serviceName) : $rawServiceName;
+		$serviceClass = ($this->has(self::$servicesKey, $serviceName)) ? $this->find(self::$servicesKey, $serviceName) : $rawServiceName;
 
 		return new $serviceClass($config);
 	}
