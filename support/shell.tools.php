@@ -141,32 +141,32 @@ class tools
 
 	public function packages(bool $displayOutput = false): array
 	{
-		$config = __ROOT__ . '/bin/config.json';
+		$deployFile = __ROOT__ . '/deploy.json';
 
 		if ($displayOutput) {
 			$this->println('Searching the following "packages"');
-			$this->println('These are loaded from the ' . $config . ' file');
+			$this->println('These are loaded from the ' . $deployFile . ' file');
 		}
 
-		if (!file_exists($config)) {
+		if (!file_exists($deployFile)) {
 			$this->error('Could not locate config file.');
 		}
 
-		$configObj = json_decode(file_get_contents($config));
+		$configObj = json_decode(file_get_contents($deployFile));
 
-		if (!is_array($configObj->search)) {
+		if (!is_array($configObj->packages)) {
 			$this->error('Search path json error.');
 		}
 
 		if ($displayOutput) {
-			foreach ($configObj->search as $package) {
+			foreach ($configObj->packages as $package) {
 				$this->println('../' . $package);
 			}
 
 			$this->println();
 		}
 
-		return $configObj->search;
+		return $configObj->packages;
 	}
 
 	public function find(string $regex, array $paths): array
@@ -187,7 +187,7 @@ class tools
 					}
 				}
 			} else {
-				$this->error('Could not locate '.$packageFolder);
+				$this->error('Could not locate ' . $packageFolder);
 			}
 		}
 

@@ -23,9 +23,11 @@ trait AppTrait
 	 */
 	static public function path(string $path, bool $throw = false): string
 	{
+		/* clean up the path name */
 		$path = (substr($path, 0, strlen(__ROOT__)) != __ROOT__) ? __ROOT__ . '/' . \trim($path, '/') : \rtrim($path, '/');
 
-		if ($throw && !\file_exists($path)) {
+		if ($throw && realpath($path) === false) {
+			/* fatal */
 			throw new FileNotFoundException($path);
 		}
 
