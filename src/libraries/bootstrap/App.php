@@ -4,5 +4,5 @@
 
 class App
 {
-	use projectorangebox\orange\library\AppTrait;
+	use projectorangebox\orange\library\FilesystemFunctionsTrait;
 } /* end app */

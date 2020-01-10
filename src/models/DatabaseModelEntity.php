@@ -87,7 +87,7 @@ abstract class DatabaseModelEntity
 			}
 		} else {
 			/* else use all public properties */
-			$saveData = \getPublicObjectVars($this);
+			$saveData = \get_object_vars($this);
 		}
 
 		$primaryId = $this->_modelReference->save($saveData);
