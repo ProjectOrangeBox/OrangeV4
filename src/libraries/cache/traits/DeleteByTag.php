@@ -28,7 +28,10 @@ trait DeleteByTag
 	 */
 	public function deleteByTags($args) /* mixed depending on who I'm attached to */
 	{
-		/* determine if it's a array, period separated list of tags or multiple arguments */
+		/*
+		determine if it's a array, period separated list of tags or multiple arguments
+		make sure it's an array
+		*/
 		if (is_array($args)) {
 			$tags = $args;
 		} elseif (strpos($args, '.') !== false) {
