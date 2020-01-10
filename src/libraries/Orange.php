@@ -55,7 +55,7 @@ class Orange
 			if (is_dir($packageFolder)) {
 				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)), '#^' . $regex . '$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
 					if (!is_dir($match[0])) {
-						$match[0] = \App::removeRoot($match[0]);
+						$match[0] = \App::resolve($match[0], true);
 
 						$found[$match[0]] = $match;
 					}
@@ -103,7 +103,7 @@ class Orange
 		$exp = explode('/', $caller['file']);
 		$file = array_pop($exp);
 
-		header('log_' . $file . '_' . $line . ': ' . json_encode($data));
+		header('file_' . strtolower(substr($file, 0, -3)) . $line . ': ' . json_encode($data));
 	}
 
 	/**
@@ -252,15 +252,16 @@ class Orange
 	 * $html = quick_merge('Hello {name}',['name'=>'Johnny'])
 	 * ```
 	 */
-	public function quickMerge(string $template, array $data = []): string
+	public function quickMerge(string $string, array $parameters = []): string
 	{
-		if (preg_match_all('/{([^}]+)}/m', $template, $matches)) {
-			foreach ($matches[1] as $key) {
-				$template = str_replace('{' . $key . '}', $data[$key], $template);
-			}
-		}
+		$left_delimiter = preg_quote('{');
+		$right_delimiter = preg_quote('}');
 
-		return $template;
+		$replacer = function ($match) use ($parameters) {
+			return isset($parameters[$match[1]]) ? $parameters[$match[1]] : $match[0];
+		};
+
+		return preg_replace_callback('/' . $left_delimiter . '\s*(.+?)\s*' . $right_delimiter . '/', $replacer, $string);
 	}
 
 	/**
