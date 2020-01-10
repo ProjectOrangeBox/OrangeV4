@@ -55,7 +55,7 @@ class Orange
 			if (is_dir($packageFolder)) {
 				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)), '#^' . $regex . '$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
 					if (!is_dir($match[0])) {
-						$match[0] = App::removeRoot($match[0]);
+						$match[0] = \App::removeRoot($match[0]);
 
 						$found[$match[0]] = $match;
 					}
@@ -93,6 +93,17 @@ class Orange
 	public function console(/* mixed */$var, string $type = 'log'): void
 	{
 		echo '<script>console.' . $type . '(' . json_encode($var) . ')</script>';
+	}
+
+	public function header_log($data): void
+	{
+		$bt = debug_backtrace();
+		$caller = array_shift($bt);
+		$line = $caller['line'];
+		$exp = explode('/', $caller['file']);
+		$file = array_pop($exp);
+
+		header('log_' . $file . '_' . $line . ': ' . json_encode($data));
 	}
 
 	/**
