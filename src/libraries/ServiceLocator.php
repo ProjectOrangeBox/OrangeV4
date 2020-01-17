@@ -31,18 +31,29 @@ class ServiceLocator implements ServiceLocatorInterface
 	}
 
 	/**
+	 * -- returns namespaced class
+	 * ci('serviceLocator')->findAlias(...);
+	 * ci('serviceLocator')->findService(...);
+	 * ci('serviceLocator')->findPear(..);
+	 * ci('serviceLocator')->findFilter(..);
+	 * ci('serviceLocator')->findValidation(..);
+	 * ci('serviceLocator')->findView(..);
 	 *
-	 * ci('serviceLocator')->findView('home');
-	 * ci('serviceLocator')->findValidationRule('cleanup');
-	 * ci('serviceLocator')->findService('cleanup');
-	 * ci('serviceLocator')->find + a prefix(..);
+	 * -- returns boolean
+	 * ci('serviceLocator')->hasAlias(...);
+	 * ci('serviceLocator')->hasService(...);
+	 * ci('serviceLocator')->hasPear(..);
+	 * ci('serviceLocator')->hasFilter(..);
+	 * ci('serviceLocator')->hasValidation(..);
+	 * ci('serviceLocator')->hasView(..);
 	 *
-	 * ci('serviceLocator')->addView('home','main/index');
-	 * ci('serviceLocator')->addValidationRule('cleanup','\library\validate\rules\Cleanup');
-	 * ci('serviceLocator')->addService('cleanup','\library\validate\rules\Cleanup');
-	 * ci('serviceLocator')->add + a prefix(..,..);
-	 *
-	 * boolean = ci('serviceLocator')->hasService('cleanup');
+	 * -- returns true
+	 * ci('serviceLocator')->addAlias('alias','real');
+	 * ci('serviceLocator')->addService('home','main/index');
+	 * ci('serviceLocator')->addPear('plugin_pear_page','\projectorangebox\orange\library\pear_plugins\Pear_page');
+	 * ci('serviceLocator')->addFilter('human','\projectorangebox\orange\library\validate\filters\Human');
+	 * ci('serviceLocator')->addValidation('is_natural_no_zero','\projectorangebox\orange\library\validate\rules\Is_natural_no_zero');
+	 * ci('serviceLocator')->addView('main/index','/views/main/index.php');
 	 *
 	 */
 	public function __call(string $name, array $arguments)
