@@ -192,7 +192,7 @@ class Config extends CI_Config
 				}
 			}
 
-			\App::var_export_file($cacheFilePath, $fileConfig);
+			\FS::var_export_file($cacheFilePath, $fileConfig);
 		} else {
 			$fileConfig = include $cacheFilePath;
 		}
@@ -234,7 +234,7 @@ class Config extends CI_Config
 				}
 			}
 
-			\App::var_export_file($cacheFilePath, $databaseConfig);
+			\FS::var_export_file($cacheFilePath, $databaseConfig);
 		} else {
 			$databaseConfig = include $cacheFilePath;
 		}

@@ -17,7 +17,7 @@ class File extends CI_Cache_file
 	{
 		parent::__construct();
 
-		$this->_cache_path = App::path($this->_cache_path);
+		$this->_cache_path = FS::path($this->_cache_path);
 	}
 
 	/**

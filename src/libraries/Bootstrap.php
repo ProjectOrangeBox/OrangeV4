@@ -1,10 +1,14 @@
 <?php
 
-/**
- * Composer Autoloader NOT loaded at this point
- */
+/* Composer Autoloader NOT loaded at this point */
 
 define('NOVALUE', '#PLEASE_THROW_AN_EXCEPTION#');
+
+/* Bring the Application root path file traits in */
+require __DIR__ . '/FS.php';
+
+/* set the root folder path */
+FS::setRoot(__ROOT__, true);
 
 /* Orginal CI index.php */
 require __DIR__ . '/bootstrap/Index.php';
@@ -25,14 +29,7 @@ require __DIR__ . '/bootstrap/Functions.php';
 /* Load the "global" namespace wrappers functions */
 require __DIR__ . '/bootstrap/Wrappers.php';
 
-/* Bring the Application root path file traits in */
-require __DIR__ . '/FilesystemFunctionsTrait.php';
-
-/* static wrapper for file functions based on Application Root (__ROOT__) */
-require __DIR__ . '/bootstrap/App.php';
-
-/* set the root folder path */
-App::setRoot(__ROOT__, true);
-
 /* Standard CodeIgniter */
 require_once BASEPATH . 'core/CodeIgniter.php';
+
+/* Composer Autoloader in now loaded */

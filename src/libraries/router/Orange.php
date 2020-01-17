@@ -224,7 +224,7 @@ class Orange
 
 			log_message('debug', 'Route: Build Router Cache File ' . $cacheFilePath);
 
-			\App::var_export_file($cacheFilePath, $config);
+			\FS::var_export_file($cacheFilePath, $config);
 		} else {
 			$config = include $cacheFilePath;
 		}

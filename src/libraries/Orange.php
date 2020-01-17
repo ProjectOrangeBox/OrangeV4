@@ -55,7 +55,7 @@ class Orange
 			if (is_dir($packageFolder)) {
 				foreach (new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($packageFolder)), '#^' . $regex . '$#i', \RecursiveRegexIterator::GET_MATCH) as $match) {
 					if (!is_dir($match[0])) {
-						$match[0] = \App::resolve($match[0], true);
+						$match[0] = \FS::resolve($match[0], true);
 
 						$found[$match[0]] = $match;
 					}

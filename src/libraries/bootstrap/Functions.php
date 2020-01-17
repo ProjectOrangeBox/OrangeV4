@@ -8,6 +8,18 @@ if (!function_exists('getServiceLocator')) {
 	}
 }
 
+/* stateless */
+function stripFromStart(string $string, string $strip): string
+{
+	return (substr($string, 0, strlen($strip)) == $strip) ? substr($string, strlen($strip)) : $string;
+}
+
+/* stateless */
+function stripFromEnd(string $string, string $strip): string
+{
+	return (substr($string, -strlen($strip)) == $strip) ? substr($string, 0, strlen($string) - strlen($strip)) : $string;
+}
+
 /**
  * ci
  *
@@ -168,18 +180,6 @@ if (!function_exists('env')) {
 	}
 }
 
-/* stateless */
-function stripFromStart(string $string, string $strip): string
-{
-	return (substr($string, 0, strlen($strip)) == $strip) ? substr($string, strlen($strip)) : $string;
-}
-
-/* stateless */
-function stripFromEnd(string $string, string $strip): string
-{
-	return (substr($string, -strlen($strip)) == $strip) ? substr($string, 0, strlen($string) - strlen($strip)) : $string;
-}
-
 /**
  * Simple Logging function for debugging purposes
  * the file name is ALWAYS orange_debug.log
@@ -247,7 +247,7 @@ if (!function_exists('site_url')) {
 				}
 			}
 
-			App::var_export_file($cacheFilePath, $array);
+			FS::var_export_file($cacheFilePath, $array);
 		} else {
 			$array = include $cacheFilePath;
 		}

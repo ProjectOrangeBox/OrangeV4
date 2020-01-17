@@ -35,9 +35,80 @@ class Event
 	 */
 	protected $listeners = [];
 
+	protected $paused = [];
+	protected $pauseAll = false;
+
 	public function __construct()
 	{
 		log_message('info', 'Orange Event Class Initialized');
+	}
+
+	/**
+	 * pause
+	 * Prevent All Triggers from firing.
+	 *
+	 * @return Event
+	 */
+	public function pauseAll(): Event
+	{
+		log_message('debug', 'event::pauseAll');
+
+		$this->pauseAll = true;
+
+		/* allow chaining */
+		return $this;
+	}
+
+	/**
+	 * pause
+	 * Prevent Trigger by name from firing.
+	 *
+	 * @return Event
+	 */
+	public function pause(string $event): Event
+	{
+		$event = $this->normalize($event);
+
+		log_message('debug', 'event::pause::' . $event);
+
+		$this->paused[$event] = true;
+
+		/* allow chaining */
+		return $this;
+	}
+
+	/**
+	 * unpause
+	 * Allow all Triggers to fire.
+	 *
+	 * @return Event
+	 */
+	public function unpauseAll(): Event
+	{
+		log_message('debug', 'event::unpauseAll');
+
+		$this->pauseAll = false;
+
+		/* allow chaining */
+		return $this;
+	}
+
+	/**
+	 * unpause
+	 * Allow Triggers by name to fire.
+	 *
+	 * @return Event
+	 */
+	public function unpause(string $event): Event
+	{
+		$event = $this->normalize($event);
+
+		log_message('debug', 'event::unpause::' . $event);
+
+		unset($this->paused[$event]);
+
+		/* allow chaining */
+		return $this;
 	}
 
 	/**
@@ -49,32 +120,24 @@ class Event
 	 * ```
 	 * @access public
 	 *
-	 * @param string $name name of the event we want to listen for
+	 * @param string $event name of the event we want to listen for
 	 * @param callable $callable function to call if the event if triggered
 	 * @param int $priority the priority this listener has against other listeners
 	 *
 	 * @return Event
 	 *
 	 */
-	public function register(string $name, $callable, int $priority = EVENT::PRIORITY_NORMAL): Event
+	public function register(string $event, $callable, int $priority = EVENT::PRIORITY_NORMAL): Event
 	{
-		/* if they pass in a array treat it as a name=>closure pair */
-		if (is_array($name)) {
-			foreach ($name as $n) {
-				$this->register($n, $callable, $priority);
-			}
-			return $this;
-		}
-
 		/* clean up the name */
-		$name = $this->_normalize_name($name);
+		$event = $this->normalize($event);
 
 		/* log a debug event */
-		log_message('debug', 'event::register::' . $name);
+		log_message('debug', 'event::register::' . $event);
 
-		$this->listeners[$name][0] = !isset($this->listeners[$name]); // Sorted?
-		$this->listeners[$name][1][] = $priority;
-		$this->listeners[$name][2][] = $callable;
+		$this->listeners[$event][0] = !isset($this->listeners[$event]); // Sorted?
+		$this->listeners[$event][1][] = $priority;
+		$this->listeners[$event][2][] = $callable;
 
 		/* allow chaining */
 		return $this;
@@ -87,7 +150,7 @@ class Event
 	 * ```php
 	 * trigger('open.page',$var1);
 	 * ```
-	 * @param string $name event to trigger
+	 * @param string $event event to trigger
 	 * @param mixed ...$arguments pass by reference
 	 *
 	 * @return Event
@@ -95,19 +158,25 @@ class Event
 	 * @access public
 	 *
 	 */
-	public function trigger(string $name, &...$arguments): Event
+	public function trigger(string $event, &...$arguments): Event
 	{
 		/* clean up the name */
-		$name = $this->_normalize_name($name);
-
-		/* log a debug event */
-		log_message('debug', 'event::trigger::' . $name);
+		$event = $this->normalize($event);
 
 		/* do we even have any events with this name? */
-		if (isset($this->listeners[$name])) {
-			foreach ($this->_listeners($name) as $listener) {
-				if ($listener(...$arguments) === false) {
-					break;
+		if (isset($this->listeners[$event])) {
+			/* are we pausing all triggers? */
+			if (!$this->pauseAll) {
+				/* are we pausing just this trigger? */
+				if (!isset($this->paused[$event])) {
+					/* log a debug event */
+					log_message('debug', 'event::trigger::' . $event);
+
+					foreach ($this->_listeners($event) as $listener) {
+						if ($listener(...$arguments) === false) {
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -126,17 +195,17 @@ class Event
 	 * ```
 	 * @access public
 	 *
-	 * @param string $name event to search for
+	 * @param string $event event to search for
 	 *
 	 * @return bool
 	 *
 	 */
-	public function has(string $name): bool
+	public function has(string $event): bool
 	{
 		/* clean up the name */
-		$name = $this->_normalize_name($name);
+		$event = $this->normalize($event);
 
-		return isset($this->listeners[$name]);
+		return isset($this->listeners[$event]);
 	}
 
 	/**
@@ -167,17 +236,17 @@ class Event
 	 * ```
 	 * @access public
 	 *
-	 * @param string $name
+	 * @param string $event
 	 *
 	 * @return int
 	 *
 	 */
-	public function count(string $name): int
+	public function count(string $event): int
 	{
 		/* clean up the name */
-		$name = $this->_normalize_name($name);
+		$event = $this->normalize($event);
 
-		return (isset($this->listeners[$name])) ? count($this->listeners[$name][1]) : 0;
+		return (isset($this->listeners[$event])) ? count($this->listeners[$event][1]) : 0;
 	}
 
 	/**
@@ -187,29 +256,29 @@ class Event
 	 *
 	 * @access public
 	 *
-	 * @param string $name
+	 * @param string $event
 	 * @param $matches
 	 *
 	 * @return bool
 	 *
 	 */
-	public function unregister(string $name, $matches = null): bool
+	public function unregister(string $event, $matches = null): bool
 	{
 		/* clean up the name */
-		$name = $this->_normalize_name($name);
+		$event = $this->normalize($event);
 
 		$removed = false;
 
-		if (isset($this->listeners[$name])) {
+		if (isset($this->listeners[$event])) {
 			if ($matches == null) {
-				unset($this->listeners[$name]);
+				unset($this->listeners[$event]);
 
 				$removed = true;
 			} else {
-				foreach ($this->listeners[$name][2] as $index => $check) {
-					if ($check === $matches) {
-						unset($this->listeners[$name][1][$index]);
-						unset($this->listeners[$name][2][$index]);
+				foreach ($this->listeners[$event][2] as $idx => $check) {
+					if ($matches === $check) {
+						unset($this->listeners[$event][1][$idx]);
+						unset($this->listeners[$event][2][$idx]);
 
 						$removed = true;
 					}
@@ -229,7 +298,7 @@ class Event
 	 *
 	 * @access public
 	 *
-	 * @param string $name
+	 * @param string $event
 	 *
 	 * @return \Event
 	 *
@@ -248,14 +317,14 @@ class Event
 	 *
 	 * @access protected
 	 *
-	 * @param string $name
+	 * @param string $event
 	 *
 	 * @return string
 	 *
 	 */
-	protected function _normalize_name(string $name): string
+	protected function normalize(string $event): string
 	{
-		return trim(preg_replace('/[^a-z0-9]+/', '.', strtolower($name)), '.');
+		return trim(preg_replace('/[^a-z0-9]+/', '.', strtolower($event)), '.');
 	}
 
 	/**
@@ -264,27 +333,27 @@ class Event
 	 *
 	 * @access protected
 	 *
-	 * @param string $name
+	 * @param string $event
 	 *
 	 * @return array
 	 *
 	 */
-	protected function _listeners(string $name): array
+	protected function _listeners(string $event): array
 	{
-		$name = $this->_normalize_name($name);
+		$event = $this->normalize($event);
 		$listeners = [];
 
-		if (isset($this->listeners[$name])) {
+		if (isset($this->listeners[$event])) {
 			/* The list is not sorted */
-			if (!$this->listeners[$name][0]) {
+			if (!$this->listeners[$event][0]) {
 				/* Sort it! */
-				array_multisort($this->listeners[$name][1], SORT_DESC, SORT_NUMERIC, $this->listeners[$name][2]);
+				array_multisort($this->listeners[$event][1], SORT_DESC, SORT_NUMERIC, $this->listeners[$event][2]);
 
 				/* Mark it as sorted already! */
-				$this->listeners[$name][0] = true;
+				$this->listeners[$event][0] = true;
 			}
 
-			$listeners = $this->listeners[$name][2];
+			$listeners = $this->listeners[$event][2];
 		}
 
 		return $listeners;

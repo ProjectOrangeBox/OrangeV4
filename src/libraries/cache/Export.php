@@ -97,12 +97,12 @@ class Export
 	{
 		$get = false;
 
-		if (App::file_exists($this->config['cache_path'] . $id . '.meta' . $this->suffix) && App::file_exists($this->config['cache_path'] . $id . $this->suffix)) {
+		if (FS::file_exists($this->config['cache_path'] . $id . '.meta' . $this->suffix) && FS::file_exists($this->config['cache_path'] . $id . $this->suffix)) {
 			$meta = $this->get_metadata($id);
 			if (time() > $meta['expire']) {
 				$this->delete($id);
 			} else {
-				$get = App::include($this->config['cache_path'] . $id . $this->suffix);
+				$get = FS::include($this->config['cache_path'] . $id . $this->suffix);
 			}
 		}
 
@@ -138,12 +138,12 @@ class Export
 			throw new \Exception('Cache export save unknown data type.');
 		}
 
-		App::file_put_contents($this->config['cache_path'] . $id . '.meta' . $this->suffix, '<?php return ' . var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true) . ';');
+		FS::file_put_contents($this->config['cache_path'] . $id . '.meta' . $this->suffix, '<?php return ' . var_export(['strlen' => strlen($data), 'time' => time(), 'ttl' => (int) $ttl, 'expire' => (time() + $ttl)], true) . ';');
 
-		$save = (App::file_put_contents($this->config['cache_path'] . $id . $this->suffix, $data)) ? true : false;
+		$save = (FS::file_put_contents($this->config['cache_path'] . $id . $this->suffix, $data)) ? true : false;
 
 		if ($include && $save) {
-			$save = App::include($this->config['cache_path'] . $id . $this->suffix);
+			$save = FS::include($this->config['cache_path'] . $id . $this->suffix);
 		}
 
 		return $save;
@@ -210,7 +210,7 @@ class Export
 	 */
 	public function clean(): bool
 	{
-		array_map('unlink', App::glob($this->config['cache_path'] . '*' . $this->suffix));
+		array_map('unlink', FS::glob($this->config['cache_path'] . '*' . $this->suffix));
 
 		return true;
 	}
@@ -228,14 +228,14 @@ class Export
 	{
 		$info = [];
 
-		foreach (App::glob($this->config['cache_path'] . '*.meta' . $this->suffix) as $path) {
-			$id = App::basename($path, '.meta' . $this->suffix);
+		foreach (FS::glob($this->config['cache_path'] . '*.meta' . $this->suffix) as $path) {
+			$id = FS::basename($path, '.meta' . $this->suffix);
 			$metadata = $this->get_metadata($id);
 
 			$info[$id] = [
 				'name' => realpath($path),
 				'server_path' => $path,
-				'size' => App::filesize($path),
+				'size' => FS::filesize($path),
 				'expires' => $metadata['expire'],
 				'created' => $metadata['time'],
 				'ttl' => $metadata['ttl'],
@@ -260,7 +260,7 @@ class Export
 	 */
 	public function get_metadata(string $id)
 	{
-		return (!App::is_file($this->config['cache_path'] . $id . '.meta' . $this->suffix) || !App::is_file($this->config['cache_path'] . $id . $this->suffix)) ? false : App::include($this->config['cache_path'] . $id . '.meta' . $this->suffix);
+		return (!FS::is_file($this->config['cache_path'] . $id . '.meta' . $this->suffix) || !FS::is_file($this->config['cache_path'] . $id . $this->suffix)) ? false : FS::include($this->config['cache_path'] . $id . '.meta' . $this->suffix);
 	}
 
 	/**
@@ -287,8 +287,8 @@ class Export
 	{
 		$keys = [];
 
-		foreach (App::glob($this->config['cache_path'] . '*.meta' . $this->suffix) as $path) {
-			$keys[] = App::basename($path, '.meta' . $this->suffix);
+		foreach (FS::glob($this->config['cache_path'] . '*.meta' . $this->suffix) as $path) {
+			$keys[] = FS::basename($path, '.meta' . $this->suffix);
 		}
 
 		return $keys;
@@ -345,14 +345,14 @@ class Export
 		$php_file = $this->config['cache_path'] . $id . $this->suffix;
 		$meta_file = $this->config['cache_path'] . $id . '.meta' . $this->suffix;
 
-		if (App::file_exists($php_file)) {
-			$php_file_deleted = App::unlink($php_file);
-			App::remove_php_file_from_opcache($php_file);
+		if (FS::file_exists($php_file)) {
+			$php_file_deleted = FS::unlink($php_file);
+			FS::remove_php_file_from_opcache($php_file);
 		}
 
-		if (App::file_exists($meta_file)) {
-			$meta_file_deleted = App::unlink($meta_file);
-			App::remove_php_file_from_opcache($meta_file);
+		if (FS::file_exists($meta_file)) {
+			$meta_file_deleted = FS::unlink($meta_file);
+			FS::remove_php_file_from_opcache($meta_file);
 		}
 
 		return ($php_file_deleted || $meta_file_deleted);

@@ -1,8 +1,13 @@
 <?php
 
-namespace projectorangebox\orange\library;
-
-trait FilesystemFunctionsTrait
+/**
+ * File System Functions
+ *
+ * File System Abstraction which automatically
+ * works in a given root path
+ *
+ */
+class FS
 {
 	static protected $rootPath = null;
 	static protected $rootLength = 0;
