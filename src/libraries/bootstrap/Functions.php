@@ -8,6 +8,10 @@ if (!function_exists('getServiceLocator')) {
 	}
 }
 
+if (!defined('EOL')) {
+	define('EOL', (PHP_SAPI == 'cli') ? PHP_EOL : '<br />');
+}
+
 /* stateless */
 function stripFromStart(string $string, string $strip): string
 {

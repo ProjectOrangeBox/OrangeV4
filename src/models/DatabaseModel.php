@@ -68,7 +68,7 @@ class DatabaseModel extends Model
 	protected $protected = [];
 
 	/**
-	 * If true a log will be generated LOGPATH folder under the table name
+	 * If true a log will be generated output log file for model debugging
 	 *
 	 * @var boolean
 	 */
@@ -1739,7 +1739,8 @@ class DatabaseModel extends Model
 		if ($this->debug) {
 			$query  = $this->_database->last_query();
 			$output = (is_array($query)) ? print_r($query, true) : $query;
-			file_put_contents(LOGPATH . '/model.' . get_called_class() . '.log', $output . chr(10), FILE_APPEND);
+			require APPPATH . '/config/config.php';
+			file_put_contents($config['log_path'] . '/model.' . get_called_class() . '.log', $output . chr(10), FILE_APPEND);
 		}
 
 		return $this;

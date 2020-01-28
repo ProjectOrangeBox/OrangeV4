@@ -17,8 +17,6 @@ class ServiceLocator implements ServiceLocatorInterface
 	 */
 	static protected $config = [];
 
-	static protected $servicesKey = 'service';
-
 	/**
 	 * __construct
 	 *
@@ -32,28 +30,13 @@ class ServiceLocator implements ServiceLocatorInterface
 
 	/**
 	 * -- returns namespaced class
-	 * ci('serviceLocator')->findAlias(...);
-	 * ci('serviceLocator')->findService(...);
-	 * ci('serviceLocator')->findPear(..);
-	 * ci('serviceLocator')->findFilter(..);
-	 * ci('serviceLocator')->findValidation(..);
-	 * ci('serviceLocator')->findView(..);
+	 * ci('serviceLocator')->find{config array key}(..);
 	 *
 	 * -- returns boolean
-	 * ci('serviceLocator')->hasAlias(...);
-	 * ci('serviceLocator')->hasService(...);
-	 * ci('serviceLocator')->hasPear(..);
-	 * ci('serviceLocator')->hasFilter(..);
-	 * ci('serviceLocator')->hasValidation(..);
-	 * ci('serviceLocator')->hasView(..);
+	 * ci('serviceLocator')->has{config array key}(..);
 	 *
 	 * -- returns true
-	 * ci('serviceLocator')->addAlias('alias','real');
-	 * ci('serviceLocator')->addService('home','main/index');
-	 * ci('serviceLocator')->addPear('plugin_pear_page','\projectorangebox\orange\library\pear_plugins\Pear_page');
-	 * ci('serviceLocator')->addFilter('human','\projectorangebox\orange\library\validate\filters\Human');
-	 * ci('serviceLocator')->addValidation('is_natural_no_zero','\projectorangebox\orange\library\validate\rules\Is_natural_no_zero');
-	 * ci('serviceLocator')->addView('main/index','/views/main/index.php');
+	 * ci('serviceLocator')->add{config array key}(..);
 	 *
 	 */
 	public function __call(string $name, array $arguments)
@@ -92,8 +75,10 @@ class ServiceLocator implements ServiceLocatorInterface
 
 		/* if the name you are looking for is missing it's fatal */
 		if (!isset(self::$config[$type])) {
+			/* fatal */
 			throw new ServiceException(sprintf('Could not locate a %s type.', $type));
 		} elseif (!isset(self::$config[$type][$name])) {
+			/* fatal */
 			throw new ServiceException(sprintf('Could not locate a %s type named %s.', $type, $name));
 		}
 
@@ -113,7 +98,7 @@ class ServiceLocator implements ServiceLocatorInterface
 	{
 		$type = strtolower($type);
 
-		return isset(self::$config[$type], self::$config[$type][$this->alias($name)]);
+		return isset(self::$config[$type], self::$config[$type][$this->findAlias($name)]);
 	}
 
 	/**
@@ -149,13 +134,14 @@ class ServiceLocator implements ServiceLocatorInterface
 	 * @param string $name
 	 * @return string
 	 */
-	public function alias(string $name): string
+	protected function findAlias(string $name): string
 	{
+		/* return orginal name if no alias exists */
 		return self::$config['alias'][strtolower($name)] ?? $name;
 	}
 
 	/**
-	 * singleton
+	 * get - singleton
 	 *
 	 * return the same instance each time
 	 *
@@ -173,26 +159,24 @@ class ServiceLocator implements ServiceLocatorInterface
 	 */
 	public function get(string $serviceName, array $userConfig = [], string $as = null): object
 	{
-		/* get the CodeIgniter Super Object */
-		$instance = get_instance();
-
 		/* is there are alias for this service name NOTE: these are NOT typed */
-		$singletonName = $as ?? $this->alias($serviceName);
+		$singletonName = $as ?? $this->findAlias($serviceName);
 
 		/* normalize the instance */
 		$singletonName = strtolower($singletonName);
 
 		/* has this service been attached yet? */
-		if (!isset($instance->$singletonName)) {
-			$instance->$singletonName = $this->create($serviceName, $userConfig);
+		if (!isset(get_instance()->$singletonName)) {
+			/* create the single instance */
+			get_instance()->$singletonName = $this->create($serviceName, $userConfig);
 		}
 
 		/* now grab the reference */
-		return $instance->$singletonName;
+		return get_instance()->$singletonName;
 	}
 
 	/**
-	 * factory
+	 * creat - factory
 	 *
 	 * Create a new instance each time this is called
 	 *
@@ -202,28 +186,34 @@ class ServiceLocator implements ServiceLocatorInterface
 	 */
 	public function create(string $serviceName, array $userConfig = []): object
 	{
-		$instance = get_instance();
-
+		/* save the orginal name */
 		$rawServiceName = $serviceName;
 
 		/* is this service known by an alias? */
-		$serviceName = $this->alias($serviceName);
+		$serviceName = $this->findAlias($serviceName);
 
 		/* normalize the instance */
 		$serviceName = strtolower($serviceName);
 
-		$config = [];
+		/* default to sent in user config */
+		$config = $userConfig;
 
 		/* try to load it's configuration if configuration library loaded */
-		if (isset($instance->config)) {
-			$serviceConfig = $instance->config->item($serviceName);
+		if (isset(get_instance()->config)) {
+			/* get configuration if matching config filename exists */
+			$serviceConfig = get_instance()->config->item($serviceName);
 
-			$config = (is_array($serviceConfig)) ? array_replace($serviceConfig, $userConfig) : $userConfig;
+			/* did we get back an array? */
+			if (is_array($serviceConfig)) {
+				/* yes! replace the matching keys of the user config over the loaded config */
+				$config = array_replace($serviceConfig, $userConfig);
+			}
 		}
 
 		/* What is the namespaced class? */
-		$serviceClass = ($this->has(self::$servicesKey, $serviceName)) ? $this->find(self::$servicesKey, $serviceName) : $rawServiceName;
+		$serviceClass = ($this->has('service', $serviceName)) ? $this->find('service', $serviceName) : $rawServiceName;
 
+		/* return a new instance of the class */
 		return new $serviceClass($config);
 	}
 } /* end class */

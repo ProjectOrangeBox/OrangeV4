@@ -182,6 +182,17 @@ class FS
 	}
 
 	/**
+	 * is_writable — Tells whether the filename is writable
+	 *
+	 * @param string $filename
+	 * @return bool
+	 */
+	static public function is_writable(string $filename): bool
+	{
+		return \is_writable(self::resolve($filename));
+	}
+
+	/**
 	 * chgrp — Changes file group
 	 *
 	 * @param string $filename
