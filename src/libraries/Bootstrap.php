@@ -10,7 +10,7 @@ require __DIR__ . '/FS.php';
 /* set the root folder path */
 FS::setRoot(__ROOT__, true);
 
-/* Orginal CI index.php */
+/* Orginal CI index.php - except last line - see below */
 require __DIR__ . '/bootstrap/Index.php';
 
 /* load the users ENVIRONMENT bootstrap file if present */
