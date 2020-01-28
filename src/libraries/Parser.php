@@ -11,7 +11,7 @@ use projectorangebox\orange\library\exceptions\MVC\ViewNotFoundException;
 /**
  *
  * This is a little different than the default CodeIgniter Parser
- * because this let's you register file extension to be hadnled by different parsers
+ * because this let's you register file extension to be handled by different parsers
  *
  * $parser->md = new MarkdownHandler($config);
  * $parser->php = new NormalHandler($config);

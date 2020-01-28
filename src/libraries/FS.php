@@ -61,6 +61,11 @@ class FS
 		return ($remove) ? \rtrim($cleanPath, DIRECTORY_SEPARATOR) : self::$rootPath . DIRECTORY_SEPARATOR . \trim($cleanPath, DIRECTORY_SEPARATOR);
 	}
 
+	static public function require(string $path)
+	{
+		return require(self::resolve($path));
+	}
+
 	/**
 	 * Find pathnames matching a pattern
 	 *
